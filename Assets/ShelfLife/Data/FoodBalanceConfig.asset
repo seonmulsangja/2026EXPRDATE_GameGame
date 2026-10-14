@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb73aa03c9c88a42a4ba89f68f9651c, type: 3}
+  m_Name: FoodBalanceConfig
+  m_EditorClassIdentifier: ExpiryGame.Survival::ExpiryGame.FoodBalanceConfig
+  shortestShelfLifeSeconds: 30
+  longestShelfLifeSeconds: 300
+  heal:
+    atLongestShelfLife: 5
+    atShortestShelfLife: 40
+  damage:
+    atLongestShelfLife: 3
+    atShortestShelfLife: 25
+  durability:
+    atLongestShelfLife: 8
+    atShortestShelfLife: 2
+  rottenHealMultiplier: -0.5
+  rottenDamageMultiplier: 0.5
