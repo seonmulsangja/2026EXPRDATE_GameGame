@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12e0ac3b021616f4994d430e040e5e30, type: 3}
+  m_Name: MapGenSettings
+  m_EditorClassIdentifier: ExpiryGame.MapGen::ExpiryGame.MapGen.MapGenSettings
+  seed: 12345
+  chunkSize: 16
+  loadRadius: 2
+  unloadMargin: 0
+  chunksPerFrame: 1
+  floorNoiseScale: 0.07
+  floorBStart: 0.45
+  floorCStart: 0.62
+  floorTiles:
+  - {fileID: 11400000, guid: b332c0558d606da4481d396ba1e466fd, type: 2}
+  - {fileID: 11400000, guid: 9efee8f4b6951d44baeabfc5784d9c25, type: 2}
+  - {fileID: 11400000, guid: 9f0633015c8cc7148931a9d37399ee85, type: 2}
+  floorSortingOrder: -100
+  obstacleNoiseScale: 0.04
+  obstacleAttemptsPerChunk: 48
+  densityAtLow: 0.02
+  densityAtHigh: 0.45
+  minObstacleSpacing: 3
+  startPoint: {x: 0, y: 0}
+  startClearRadius: 6
+  obstacles:
+  - name: Crate
+    sprite: {fileID: 21300000, guid: afa5566e767a5234d9a5ccde0d96cec0, type: 3}
+    weight: 3
+    colliderSize: {x: 0.8, y: 0.6}
+    colliderOffset: {x: 0, y: 0.3}
+  - name: Barrel
+    sprite: {fileID: 21300000, guid: 3c6c5f745acd6b74784921dd77521b9d, type: 3}
+    weight: 2
+    colliderSize: {x: 0.8, y: 0.6}
+    colliderOffset: {x: 0, y: 0.3}
+  - name: Rubble
+    sprite: {fileID: 21300000, guid: 46ff89c281d6bf84daabb2bb610bb311, type: 3}
+    weight: 4
+    colliderSize: {x: 0.8, y: 0.6}
+    colliderOffset: {x: 0, y: 0.3}
+  obstacleMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  obstacleSortingOrder: 1

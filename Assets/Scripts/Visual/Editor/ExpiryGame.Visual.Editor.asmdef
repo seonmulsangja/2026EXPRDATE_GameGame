@@ -1,0 +1,22 @@
+{
+    "name": "ExpiryGame.Visual.Editor",
+    "rootNamespace": "ExpiryGame.Visual.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

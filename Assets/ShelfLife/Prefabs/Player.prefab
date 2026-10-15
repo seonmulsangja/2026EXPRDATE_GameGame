@@ -271,3 +271,4 @@ MonoBehaviour:
   reach: 1
   radius: 0.7
   cooldownSeconds: 0.4
+  attackDriver: {fileID: 0}

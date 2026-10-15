@@ -13,6 +13,8 @@ namespace ExpiryGame
         [SerializeField, Min(0f)] private float reach = 1f;
         [SerializeField, Min(0.01f)] private float radius = 0.7f;
         [SerializeField, Min(0f)] private float cooldownSeconds = 0.4f;
+        [Tooltip("(선택) IAttackDriver를 구현한 컴포넌트(SwingController 등). 있으면 판정/연출을 위임하고, 없으면 즉발 원형 판정을 쓴다.")]
+        [SerializeField] private MonoBehaviour attackDriver;
 
         private readonly List<Collider2D> hits = new List<Collider2D>();
         private readonly HashSet<IDamageable> targets = new HashSet<IDamageable>();
@@ -34,14 +36,27 @@ namespace ExpiryGame
         {
             var item = ((IFoodInventory)inventory).Selected;
             if (item == null || Time.time < nextAttackTime) return;
-            nextAttackTime = Time.time + cooldownSeconds;
 
-            CollectTargets();
-            foreach (var target in targets) target.TakeDamage(item.CurrentDamage);
+            var driver = attackDriver as IAttackDriver;
+            if (driver == null)
+            {
+                nextAttackTime = Time.time + cooldownSeconds;
+                CollectTargets();
+                foreach (var target in targets) target.TakeDamage(item.CurrentDamage);
+                Commit(item, targets.Count);
+                return;
+            }
 
+            if (driver.IsBusy) return;
+            nextAttackTime = Time.time + driver.CooldownSeconds;
+            driver.Begin(item, hitCount => Commit(item, hitCount));
+        }
+
+        private void Commit(FoodItem item, int hitCount)
+        {
             item.UseDurability();
             if (item.IsBroken) ((IFoodInventory)inventory).Remove(item);
-            WeaponUsed?.Invoke(item, targets.Count);
+            WeaponUsed?.Invoke(item, hitCount);
         }
 
         private void CollectTargets()

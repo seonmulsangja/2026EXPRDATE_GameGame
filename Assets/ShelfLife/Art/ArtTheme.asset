@@ -1,0 +1,222 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 668f1d1b591f4354cae13e64b65a9ebc, type: 3}
+  m_Name: ArtTheme
+  m_EditorClassIdentifier: ExpiryGame.Visual::ExpiryGame.Visual.ArtTheme
+  pixelsPerUnit: 32
+  spriteSize: 32
+  backgroundColor: {r: 0.078431375, g: 0.08627451, b: 0.10980392, a: 1}
+  floorColor: {r: 0.16470589, g: 0.19215687, b: 0.2509804, a: 1}
+  floorAccentColor: {r: 0.14509805, g: 0.16862746, b: 0.21960784, a: 1}
+  playerColor: {r: 0.5568628, g: 0.60784316, b: 0.68235296, a: 1}
+  enemyColor: {r: 0.43137255, g: 0.30980393, b: 0.3529412, a: 1}
+  outlineDarken: 0.55
+  placeholderFoods:
+  - keyword: fish
+    color: {r: 0.23921569, g: 0.72156864, b: 1, a: 1}
+  - keyword: bread
+    color: {r: 0.9490196, g: 0.6627451, b: 0.23137255, a: 1}
+  - keyword: bean
+    color: {r: 0.8862745, g: 0.33333334, b: 0.23137255, a: 1}
+  witherOverlay:
+    serializedVersion: 2
+    key0: {r: 0.5411765, g: 0.5764706, b: 0.6392157, a: 0}
+    key1: {r: 0.4862745, g: 0.5137255, b: 0.5647059, a: 0.15}
+    key2: {r: 0, g: 0, b: 0, a: 0.65}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 29491
+    atime2: 65535
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 3
+  rottenOverlay: {r: 0.36078432, g: 0.41960785, b: 0.28235295, a: 0.8}
+  ambientColorOverDay:
+    serializedVersion: 2
+    key0: {r: 0.43529412, g: 0.4862745, b: 0.57254905, a: 1}
+    key1: {r: 0.6039216, g: 0.654902, b: 0.7411765, a: 1}
+    key2: {r: 0.6039216, g: 0.654902, b: 0.7411765, a: 0}
+    key3: {r: 0.47843137, g: 0.41568628, b: 0.47058824, a: 0}
+    key4: {r: 0.13725491, g: 0.16470589, b: 0.26666668, a: 0}
+    key5: {r: 0.101960786, g: 0.1254902, b: 0.21176471, a: 0}
+    key6: {r: 0.43529412, g: 0.4862745, b: 0.57254905, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 9830
+    ctime2: 26214
+    ctime3: 32768
+    ctime4: 40632
+    ctime5: 58982
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 2
+  ambientIntensityOverDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.7
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.15
+      value: 0.9
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.4
+      value: 0.9
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.55
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 0.25
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.9
+      value: 0.25
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.7
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  playerLightColor: {r: 1, g: 0.8509804, b: 0.627451, a: 1}
+  playerLightInnerRadius: 1.5
+  playerLightOuterRadius: 7
+  playerLightIntensityOverDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.4
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.55
+      value: 0.8
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 1.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.9
+      value: 1.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
