@@ -1,0 +1,1136 @@
+fileFormatVersion: 2
+guid: fb3bf1d06a05bb54a8ce3cf6ceb84d63
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -703091051048647416
+    second: Enemy_Seet 1_0
+  - first:
+      213: -4774803639367246153
+    second: Enemy_Seet 1_1
+  - first:
+      213: -1988646630800980306
+    second: Enemy_Seet 1_2
+  - first:
+      213: 6398765913904758491
+    second: Enemy_Seet 1_3
+  - first:
+      213: -3013632477378484217
+    second: Enemy_Seet 1_4
+  - first:
+      213: 5740366140443385008
+    second: Enemy_Seet 1_5
+  - first:
+      213: 7521536432369822389
+    second: Enemy_Seet 1_6
+  - first:
+      213: -482519620832567576
+    second: Enemy_Seet 1_7
+  - first:
+      213: -2884135961155909149
+    second: Enemy_Seet 1_8
+  - first:
+      213: 8701090268375281178
+    second: Enemy_Seet 1_9
+  - first:
+      213: 4159690041560394402
+    second: Enemy_Seet 1_10
+  - first:
+      213: 3982842594012151257
+    second: Enemy_Seet 1_11
+  - first:
+      213: 9124319894045393550
+    second: Enemy_Seet 1_12
+  - first:
+      213: 6693913570105153405
+    second: Enemy_Seet 1_13
+  - first:
+      213: -2986437813589648877
+    second: Enemy_Seet 1_14
+  - first:
+      213: 6899835453119616317
+    second: Enemy_Seet 1_15
+  - first:
+      213: 2915546160871889935
+    second: Enemy_Seet 1_16
+  - first:
+      213: -380731246232512137
+    second: Enemy_Seet 1_17
+  - first:
+      213: 2984175497522275332
+    second: Enemy_Seet 1_18
+  - first:
+      213: -389221555075703818
+    second: Enemy_Seet 1_19
+  - first:
+      213: 4594580719177789308
+    second: Enemy_Seet 1_20
+  - first:
+      213: -5365274947426725883
+    second: Enemy_Seet 1_21
+  - first:
+      213: 5801563738983582743
+    second: Enemy_Seet 1_22
+  - first:
+      213: -7157602915791239585
+    second: Enemy_Seet 1_23
+  - first:
+      213: 7853367457503268767
+    second: Enemy_Seet 1_24
+  - first:
+      213: -6540405028703168103
+    second: Enemy_Seet 1_25
+  - first:
+      213: 2567668519829182844
+    second: Enemy_Seet 1_26
+  - first:
+      213: 878749059225611256
+    second: Enemy_Seet 1_27
+  - first:
+      213: -1697640598858639633
+    second: Enemy_Seet 1_28
+  - first:
+      213: 7624738744718846332
+    second: Enemy_Seet 1_29
+  - first:
+      213: 2417843945047381186
+    second: Enemy_Seet 1_30
+  - first:
+      213: -3485184673179357081
+    second: Enemy_Seet 1_31
+  - first:
+      213: 4007025341238000537
+    second: Enemy_Seet 1_32
+  - first:
+      213: -4584546038739872628
+    second: Enemy_Seet 1_33
+  - first:
+      213: 6239371060149088084
+    second: Enemy_Seet 1_34
+  - first:
+      213: -5570684895743595796
+    second: Enemy_Seet 1_35
+  - first:
+      213: 721376680781554032
+    second: Enemy_Seet 1_36
+  - first:
+      213: 8039547232910903376
+    second: Enemy_Seet 1_37
+  - first:
+      213: 7945261085413643183
+    second: Enemy_Seet 1_38
+  - first:
+      213: 6659038408039407073
+    second: Enemy_Seet 1_39
+  - first:
+      213: -1689502531095981164
+    second: Enemy_Seet 1_40
+  - first:
+      213: 1288786612045776489
+    second: Enemy_Seet 1_41
+  - first:
+      213: 3294592999700292423
+    second: Enemy_Seet 1_42
+  - first:
+      213: 3591240677398651000
+    second: Enemy_Seet 1_43
+  - first:
+      213: -296755963134679341
+    second: Enemy_Seet 1_44
+  - first:
+      213: 2555708837485096490
+    second: Enemy_Seet 1_45
+  - first:
+      213: -3623807056220044966
+    second: Enemy_Seet 1_46
+  - first:
+      213: 3636747039608142771
+    second: Enemy_Seet 1_47
+  - first:
+      213: -8854128222113579509
+    second: Enemy_Seet 1_48
+  - first:
+      213: 8961408876777366870
+    second: Enemy_Seet 1_49
+  - first:
+      213: 8660671792860432208
+    second: Enemy_Seet 1_50
+  - first:
+      213: 5195145893448379097
+    second: Enemy_Seet 1_51
+  - first:
+      213: 8246860866419105118
+    second: Enemy_Seet 1_52
+  - first:
+      213: 5310127735701350715
+    second: Enemy_Seet 1_53
+  - first:
+      213: 3074930652209313679
+    second: Enemy_Seet 1_54
+  - first:
+      213: -8607430437037093332
+    second: Enemy_Seet 1_55
+  - first:
+      213: -2780435745878923091
+    second: Enemy_Seet 1_56
+  - first:
+      213: 6021063124740322155
+    second: Enemy_Seet 1_57
+  - first:
+      213: -316123811756522792
+    second: Enemy_Seet 1_58
+  - first:
+      213: -2190738041089755585
+    second: Enemy_Seet 1_59
+  - first:
+      213: 5810911474431262229
+    second: Enemy_Seet 1_60
+  - first:
+      213: 4830893448661431497
+    second: Enemy_Seet 1_61
+  - first:
+      213: -4485877260319979130
+    second: Enemy_Seet 1_62
+  - first:
+      213: 7412972919292521695
+    second: Enemy_Seet 1_63
+  - first:
+      213: 6705479958405267579
+    second: Enemy_Seet 1_64
+  - first:
+      213: -7624557745393541053
+    second: Enemy_Seet 1_65
+  - first:
+      213: -7406627521387985735
+    second: Enemy_Seet 1_66
+  - first:
+      213: -291429045086829358
+    second: Enemy_Seet 1_67
+  - first:
+      213: 1325517364453267213
+    second: Enemy_Seet 1_68
+  - first:
+      213: -7984266309567544228
+    second: Enemy_Seet 1_69
+  - first:
+      213: -7039752765948356250
+    second: Enemy_Seet 1_70
+  - first:
+      213: -1877964138700203917
+    second: Enemy_Seet 1_71
+  - first:
+      213: -5159215391252699433
+    second: Enemy_Seet 1_72
+  - first:
+      213: 1769755305952042655
+    second: Enemy_Seet 1_73
+  - first:
+      213: -7930086127976352049
+    second: Enemy_Seet 1_74
+  - first:
+      213: 8472489547092069418
+    second: Enemy_Seet 1_75
+  - first:
+      213: 4358611468320285334
+    second: Enemy_Seet 1_76
+  - first:
+      213: 6613416568988748
+    second: Enemy_Seet 1_77
+  - first:
+      213: 7434038169028610975
+    second: Enemy_Seet 1_78
+  - first:
+      213: 3134285108902669529
+    second: Enemy_Seet 1_79
+  - first:
+      213: 3701306263614317543
+    second: Enemy_Seet 1_80
+  - first:
+      213: 2330654034248093823
+    second: Enemy_Seet 1_81
+  - first:
+      213: -4974659081172528313
+    second: Enemy_Seet 1_82
+  - first:
+      213: 972420354329188299
+    second: Enemy_Seet 1_83
+  - first:
+      213: -2746262033021938358
+    second: Enemy_Seet 1_84
+  - first:
+      213: -5100569517173247852
+    second: Enemy_Seet 1_85
+  - first:
+      213: 129233852348671771
+    second: Enemy_Seet 1_86
+  - first:
+      213: -3329664975168804702
+    second: Enemy_Seet 1_87
+  - first:
+      213: 3502037581067714189
+    second: Enemy_Seet 1_88
+  - first:
+      213: -2910027618392460255
+    second: Enemy_Seet 1_89
+  - first:
+      213: 7449577655499488721
+    second: Enemy_Seet 1_90
+  - first:
+      213: -3267644571250353792
+    second: Enemy_Seet 1_91
+  - first:
+      213: 570475574261950251
+    second: Enemy_Seet 1_92
+  - first:
+      213: 113417543014728933
+    second: Enemy_Seet 1_93
+  - first:
+      213: 2403566034357690960
+    second: Enemy_Seet 1_94
+  - first:
+      213: 3310148867020047022
+    second: Enemy_Seet 1_95
+  - first:
+      213: -1227421706198205489
+    second: Enemy_Seet 1_96
+  - first:
+      213: -5108126059282890691
+    second: Enemy_Seet 1_97
+  - first:
+      213: 7884208433348453156
+    second: Enemy_Seet 1_98
+  - first:
+      213: 3658297329563511566
+    second: Enemy_Seet 1_99
+  - first:
+      213: 1303089130248394499
+    second: Enemy_Seet 1_100
+  - first:
+      213: -3582266232737383351
+    second: Enemy_Seet 1_101
+  - first:
+      213: 1447829053272992434
+    second: Enemy_Seet 1_102
+  - first:
+      213: -6151408934374409513
+    second: Enemy_Seet 1_103
+  - first:
+      213: -6212622891326264889
+    second: Enemy_Seet 1_104
+  - first:
+      213: 139875169626147007
+    second: Enemy_Seet 1_105
+  - first:
+      213: -1198742683526560778
+    second: Enemy_Seet 1_106
+  - first:
+      213: -8132904181341179683
+    second: Enemy_Seet 1_107
+  - first:
+      213: 1979029292895558587
+    second: Enemy_Seet 1_108
+  - first:
+      213: -1629400623308836980
+    second: Enemy_Seet 1_109
+  - first:
+      213: 6549754397613964230
+    second: Enemy_Seet 1_110
+  - first:
+      213: -6216719295759897192
+    second: Enemy_Seet 1_111
+  - first:
+      213: 4265450581249421249
+    second: Enemy_Seet 1_112
+  - first:
+      213: 8594304782746948749
+    second: Enemy_Seet 1_113
+  - first:
+      213: 7525637562289859415
+    second: Enemy_Seet 1_114
+  - first:
+      213: 3360889472535911586
+    second: Enemy_Seet 1_115
+  - first:
+      213: -6788865560581785885
+    second: Enemy_Seet 1_116
+  - first:
+      213: -2270582656390677286
+    second: Enemy_Seet 1_117
+  - first:
+      213: -196216882555679314
+    second: Enemy_Seet 1_118
+  - first:
+      213: 3664575336095366510
+    second: Enemy_Seet 1_119
+  - first:
+      213: 6332558368706622626
+    second: Enemy_Seet 1_120
+  - first:
+      213: 3538001209422926061
+    second: Enemy_Seet 1_121
+  - first:
+      213: -3147363048337784387
+    second: Enemy_Seet 1_122
+  - first:
+      213: 946589027442192291
+    second: Enemy_Seet 1_123
+  - first:
+      213: -1218655637272289537
+    second: Enemy_Seet 1_124
+  - first:
+      213: -1871339674784705462
+    second: Enemy_Seet 1_125
+  - first:
+      213: -3000903039214558069
+    second: Enemy_Seet 1_126
+  - first:
+      213: -3880658987285235347
+    second: Enemy_Seet 1_127
+  - first:
+      213: -3303505070138734854
+    second: Enemy_Seet 1_128
+  - first:
+      213: 2980258219260769398
+    second: Enemy_Seet 1_129
+  - first:
+      213: -4267151020892893062
+    second: Enemy_Seet 1_130
+  - first:
+      213: 6801712246779642435
+    second: Enemy_Seet 1_131
+  - first:
+      213: 5665672703271126231
+    second: Enemy_Seet 1_132
+  - first:
+      213: -6267847478167595019
+    second: Enemy_Seet 1_133
+  - first:
+      213: 2088231366594437256
+    second: Enemy_Seet 1_134
+  - first:
+      213: 2475705530612993989
+    second: Enemy_Seet 1_135
+  - first:
+      213: 2537651346663900892
+    second: Enemy_Seet 1_136
+  - first:
+      213: 2262976925951071086
+    second: Enemy_Seet 1_137
+  - first:
+      213: 7239133392341752024
+    second: Enemy_Seet 1_138
+  - first:
+      213: -6904893083645638507
+    second: Enemy_Seet 1_139
+  - first:
+      213: -2982865424766118729
+    second: Enemy_Seet 1_140
+  - first:
+      213: -2461136076327021872
+    second: Enemy_Seet 1_141
+  - first:
+      213: 6753013266618448550
+    second: Enemy_Seet 1_142
+  - first:
+      213: -3522569822052367029
+    second: Enemy_Seet 1_143
+  - first:
+      213: 3453962407459025315
+    second: Enemy_Seet 1_144
+  - first:
+      213: -4101900236447047111
+    second: Enemy_Seet 1_145
+  - first:
+      213: -6561807480904557108
+    second: Enemy_Seet 1_146
+  - first:
+      213: 696592415738948068
+    second: Enemy_Seet 1_147
+  - first:
+      213: -1767581032571945489
+    second: Enemy_Seet 1_148
+  - first:
+      213: -4048310805694930572
+    second: Enemy_Seet 1_149
+  - first:
+      213: 8927637262364512399
+    second: Enemy_Seet 1_150
+  - first:
+      213: 6609057525334770276
+    second: Enemy_Seet 1_151
+  - first:
+      213: -1901536000903737103
+    second: Enemy_Seet 1_152
+  - first:
+      213: -8450222262523456029
+    second: Enemy_Seet 1_153
+  - first:
+      213: -768072021590472274
+    second: Enemy_Seet 1_154
+  - first:
+      213: 3106248175744838885
+    second: Enemy_Seet 1_155
+  - first:
+      213: -5867843022710534207
+    second: Enemy_Seet 1_156
+  - first:
+      213: -5974589064700676233
+    second: Enemy_Seet 1_157
+  - first:
+      213: 7753372833720128322
+    second: Enemy_Seet 1_158
+  - first:
+      213: 6604970614926274349
+    second: Enemy_Seet 1_159
+  - first:
+      213: -6400227687525066124
+    second: Enemy_Seet 1_160
+  - first:
+      213: 4957355834055944679
+    second: Enemy_Seet 1_161
+  - first:
+      213: -1118819165412173797
+    second: Enemy_Seet 1_162
+  - first:
+      213: -3392332294023331421
+    second: Enemy_Seet 1_163
+  - first:
+      213: 5751099676764048554
+    second: Enemy_Seet 1_164
+  - first:
+      213: 2376865285610807165
+    second: Enemy_Seet 1_165
+  - first:
+      213: 4628439658734770196
+    second: Enemy_Seet 1_166
+  - first:
+      213: 1841771787382016628
+    second: Enemy_Seet 1_167
+  - first:
+      213: 1866215205272410115
+    second: Enemy_Seet 1_168
+  - first:
+      213: -3598655500935236613
+    second: Enemy_Seet 1_169
+  - first:
+      213: 3916092538034817619
+    second: Enemy_Seet 1_170
+  - first:
+      213: -1949328471222423375
+    second: Enemy_Seet 1_171
+  - first:
+      213: -7551539722802615196
+    second: Enemy_Seet 1_172
+  - first:
+      213: -6553484438669687120
+    second: Enemy_Seet 1_173
+  - first:
+      213: 5273561922116309673
+    second: Enemy_Seet 1_174
+  - first:
+      213: -2033248755602019159
+    second: Enemy_Seet 1_175
+  - first:
+      213: -3714041036047781364
+    second: Enemy_Seet 1_176
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Enemy_Seet 1_0
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 1004
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8054d790a6e1e36f0800000000000000
+      internalID: -703091051048647416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_1
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 1004
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bed543536d7cbdb0800000000000000
+      internalID: -4774803639367246153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_2
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 1004
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea68453fc68e664e0800000000000000
+      internalID: -1988646630800980306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_3
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 1004
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdebb2352bbfcc850800000000000000
+      internalID: 6398765913904758491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_4
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 754
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 708664e8a3d6d26d0800000000000000
+      internalID: -3013632477378484217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_5
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 754
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bcdec94790e9af40800000000000000
+      internalID: 5740366140443385008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_6
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 754
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5baef80d88dd16860800000000000000
+      internalID: 7521536432369822389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_7
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 754
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ee5e1b16febd49f0800000000000000
+      internalID: -482519620832567576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_8
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 504
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e94f57cf9d79f7d0800000000000000
+      internalID: -2884135961155909149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_9
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 504
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1eed1daf7b70c870800000000000000
+      internalID: 8701090268375281178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_10
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 504
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2aaefe6cd003ab930800000000000000
+      internalID: 4159690041560394402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_11
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 504
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ddb36cbc36e54730800000000000000
+      internalID: 3982842594012151257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_12
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 254
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e820b95d99810ae70800000000000000
+      internalID: 9124319894045393550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_13
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 254
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d77d8471dee85ec50800000000000000
+      internalID: 6693913570105153405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_14
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 254
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31ad131a1aa0e86d0800000000000000
+      internalID: -2986437813589648877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_15
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 254
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3557d7a9c321cf50800000000000000
+      internalID: 6899835453119616317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_16
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 4
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0cd50d39c9167820800000000000000
+      internalID: 2915546160871889935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_17
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 4
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7795b61e2fe57baf0800000000000000
+      internalID: -380731246232512137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_18
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 4
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4046d3dddcbe96920800000000000000
+      internalID: 2984175497522275332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Enemy_Seet 1_19
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 4
+        width: 300
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fb99cece05399af0800000000000000
+      internalID: -389221555075703818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 48ee6bdad6b1a144aba677e05fae83bd
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":300.0,"y":250.0},"gridSpriteOffset":{"x":25.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Enemy_Seet 1_0: -703091051048647416
+      Enemy_Seet 1_1: -4774803639367246153
+      Enemy_Seet 1_10: 4159690041560394402
+      Enemy_Seet 1_11: 3982842594012151257
+      Enemy_Seet 1_12: 9124319894045393550
+      Enemy_Seet 1_13: 6693913570105153405
+      Enemy_Seet 1_14: -2986437813589648877
+      Enemy_Seet 1_15: 6899835453119616317
+      Enemy_Seet 1_16: 2915546160871889935
+      Enemy_Seet 1_17: -380731246232512137
+      Enemy_Seet 1_18: 2984175497522275332
+      Enemy_Seet 1_19: -389221555075703818
+      Enemy_Seet 1_2: -1988646630800980306
+      Enemy_Seet 1_3: 6398765913904758491
+      Enemy_Seet 1_4: -3013632477378484217
+      Enemy_Seet 1_5: 5740366140443385008
+      Enemy_Seet 1_6: 7521536432369822389
+      Enemy_Seet 1_7: -482519620832567576
+      Enemy_Seet 1_8: -2884135961155909149
+      Enemy_Seet 1_9: 8701090268375281178
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

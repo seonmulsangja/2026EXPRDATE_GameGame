@@ -1,4 +1,7 @@
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public class EnemySpawner_JCY : MonoBehaviour
 {
@@ -6,6 +9,15 @@ public class EnemySpawner_JCY : MonoBehaviour
     [SerializeField] private Transform[] _spawnPoints;
 
     public bool _isSpawn;
+
+    private void Update()
+    {
+        //테스트용
+        if (Keyboard.current.tKey.wasPressedThisFrame)
+        {
+            SpawnEnemy();
+        }
+    }
 
     public void SpawnEnemy()
     {

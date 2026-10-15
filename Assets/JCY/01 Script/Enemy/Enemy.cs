@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.U2D.Animation;
 
 public class Enemy : MonoBehaviour
 {
@@ -9,14 +11,19 @@ public class Enemy : MonoBehaviour
     public int _health;
     public int _damage;
     public float _speed;
-    public Sprite _sprite;
+    public SpriteLibraryAsset _sprite;
     public string _enemyName;
+    public float _width;
+    public float _height;
     
     public EnemyPooling _enemyPooling;
     public Transform targetTrm;
+    
     [SerializeField] private LayerMask _whatIsPlayer;
+    
     private Vector2 _dir;
     private Rigidbody2D _rb;
+    private SpriteLibrary _spriteLibrary;
     
     public void Initialize(EnemySO enemySo)
     {
@@ -27,11 +34,16 @@ public class Enemy : MonoBehaviour
         _speed = _enemySo.speed;
         _sprite = _enemySo.sprite;
         _enemyName = _enemySo.enemyName;
+        _width = _enemySo.width;
+        _height = _enemySo.height;
+
+        _spriteLibrary.spriteLibraryAsset = _sprite;
     }
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _spriteLibrary = GetComponent<SpriteLibrary>();
     }
 
     private void Update()
@@ -87,6 +99,6 @@ public class Enemy : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position , transform.localScale);
+        Gizmos.DrawWireCube(transform.position , new Vector3(_width , _height , 1));
     }
 }
