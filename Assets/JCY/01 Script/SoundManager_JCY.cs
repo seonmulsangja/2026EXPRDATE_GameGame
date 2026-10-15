@@ -28,7 +28,7 @@ public class SoundManager_JCY : MonoBehaviour
 
     private void Start()
     {
-        PlayBGM(0);
+        //PlayBGM(0);
     }
 
     public void PlaySound(int index)

@@ -6,9 +6,9 @@ using Random = UnityEngine.Random;
 public class EnemySpawner_JCY : MonoBehaviour
 {
     [SerializeField] private EnemyPooling _enemyPooling;
-    [SerializeField] private Transform[] _spawnPoints;
+    public Transform[] _spawnPoints;
 
-    public bool _isSpawn;
+    public bool _isSpawn = true;
 
     private void Update()
     {
@@ -19,14 +19,15 @@ public class EnemySpawner_JCY : MonoBehaviour
         }
     }
 
-    public void SpawnEnemy()
+    public GameObject SpawnEnemy()
     {
         if(!_isSpawn)
-            return;
+            return null;
 
         int num = Random.Range(0, _spawnPoints.Length);
 
         GameObject enemy = _enemyPooling.SpawnRandomEnemy();
         Instantiate(enemy, _spawnPoints[num].position , Quaternion.identity);
+        return enemy;
     }
 }

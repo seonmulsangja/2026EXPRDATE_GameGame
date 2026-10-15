@@ -56,7 +56,21 @@ public class Enemy : MonoBehaviour
 
     public void Move()
     {
-        _dir = targetTrm.position - gameObject.transform.position;
+        _dir = targetTrm.position - transform.position;
+
+        Vector3 scale = transform.localScale;
+
+        if (_dir.x > 0)
+        {
+            scale.x = Mathf.Abs(scale.x);
+        }
+        else if (_dir.x < 0)
+        {
+            scale.x = -Mathf.Abs(scale.x);
+        }
+
+        transform.localScale = scale;
+        _dir.Normalize();
         _rb.linearVelocity = _dir * _speed;
     }
 
