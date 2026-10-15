@@ -10,14 +10,15 @@ public class EnemyPooling : MonoBehaviour
 
     private Stack<GameObject> enemyPool = new Stack<GameObject>();
     [SerializeField] private Transform _payerTrm;
+    [SerializeField] private EnemySpawner_JCY _enemySpawner;
 
-    private void Awake()
+    private void Start()
     {
+        GameObject enemy;
         for (int i = 0; i < poolSize; i++)
-        {
-            GameObject enemy = Instantiate(enemyPrefab, transform);
-            enemy.SetActive(false);
-            enemyPool.Push(enemy);
+        { 
+            enemy = Instantiate(enemyPrefab , transform.position , Quaternion.identity);
+            enemy = EnemyPoolPush(enemy);
         }
     }
 
@@ -25,16 +26,18 @@ public class EnemyPooling : MonoBehaviour
     {
         GameObject enemy;
 
-        if (enemyPool.Count > 0)
+        if (enemyPool.Count > 1)
         {
             enemy = enemyPool.Pop();
         }
         else
-        {
-            enemy = Instantiate(enemyPrefab, transform);
+        { 
+            enemy = Instantiate(enemyPrefab , transform.position , Quaternion.identity);
+            enemy = EnemyPoolPush(enemy);
         }
 
         Enemy enemyScript = enemy.GetComponent<Enemy>();
+        enemyScript._enemyPooling = this;
 
         EnemySO randomData =
             enemyDatas[Random.Range(0, enemyDatas.Count)];
@@ -45,6 +48,14 @@ public class EnemyPooling : MonoBehaviour
         
         enemy.SetActive(true);
 
+        return enemy;
+    }
+
+    public GameObject EnemyPoolPush(GameObject enemy)
+    {
+        enemy.SetActive(false);
+        enemy.transform.position = _enemySpawner._spawnPoints[Random.Range(0, _enemySpawner._spawnPoints.Length)].position;
+        enemyPool.Push(enemy);
         return enemy;
     }
 
