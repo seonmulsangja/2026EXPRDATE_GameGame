@@ -1,0 +1,17 @@
+{
+    "name": "ExpiryGame.Drop",
+    "rootNamespace": "ExpiryGame.Drop",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Food_Bread
   m_EditorClassIdentifier: ExpiryGame.Survival::ExpiryGame.FoodData
   displayName: Bread
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 83ac888a635e4e643a6cdd8b17794c53, type: 3}
+  sprite: {fileID: 21300000, guid: 83ac888a635e4e643a6cdd8b17794c53, type: 3}
+  spriteRotten: {fileID: 21300000, guid: b0e2dd4a75d48414a9cd64eb5190fee3, type: 3}
   shelfLifeSeconds: 120

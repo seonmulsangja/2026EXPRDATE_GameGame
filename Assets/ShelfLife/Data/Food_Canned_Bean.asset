@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Food_Canned_Bean
   m_EditorClassIdentifier: ExpiryGame.Survival::ExpiryGame.FoodData
   displayName: Canned Bean
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 6e318568a90a96443a39623068756e3b, type: 3}
+  sprite: {fileID: 21300000, guid: 6e318568a90a96443a39623068756e3b, type: 3}
+  spriteRotten: {fileID: 21300000, guid: f66ea1faccab8c944ad2fb5bd89866ca, type: 3}
   shelfLifeSeconds: 300

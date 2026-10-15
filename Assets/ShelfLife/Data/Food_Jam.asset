@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba60d385cde2f0d4687667f26c950742, type: 3}
+  m_Name: Food_Jam
+  m_EditorClassIdentifier: ExpiryGame.Survival::ExpiryGame.FoodData
+  displayName: Jam
+  icon: {fileID: 21300000, guid: 377f125238f5e84468a2a5eba60e63ac, type: 3}
+  sprite: {fileID: 21300000, guid: 377f125238f5e84468a2a5eba60e63ac, type: 3}
+  spriteRotten: {fileID: 21300000, guid: 001bbe1ef9412274f8f4193da7114510, type: 3}
+  shelfLifeSeconds: 240

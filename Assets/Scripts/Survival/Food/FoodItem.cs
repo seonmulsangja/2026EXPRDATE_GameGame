@@ -27,6 +27,12 @@ namespace ExpiryGame
             RemainingDurability = stats.MaxDurability;
         }
 
+        // 드롭처럼 "갓 만든 것이 아닌" 음식을 만들 때 쓴다. 스탯(회복/데미지/내구도)은 최대 유통기한 기준 그대로.
+        public void SetShelfLife01(float ratio)
+        {
+            RemainingShelfLife = Mathf.Clamp01(ratio) * Data.shelfLifeSeconds;
+        }
+
         public void Tick(float deltaSeconds)
         {
             if (IsRotten) return;

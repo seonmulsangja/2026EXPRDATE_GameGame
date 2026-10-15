@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Food_Fresh_Fish
   m_EditorClassIdentifier: ExpiryGame.Survival::ExpiryGame.FoodData
   displayName: Fresh Fish
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 34fa1137f477c7d44925ceac5bc62aaf, type: 3}
+  sprite: {fileID: 21300000, guid: 34fa1137f477c7d44925ceac5bc62aaf, type: 3}
+  spriteRotten: {fileID: 21300000, guid: 7fc882ab4381114419fe069f605a0ec1, type: 3}
   shelfLifeSeconds: 30

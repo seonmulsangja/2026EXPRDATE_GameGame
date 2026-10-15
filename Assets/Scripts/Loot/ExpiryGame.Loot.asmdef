@@ -1,0 +1,18 @@
+{
+    "name": "ExpiryGame.Loot",
+    "rootNamespace": "ExpiryGame.Loot",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Drop",
+        "ExpiryGame.MapGen"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

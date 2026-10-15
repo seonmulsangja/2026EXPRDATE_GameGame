@@ -1,0 +1,26 @@
+{
+    "name": "ExpiryGame.Tests.DropMap",
+    "rootNamespace": "ExpiryGame.Tests",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Drop",
+        "ExpiryGame.MapGen",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
