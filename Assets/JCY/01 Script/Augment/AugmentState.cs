@@ -62,8 +62,16 @@ public class AugmentState : MonoBehaviour
         int newLevel = currentLevel + 1;
         _skillLevels[skill] = newLevel;
 
-        Debug.Log($"{skill.skillName} 획득! Lv.{newLevel}");
+        if (_skillController != null)
+        {
+            _skillController.AddOrLevelUpSkill(skill, newLevel);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerSkillController가 플레이어에 없습니다.");
+        }
 
+        Debug.Log($"{skill.skillName} 획득! Lv.{newLevel}");
         return true;
     }
 }
