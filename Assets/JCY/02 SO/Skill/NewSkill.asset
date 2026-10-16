@@ -17,5 +17,12 @@ MonoBehaviour:
   description: 
   maxLevel: 5
   damage: 10
+  damagePerLevel: 5
+  duration: 2
+  durationPerLevel: 0.5
   cooldown: 3
+  cooldownReductionPerLevel: 0.2
+  minCooldown: 1
   range: 5
+  rangePerLevel: 0.5
+  skillAction: {fileID: 11400000, guid: 4271074d8e53eda4894361d2cce8d413, type: 2}

@@ -19,17 +19,45 @@ public class AugmentSlotUI : MonoBehaviour
         _augment = augment;
         _augmentUI = augmentUI;
 
-        iconImage.sprite = augment.icon;
-        nameText.text = augment.augmentName;
-        descriptionText.text = augment.description;
+        // 기본적으로 증강 SO 정보 사용
+        Sprite icon = augment.icon;
+        string displayName = augment.augmentName;
+        string displayDescription = augment.description;
+
+        // 스킬 증강이면 SkillSO 정보 사용
+        if (augment.augmentType == AugmentType.Skill
+            && augment.skill != null)
+        {
+            SkillSO skill = augment.skill;
+
+            icon = skill.icon;
+            displayName = skill.skillName;
+            displayDescription = skill.description;
+        }
+
+        iconImage.sprite = icon;
+        nameText.text = displayName;
+        descriptionText.text = displayDescription;
 
         int currentLevel = _augmentUI.GetAugmentLevel(augment);
 
         if (levelText != null)
         {
-            levelText.text = currentLevel > 0
-                ? $"Lv.{currentLevel} → Lv.{currentLevel + 1}"
-                : "NEW";
+            if (augment.augmentType == AugmentType.Skill
+                && augment.skill != null)
+            {
+                int skillLevel = currentLevel;
+
+                levelText.text = skillLevel > 0
+                    ? $"Lv.{skillLevel} → Lv.{skillLevel + 1}"
+                    : "NEW";
+            }
+            else
+            {
+                levelText.text = currentLevel > 0
+                    ? $"Lv.{currentLevel} → Lv.{currentLevel + 1}"
+                    : "NEW";
+            }
         }
 
         selectButton.onClick.RemoveAllListeners();
