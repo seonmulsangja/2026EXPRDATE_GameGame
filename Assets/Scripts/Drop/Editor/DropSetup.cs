@@ -169,7 +169,7 @@ namespace ExpiryGame.Drop.Editor
             go.layer = enemyLayer;
 
             var renderer = go.GetComponent<SpriteRenderer>();
-            renderer.sprite = ArtAssets.Load("player", "player_down");
+            renderer.sprite = ArtAssets.Load("player", "player_down_idle");
             renderer.sortingOrder = 2;
             DarkArtSceneInstaller.EnsureLit(renderer);
 

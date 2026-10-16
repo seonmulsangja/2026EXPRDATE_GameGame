@@ -1,0 +1,23 @@
+{
+    "name": "ExpiryGame.UI.Editor",
+    "rootNamespace": "ExpiryGame.UI.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual.Editor",
+        "ExpiryGame.Landmark",
+        "ExpiryGame.UI",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

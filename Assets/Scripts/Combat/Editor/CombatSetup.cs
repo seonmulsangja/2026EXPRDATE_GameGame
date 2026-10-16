@@ -128,7 +128,7 @@ namespace ExpiryGame.Combat.Editor
                 if (health.GetComponent<FoodInventory>() == null && health.name.StartsWith("EnemyDummy"))
                     Object.DestroyImmediate(health.gameObject);
 
-            var dummy = CreateTargetPrefab("CombatDummy", "player_down", new Color(1f, 0.6f, 0.6f), false, flashMaterial, enemyLayer);
+            var dummy = CreateTargetPrefab("CombatDummy", "player_down_idle", new Color(1f, 0.6f, 0.6f), false, flashMaterial, enemyLayer);
             var scarecrow = CreateTargetPrefab("Scarecrow", "obstacle_barrel", Color.white, true, flashMaterial, enemyLayer);
 
             PlaceIfMissing(dummy, "CombatDummy_1", new Vector3(4f, 2f));

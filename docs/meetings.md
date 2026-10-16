@@ -72,3 +72,106 @@
 
 ## 검증 범위
 - 열려 있는 Unity 에디터가 자동 컴파일한 결과(Editor.log)로 C# 컴파일 에러 확인. 씬 설치 메뉴 / 플레이 동작 / EditMode 테스트 실행은 이 환경에서 직접 실행해 보지 못함 → handoff의 체크리스트 참고.
+
+---
+
+# 아트 v2 + HUD + 낮밤 + 랜드마크 작업 (2026-10-16)
+
+이번에도 진행이 막히는 지점이 없어 **서브에이전트 회의(설계/비판/일정)는 열지 않았다.** 비용이 큰 갈림길 8개를 혼자 판단해 근거를 남긴다. 이견이 있으면 바꿔도 되는 지점들.
+
+## D15. 냉장고 배율: `IDecayRateModifier` + 정적 `DecayRateRegistry`
+- `ShelfLifeSystem`(Survival)은 Landmark를 참조할 수 없다(어셈블리 방향). 그래서 인터페이스/등록소를 Survival에 두고 `ShelfLifeSystem`은 틱마다 `Combined()` 곱만 읽는다. `DropSourceRegistry`와 같은 방식.
+- 한계: 배율이 플레이어 위치 기준으로 **추적 중인 모든 음식**에 걸린다 (바닥 드롭 포함). 음식별 위치 판정은 `FoodItem`에 위치가 없어 하지 않았다.
+
+## D16. 낮밤 구간(새벽/낮/황혼/밤)과 기존 Day/Night 페이즈는 별개
+- 기존 `GameClock.Phase`는 `nightStartNormalized`로 Day/Night 둘뿐이고 게임 로직(UI 아이콘 등)이 쓴다. 시각용 4구간은 `DayNightProfile`이 `TimeOfDay01`을 직접 해석한다 (기존 값/이벤트만 구독, 시계는 수정 안 함).
+- 기본값(황혼 0.45~0.55)이 `nightStart` 0.5와 맞물리게 잡았다. 다르게 쓰려면 둘을 같이 조절.
+
+## D17. 낮밤 계산은 `DayNightDirector` 한 곳, 소비자는 구독만
+- 타일 페이드/발광/비네트/모닥불 빛이 각자 시간을 읽으면 곡선이 어긋난다. `DayNightSample.Night01`을 단일 진실로 두고 `Changed`로 전달. 프리팹(씬 참조 불가)은 `DayNightState.Instance`.
+- 렌더 파이프라인 확인 결과 URP 2D → Light 2D + URP Volume Vignette. 오버레이 방식은 쓰지 않음.
+
+## D18. 랜드마크 효과는 `LandmarkZone` + 효과별 독립 컴포넌트, 서비스는 `LandmarkContext`로 주입
+- 프리팹은 씬 오브젝트를 참조할 수 없어서 스폰 직후 `ILandmarkPart.Bind(context)`로 (플레이어/체력/`IDropService`/위험 이벤트) 받는다. 효과 컴포넌트는 서로 모른다.
+- 편의점 상호작용 키(F)는 기존 입력 에셋을 건드리지 않으려고 `LandmarkInteractor`가 `InputAction`을 직접 가진다.
+
+## D19. 랜드마크 배치는 순수 계산(`LandmarkPlanner`), 스폰은 청크 이벤트에 얹기
+- 지역별 seed 계산이라 로드 여부와 무관하게 "가장 가까운 랜드마크"(UI 화살표/텔레포트)를 물을 수 있다. 스폰/언로드는 `IChunkEvents`(기존 계약)로. 장애물 비우기는 MapGen에 `IObstacleFilter`만 추가.
+- 지역 경계 여유(`regionMargin` 8타일)가 비움 영역보다 커서 이웃 지역을 보지 않아도 겹치지 않는다. 시작 랜드마크는 모닥불(기본), `LandmarkSettings.startLandmark`로 변경.
+
+## D20. HUD: 도트 3배 정수 배율 + 값이 바뀔 때만 갱신, 컨트롤러는 패널 밖
+- 1080p에서 도트 1px = 3px(`UITheme.pixelScale`). 9-slice는 `pixelsPerUnitMultiplier = 1/3`로 보더 두께 유지. 텍스트는 `ThemedText`가 `UITheme.font`를 입힌다 (폰트 지정은 한 곳).
+- 숨겨졌다 켜지는 패널(상세/상호작용)의 구독이 끊기지 않게 컨트롤러 컴포넌트는 캔버스 쪽에 둔다.
+- 낮/밤 텍스트의 시간은 "현재 구간(낮/밤)이 끝나기까지 남은 시간"(`GameClock.NightStartNormalized` 노출 1줄 추가).
+
+## D21. 디버그 빨리감기는 `Time.timeScale`이 아니라 `GameClock.SpeedMultiplier`
+- 히트스톱이 `timeScale`을 만지므로 충돌하고, 물리/이동까지 빨라지면 테스트가 어렵다. 시계 배속은 낮밤과 유통기한 감소만 빠르게 한다. 시각 점프는 `JumpToTimeOfDay` + 0초 틱.
+
+## D22. 한글 폰트는 임시 폰트로 연결, 교체 지점은 `UITheme.font` 하나
+- TMP 기본 폰트에는 한글이 없어 네모로 보인다. 설치 시 OS의 맑은 고딕을 TMP 동적 폰트로 만들어 연결한다 (배포용 아님, 라이선스 때문에 픽셀 폰트로 교체 필요).
+
+## 검증 범위
+- Unity를 실행하지 못해(스킬/배치 모드 미사용) **asmdef 경계를 그대로 살려 어셈블리별 `dotnet build`**(Unity 6000.3.16f1 참조 DLL)로 C# 컴파일 에러 0 확인. 셰이더, 씬/프리팹 설치 메뉴, 플레이 동작, EditMode 테스트(`ArtV2Tests`)는 실행해 보지 못함.
+
+
+---
+
+# 후속 수정 (2026-10-16)
+
+이번에도 막히는 지점이 없어 **서브에이전트 회의는 열지 않았다.** 갈림길 4개를 혼자 판단해 남긴다.
+
+## D23. 음식 위치는 `FoodItem.Anchor`(Transform)로, 배율은 위치를 받는 인터페이스로
+- `FoodItem`은 순수 클래스라 위치가 없다. 위치를 아는 쪽(가방=`FoodInventory`, 바닥=`DropSpawner`)이 `Anchor`를 설정하고, `ShelfLifeSystem`은 음식마다 `Combined(anchor.position)`만 호출한다. 바닥 음식이 주워지면 `TryAdd`가 Anchor를 플레이어로 바꾼다.
+- `IDecayRateModifier`는 이름을 유지하고 프로퍼티를 `GetDecayRateMultiplier(Vector2)`로 바꿨다 (직전 작업에서 만든 것이라 외부 구현체 없음). Anchor가 없는 음식은 배율 없음.
+
+## D24. 장식은 `IBiome.Decor`(기본 null) + MapGen 안의 `DecorLighting`
+- `IBiome`에 멤버를 더하되 default interface member로 두어 기존 바이옴이 깨지지 않는다.
+- MapGen은 낮밤을 모르므로 장식의 밤 처리는 `DecorLighting.Night01`을 World가 넣어 준다. 장식 수백 개가 매 틱 갱신되지 않게 1% 단위로만 전달. 충돌 없음, 풀링.
+
+## D25. 디버그 메뉴는 릴리스에서 빈 껍데기 컴포넌트로
+- 파일을 통째로 `#if`로 막으면 씬에 남은 컴포넌트가 Missing Script가 된다. 릴리스에서는 같은 이름의 빈 `MonoBehaviour`만 컴파일한다.
+
+## D26. HUD 레이아웃 보존 대신 확인창
+- HUD는 코드 생성(수백 개 참조)이라 재설치 시 부분 병합이 오히려 위험하다. 덮어쓰기 전 확인창을 띄우고, 새 씬에 설치하는 올인원은 묻지 않는다.
+
+## 검증 범위
+- 직전과 동일: asmdef별 `dotnet build` 에러 0. 씬/에디터 메뉴/플레이/EditMode 테스트(`ArtV2Tests` 8개)는 실행하지 못함.
+
+
+---
+
+# UI 정리 (2026-10-16)
+
+막히는 지점이 없어 **서브에이전트 회의는 열지 않았다.** 첨부한 스크린샷은 세션에 전달되지 않아 코드/씬 기준으로 판단했다.
+
+## D27. 지난번 UI 축소안은 적용돼 있지 않았다 → 이번에 구현
+- 확인 결과: DetailPanel은 항상 표시(선택 슬롯 위, 가운데), 배율 3배, `MapDebugOverlay`는 `#if` 없음. 슬롯 번호 항상 표시와 `DebugMenu`의 `#if`만 이미 있었다.
+- 적용: `pixelScale` 2 통일(좌표는 `UISetup.P()`가 3배 기준 값을 정수로 환산, 텍스트는 `ThemedText`가 `TextScale`로 환산), DetailPanel은 Tab 고정 표시 + 선택 변경/썩을 때 `detailPreviewSeconds`(2초) 미리보기, `MapDebugOverlay`는 에디터/Development Build에서만 컴파일(릴리스는 빈 껍데기, D25와 같은 이유).
+
+## D28. DetailPanel은 우하단 구석
+- 슬롯 바 바로 위는 1080p에서도 플레이어 아래 영역과 가까워 구석(우하단)으로 정했다. 더 이상 선택 슬롯 x를 따라가지 않아 `slotBar` 참조를 제거했다.
+
+## D29. HUD 안전 영역은 `UITheme.hudZones`, 값은 UISetup이 실제 패널 크기로 기록
+- 손으로 적은 숫자는 패널을 바꾸면 어긋나므로, 설치 때 패널 크기를 읽어 기록한다. `LandmarkArrowView`는 화살표+라벨 사각형이 영역(+`hudZoneGap`)과 겹치면 화면 가장자리를 따라 가까운 빈 자리로 민다. 자리가 없으면 원래 위치 유지.
+
+## D30. "+N 예상"은 실제 회복(>0)일 때만
+- 체력 가득/회복 0/피해일 때 텍스트는 숨긴다. 피해는 체력바의 붉은 구간(ghost)으로만 표시된다.
+
+## D31. 버그: `LandmarkInteractor`가 Missing Script
+- 클래스가 `Interaction.cs`에 있어(파일명 ≠ 클래스명) Unity가 스크립트로 연결하지 못했고, `InteractPromptView`가 NullReference를 냈다. `LandmarkInteractor.cs`로 분리하고 씬 참조를 새 guid로 고쳤다. (`DecorPool.cs`의 `DecorInstance`, `ObstaclePool.cs`의 `PooledObstacle`도 같은 형태지만 코드로 AddComponent 하는 컴포넌트라 두었다.)
+
+## 상시 표시 UI 면적 (1920x1080 = 2,073,600 px²)
+| 항목 | 수정 전 (3배) | 수정 후 (2배) |
+|---|---|---|
+| 체력 패널 | 570×138 = 78,660 | 380×92 = 34,960 |
+| 시간 패널 | 444×171 = 75,924 | 296×114 = 33,744 |
+| 슬롯 5개 | 5×144² = 103,680 | 5×96² = 46,080 |
+| DetailPanel | 488×360 = 175,680 (상시) | 0 (Tab/2초 미리보기 때 325×240 = 78,000) |
+| **상시 합계** | **433,944 (20.9%)** | **114,784 (5.5%)** |
+
+## 중앙 영역 확인
+- 플레이어 주변 반경 300px 사각형 (x 660~1260, y 240~840) 기준: 슬롯 바 최상단 y≈128, DetailPanel 왼쪽 끝 x≈1571, 체력/시간 패널은 모서리. 상시 UI는 이 영역에 없다.
+- 예외: 상호작용 안내("F 열기", `InteractPrompt`)는 랜드마크 근처에서만 중앙 아래(-110px)에 뜬다. 상시 표시가 아니라 그대로 뒀다.
+
+## 검증 범위
+- `ExpiryGame.Landmark/UI/UI.Editor/DebugTools` `dotnet build` 에러 0. 릴리스 분기(`#else`)는 별도로 빌드하지 않았다. Unity 실행, 씬 재설치, 플레이 동작은 확인하지 못했다.

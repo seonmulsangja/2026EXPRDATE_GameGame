@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff2017d9a27acdc45b309b98a29fa997, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: ExpiryGame.UI::ExpiryGame.UI.UITheme
+  font: {fileID: 11400000, guid: 2d0692bb4258cb747b0c672a95474b72, type: 2}
+  pixelScale: 2
+  title:
+    size: 36
+    color: {r: 1, g: 1, b: 1, a: 1}
+  body:
+    size: 28
+    color: {r: 1, g: 1, b: 1, a: 1}
+  small:
+    size: 20
+    color: {r: 0.62, g: 0.66, b: 0.72, a: 1}
+  number:
+    size: 26
+    color: {r: 1, g: 1, b: 1, a: 1}
+  accent: {r: 0.878, g: 0.475, b: 0.227, a: 1}
+  healthFill: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  timeFill: {r: 0.878, g: 0.475, b: 0.227, a: 1}
+  healText: {r: 0.35, g: 0.85, b: 0.4, a: 1}
+  shelfText: {r: 0.95, g: 0.78, b: 0.25, a: 1}
+  dangerText: {r: 0.95, g: 0.3, b: 0.3, a: 1}
+  ghostHeal: {r: 0.35, g: 0.9, b: 0.4, a: 0.9}
+  ghostDamage: {r: 1, g: 0.3, b: 0.3, a: 0.9}
+  landmarkLabel: {r: 0.45, g: 0.9, b: 1, a: 1}
+  freshness:
+    serializedVersion: 2
+    key0: {r: 0.9, g: 0.25, b: 0.22, a: 1}
+    key1: {r: 0.95, g: 0.75, b: 0.2, a: 1}
+    key2: {r: 0.35, g: 0.8, b: 0.35, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 29491
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  hudZones:
+  - name: HealthPanel
+    corner: {x: 0, y: 1}
+    size: {x: 404, y: 116}
+  - name: TimePanel
+    corner: {x: 1, y: 1}
+    size: {x: 320, y: 138}
+  - name: DetailPanel
+    corner: {x: 1, y: 0}
+    size: {x: 349, y: 264}
+  - name: SlotBar
+    corner: {x: 0.5, y: 0}
+    size: {x: 550, y: 140}
+  hudZoneGap: 12
+  detailPreviewSeconds: 2
+  screenMargin: 8
+  slotSpacing: 4
+  dayFormat: "{0}\uC77C\uCC28"
+  dayLabel: "\uB0AE"
+  nightLabel: "\uBC24"
+  hpFormat: '{0} / {1}'
+  previewFormat: "{0} \uC608\uC0C1"
+  eatLine: "\uBA39\uC73C\uBA74 HP {0}"
+  weaponLine: "\uBB34\uAE30 \uB370\uBBF8\uC9C0 {0}"
+  usesLine: "\uB0A8\uC740 \uC0AC\uC6A9 {0}/{1}"
+  shelfLine: "\uC720\uD1B5\uAE30\uD55C {0}"
+  rottenLabel: "\uC369\uC74C"
+  controlsHint: "E(\uAE38\uAC8C): \uBA39\uAE30 \xB7 \uC88C\uD074\uB9AD: \uD718\uB450\uB974\uAE30"
+  landmarkFormat: "{0} \xB7 {1}m"
+  sprites:
+    panel: {fileID: 21300000, guid: 7262603b59947db4e873c6462cb8720b, type: 3}
+    panelAccent: {fileID: 21300000, guid: 23a93c3a5ef3a2b49a3d0f19a326a290, type: 3}
+    slot: {fileID: 21300000, guid: 133c6583285ee934c92c4fef34e2d49c, type: 3}
+    slotSelected: {fileID: 21300000, guid: fc4a685a919b41844bbb7b1ed59cdfb6, type: 3}
+    barFrame: {fileID: 21300000, guid: 14cc9de440acdc744a6e9f2bef59edf3, type: 3}
+    barFill: {fileID: 21300000, guid: 5270c67c1eb52464c8ce73e081294596, type: 3}
+    barGhost: {fileID: 21300000, guid: 5176fa09b7d0864488300fa62e911926, type: 3}
+    heart: {fileID: 21300000, guid: f391b3b701855854e8d97cf3ebb85019, type: 3}
+    healIcon: {fileID: 21300000, guid: aab09782bb7315e4885b45429e9d906c, type: 3}
+    weaponIcon: {fileID: 21300000, guid: acec2256f347bb44aac0a9c8c46c225c, type: 3}
+    shelfLifeIcon: {fileID: 21300000, guid: 5bc399d4b5c558f44a76fe685b75a918, type: 3}
+    sun: {fileID: 21300000, guid: 253c81a1cb1774445b45fe52c17f9c54, type: 3}
+    moon: {fileID: 21300000, guid: ef1fee94c0fb063448b92b1ed299c383, type: 3}
+    pipFull: {fileID: 21300000, guid: 18a0c4e8dcee21f4db34663b685f5877, type: 3}
+    pipEmpty: {fileID: 21300000, guid: 8ebda3d504dc054418fac0a3612884c8, type: 3}
+    arrow: {fileID: 21300000, guid: ad12322cbe70a5641b71c4b071ee68b0, type: 3}

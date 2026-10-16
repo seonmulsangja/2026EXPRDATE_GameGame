@@ -149,3 +149,52 @@ events.OnChunkUnloaded += (Vector2Int chunk) => { ... };   // 이 청크에서 �
 - [ ] `Tools > ShelfLife > Setup Drop + Infinite Map Test (All In One)` 실행 → `Assets/ShelfLife/Scenes/DropMapTest.unity`(ShelfLifeTest 복사본)에 드롭/무한 맵/상자 설치. 이미 만든 씬에는 개별 메뉴: `Install Drop To Open Scene`, `Install Infinite Map To Open Scene`, `Install Loot Crates To Open Scene` (이 순서)
 - [ ] (선택) Test Runner > EditMode > `DropMapTests` 5개 실행
 - [ ] 수치 위치: `Assets/ShelfLife/Data/Drop/{DropTable_Default, DropFeelSettings, LootCrateSettings}.asset`, `Assets/ShelfLife/Data/MapGen/MapGenSettings.asset`
+
+
+---
+
+# 추가: 아트 v2 + HUD + 낮밤 시각 + 랜드마크 (UI / World / Landmark / DebugTools)
+
+코드: `Assets/Scripts/{UI,World,Landmark,DebugTools}/` (asmdef `ExpiryGame.UI/.World/.Landmark/.DebugTools`, 에디터 `…Editor`). 결정 근거는 `docs/meetings.md` D15~, 아트 설명은 `docs/art.md` 하단.
+**기존 코드 수정은 최소**: `ShelfLifeSystem`(감소량 × `DecayRateRegistry.Combined()`), `GameClock`(`JumpToTimeOfDay`, `SpeedMultiplier`, `NightStartNormalized` 추가), `MapGen`(night Tilemap 선택 필드, `IObstacleFilter`), 에디터 설치기의 플레이어 스프라이트 이름(`player_down` → `player_down_idle`). **적 AI / 조합 코드는 수정하지 않았다.** 기존 이벤트/인터페이스 이름 변경 없음.
+
+## 새 이벤트 / 인터페이스
+```csharp
+using ExpiryGame;            // Survival
+IDecayRateModifier.GetDecayRateMultiplier(Vector2 pos)   // 위치별 유통기한 감소 배율 제공자 (1 = 그대로). DecayRateRegistry.Register/Unregister 로 등록
+FoodItem.Anchor                              // 음식의 현재 월드 위치(Transform)
+DecayRateRegistry.Combined(Vector2)          // ShelfLifeSystem이 음식마다 읽는 곱 (등록 없으면 1)
+GameClock.JumpToTimeOfDay(float01) / SpeedMultiplier / NightStartNormalized   // 디버그·UI용
+
+using ExpiryGame.Landmark;
+IDangerZoneEvents : OnDangerZoneEntered(DangerZoneInfo) OnDangerZoneExited(DangerZoneInfo) IsPlayerInDanger   // 쓰레기 더미. DangerZoneEvents 컴포넌트가 구현 (씬에 1개)
+DangerZoneInfo : Source(LandmarkKind) Center Radius
+ILandmarkLocator.GetNearby(Vector2 from, List<LandmarkInfo>)   // 가까운 순 (LandmarkLocator)
+IInteractionPrompt : PromptChanged(string) CurrentPrompt        // LandmarkInteractor (F 키)
+ILandmarkInteractable / InteractableRegistry                     // 상호작용 대상 추가용
+
+using ExpiryGame.World;
+IDayNightState : Current(DayNightSample: Part, Night01, AmbientColor …) Profile / Changed(DayNightSample)   // DayNightDirector. DayNightState.Instance 로도 접근
+
+using ExpiryGame.MapGen;
+IObstacleFilter.IsBlocked(Vector2)   ChunkStreamer.SetObstacleFilter(...)
+```
+- **적 쪽 연결**: 위험 구역 반응은 `IDangerZoneEvents.OnDangerZoneEntered`만 구독하면 된다 (`FindFirstObjectByType<DangerZoneEvents>()`). 적 코드는 건드리지 않았다.
+- 냉장고 배율은 **음식이 놓인 위치 기준**이다: `IDecayRateModifier.GetDecayRateMultiplier(Vector2)`, `DecayRateRegistry.Combined(Vector2)`. `FoodItem.Anchor`(Transform)가 위치를 알려준다 — 가방 안은 `FoodInventory`가 플레이어로, 바닥 드롭은 `DropSpawner`가 드롭 오브젝트로 설정한다. `Anchor`가 비어 있으면 배율 없음.
+- HUD는 기존 이벤트만 구독한다: `Health.HealthChanged`, `IFoodInventory.Changed`, `FoodItem.Rotted`, `FoodWeapon.WeaponUsed`, `IGameClock.Ticked/PhaseChanged/DayStarted`. 회복/데미지/사용횟수는 `FoodItem.CurrentHeal/CurrentDamage/RemainingDurability`를 그대로 읽는다 (UI에서 재계산 없음).
+
+## 유니티에서 할 일
+- [ ] Console에 컴파일 에러/경고, **`SpriteAdditive.shader` 컴파일 에러** 없는지 확인 (이 환경은 Unity 없이 asmdef별 `dotnet build`로 C#만 검증함)
+- [ ] 메뉴 한 번: `Tools > ShelfLife > Setup Art V2 Test (All In One)` → `Assets/ShelfLife/Scenes/ArtV2Test.unity` 생성(DropMapTest 복사본). 이미 만든 씬에는 개별 메뉴 (이 순서): `Install Infinite Map…` → `Install Day-Night + Walk Anim To Open Scene` → `Install Landmarks To Open Scene` → `Install HUD To Open Scene` → `Install Debug Menu To Open Scene`
+- [ ] (선택) Test Runner > EditMode > `ArtV2Tests` 6개
+- [ ] 수치 위치: `Assets/ShelfLife/Data/World/{DayNightProfile,WalkAnimationProfile}.asset`, `Data/Landmark/{LandmarkSettings,Landmark_*,DropTable_Store,DropTable_Dump}.asset`, `Data/MapGen/MapGenSettings.asset`(night 타일), `ShelfLife/UI/UITheme.asset`(폰트·색·문구)
+- [ ] 한글 폰트: 임시로 OS 맑은 고딕을 TMP 동적 폰트로 만들어 연결함(`ShelfLife/UI/Fonts`, 배포용 아님). 픽셀 폰트가 정해지면 **`UITheme.font` 한 곳만** 교체
+
+## 후속 수정 (냉장고 위치 판정 / 바닥 풀·장식 / 디버그 / 폰트 / HUD)
+- **냉장고**: 반경 안에 놓인 음식만 느려진다 (바닥 음식은 자기 위치, 가방은 플레이어 위치).
+- **바닥 풀 + 장식**: `floor_d`는 바닥 변형 3번 (별도 노이즈 `grassNoiseScale/grassStart`). 장식은 `IDecorRule`(`PerlinDecorRule`)이 청크 생성에서 배치, `ChunkStreamer`가 `DecorPool`로 올린다 (충돌 없음). 랜드마크 주변은 `IObstacleFilter`로, 시작 지점/장애물 주변은 규칙에서 비운다. `IBiome.Decor`는 기본 구현이 null이라 기존 바이옴은 그대로 동작. 낮밤: weed/puddle은 day/night 쌍 알파 크로스페이드, 나머지는 밤 틴트 (`DecorLighting` ← World의 `DecorNightController`).
+  수치는 전부 `MapGenSettings`: `grassStart`, `decor[]`(가중치/밤 틴트), `decorAttemptsPerChunk`, `decorDensityAtLow/High`, `minDecorSpacing`, `decorObstacleClearance`, `decorSortingOrder`.
+- **F1 디버그 메뉴**는 `UNITY_EDITOR || DEVELOPMENT_BUILD`에서만 컴파일된다 (릴리스에서는 빈 컴포넌트 껍데기만 남음).
+- **폰트**: 폰트 파일(.ttf/.otf)을 `Assets/ShelfLife/UI/Fonts/`에 넣고 `Tools > ShelfLife > UI > Create TMP Font From Project Font`를 실행하면 TMP 폰트 에셋이 만들어져 `UITheme.font`에 연결된다 (Project 창에서 폰트를 선택해도 됨). 이제 HUD 설치는 OS 폰트를 복사하지 않는다.
+  - ⚠️ **제출 전 폰트 교체 필수**: 지금 프로젝트에 남아 있는 `PlaceholderKorean`은 OS 맑은 고딕을 복사한 임시 폰트라 배포 라이선스 문제가 있다. 제출 전에 한글 픽셀 폰트로 교체하고 `Assets/ShelfLife/UI/Fonts/PlaceholderKorean*`을 삭제할 것. (폰트 파일이 없는 새 환경에서는 TMP 기본 폰트가 연결돼 한글이 네모로 보인다.)
+- **HUD 재설치**: `Install HUD To Open Scene`는 이미 HUD가 있으면 덮어쓸지 확인창을 띄운다 (취소하면 기존 레이아웃 유지).

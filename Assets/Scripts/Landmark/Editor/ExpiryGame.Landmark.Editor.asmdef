@@ -1,0 +1,30 @@
+{
+    "name": "ExpiryGame.Landmark.Editor",
+    "rootNamespace": "ExpiryGame.Landmark.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual",
+        "ExpiryGame.Visual.Editor",
+        "ExpiryGame.MapGen",
+        "ExpiryGame.MapGen.Editor",
+        "ExpiryGame.Drop",
+        "ExpiryGame.Drop.Editor",
+        "ExpiryGame.World",
+        "ExpiryGame.World.Editor",
+        "ExpiryGame.Landmark",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,5 +1,5 @@
 > **렌더 파이프라인: URP 2D** (`UniversalRP.asset` + `Renderer2D.asset`, URP 17.3 / Unity 6000.3).
-> 따라서 어둠은 **Light 2D**(Global + Point)로 구현한다. 오버레이/비네트 방식은 쓰지 않음.
+> 따라서 어둠은 **Light 2D**(Global + Point)로 구현한다. 화면 가장자리 비네트만 URP **Volume(Vignette)** 후처리를 쓴다 (`Renderer2D.asset`에 Post Process Data 연결 확인됨, 카메라 Post Processing 켬). 오버레이 방식은 쓰지 않음.
 
 # 다크 톤 아트 적용
 
@@ -52,3 +52,33 @@
 - 플레이어: `PlayerSpriteFacing`이 이동 방향에 따라 4방향 스프라이트 선택, `shadow.png`는 자식 Shadow.
 - 바닥/벽/장애물: `Tools > ShelfLife > Apply Dark Art To Open Scene`이 배치 (바닥 floor_a 타일링, 벽 4면 + 콜라이더, 장애물 6개).
 - 임시 아트 생성기(`PlaceholderArtGenerator`)와 임시 PNG는 삭제함.
+
+
+---
+
+# 아트 v2 (낮밤 바닥 / UI / 랜드마크)
+
+원본: `docs/art_pack/v2/` (매니페스트 `ART_MANIFEST_V2.md`, 미리보기, 시트, zip). 스프라이트는 `Assets/Art/Sprites/{decor,fx,landmarks,player,tiles,ui}`에 v1과 같은 규칙으로 배치.
+`ArtImporter`가 PPU 32 / Point / 무압축을 자동 적용하고, 9-slice 보더(`ui_panel`·`ui_panel_accent` 6/6/6/6, `ui_bar_frame` 4/4/4/4)와 랜드마크 피벗(Bottom Center)도 여기서 설정한다. 수동 재적용: `Tools > ShelfLife > Apply Art Import Settings`.
+v1 `player_{방향}.png` 4장은 삭제했고 `shadow.png`는 같은 파일(GUID 유지)에 v2를 덮어썼다. `floor_d`(풀)와 `decor_*`는 청크 생성에서 배치한다 (아래 handoff의 "후속 수정" 참고).
+
+## 낮밤 시각 차이 (`Assets/Scripts/World`)
+| 클래스 | 책임 |
+|---|---|
+| `DayNightProfile` (SO) | 새벽/낮/황혼/밤 비율, 구간별 전역 조명 색(Gradient)·밝기·밤 진행도(Curve), 비네트/발광 세기 |
+| `DayNightDirector` | `IGameClock.Ticked`를 구독해 프로필로 `DayNightSample`을 **한 번** 계산 → 전역 Light 2D 적용 → `Changed` 발행 (`DayNightState.Instance`로 프리팹도 접근) |
+| `NightTilemapFader` | 같은 좌표에 겹친 night Tilemap 알파 = `Night01` |
+| `NightGlowFader` | `*_glow` / `fx_glow_soft` Additive 스프라이트 알파 = `Night01` (프리팹용) |
+| `NightVignette` | URP Volume Vignette 세기 = lerp(낮, 밤, `Night01`) |
+| `PlayerWalkAnimator` + `WalkAnimationProfile` (SO) | walk_a→idle→walk_b→idle, `frameSeconds`로 간격 조절 |
+
+- 시간 0에서 새벽으로 시작: 새벽(밤→낮 페이드) → 낮 → 황혼(낮→밤) → 밤. 기존 `DayCycleConfig.nightStartNormalized`(페이즈/UI용)와 시각 구간은 별개 값이다 — 기본값은 황혼이 0.45~0.55라 대략 맞물린다.
+- 무한 맵: `ChunkStreamer.nightTilemap`(선택) + `MapGenSettings.nightFloorTiles`. `ChunkTilemapView.Show/Hide`가 두 Tilemap을 동시에 채우고 비운다.
+- 밤 플레이어 주변광: 기존 `PlayerLight`(Light 2D) 그대로 + `NightGlow`(fx_glow_soft Additive) 자식.
+- 새 셰이더 `ShelfLife/SpriteAdditive` (URP 2D unlit, `Blend SrcAlpha One`). 이 환경에서는 컴파일 검증을 못 했다 → Console 확인.
+- 기존 `AmbientLightController` / `DayNightLighting`은 같은 전역 라이트를 건드리므로 설치 시 `enabled = false`.
+
+## 랜드마크 (`Assets/Scripts/Landmark`)
+- 지역(`chunksPerRegion`=6 → 96타일) 단위로 `LandmarkPlanner`가 seed로 0~1개 결정 (순수 계산, 캐시). 시작 지점 지역에는 `startLandmark`(기본 모닥불)가 `startPoint+startOffset` 근처에 항상 놓인다.
+- 장애물 비움은 `MapGen/Contracts/IObstacleFilter` + `ChunkStreamer.SetObstacleFilter` (`LandmarkObstacleFilter`가 등록).
+- 효과는 프리팹 안의 독립 컴포넌트: `LandmarkZone`(반경 판정) · `FridgeDecayEffect` · `CampfireHealEffect` · `StoreLootEffect` · `DumpDangerEffect` · `ZoneRingView` · `LandmarkFlipbook` · `CampfireLight`. 수치는 전부 `LandmarkData`(SO).

@@ -1,0 +1,19 @@
+{
+    "name": "ExpiryGame.DebugTools",
+    "rootNamespace": "ExpiryGame.DebugTools",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Landmark",
+        "ExpiryGame.World",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -33,6 +33,19 @@ namespace ExpiryGame.MapGen
         }
     }
 
+    // 충돌 없는 바닥 장식 배치. TypeIndex는 MapGenSettings.decor 의 인덱스.
+    public readonly struct DecorPlacement
+    {
+        public readonly int TypeIndex;
+        public readonly Vector2 Position;
+
+        public DecorPlacement(int typeIndex, Vector2 position)
+        {
+            TypeIndex = typeIndex;
+            Position = position;
+        }
+    }
+
     // 생성 결과(순수 데이터). 타일맵/게임오브젝트 반영은 View가 한다.
     public sealed class ChunkData
     {
@@ -43,6 +56,9 @@ namespace ExpiryGame.MapGen
         public readonly int[] FloorVariants;
         public readonly System.Collections.Generic.List<ObstaclePlacement> Obstacles =
             new System.Collections.Generic.List<ObstaclePlacement>();
+
+        public readonly System.Collections.Generic.List<DecorPlacement> Decor =
+            new System.Collections.Generic.List<DecorPlacement>();
 
         public ChunkData(ChunkInfo info)
         {

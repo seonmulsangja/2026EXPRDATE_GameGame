@@ -40,6 +40,7 @@ namespace ExpiryGame
         {
             if (items.Count >= capacity) return false;
             items.Add(item);
+            item.Anchor = transform;
             ((IShelfLifeTracker)tracker).Register(item);
             Changed?.Invoke();
             return true;
@@ -48,6 +49,7 @@ namespace ExpiryGame
         public bool Remove(FoodItem item)
         {
             if (!items.Remove(item)) return false;
+            item.Anchor = null;
             ((IShelfLifeTracker)tracker).Unregister(item);
             selectedIndex = items.Count == 0 ? 0 : Mathf.Min(selectedIndex, items.Count - 1);
             Changed?.Invoke();

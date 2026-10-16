@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2f2b53d9b3c434c94cd933a70065bc, type: 3}
+  m_Name: DropTable_Dump
+  m_EditorClassIdentifier: ExpiryGame.Drop::ExpiryGame.Drop.DropTable
+  entries:
+  - food: {fileID: 11400000, guid: a89b0a2faf73b784d880fda02543305a, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: a89b0a2faf73b784d880fda02543305a, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: ddd82a9810919124a8bcab9b84b220d4, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: ddd82a9810919124a8bcab9b84b220d4, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: a43b5fa2bcd0257419fafdc668083b4f, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: a43b5fa2bcd0257419fafdc668083b4f, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 7c2008b14a368e145b6ba30426e155ea, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 7c2008b14a368e145b6ba30426e155ea, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 08dd8891e33839f409740168c6ebfe0a, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 08dd8891e33839f409740168c6ebfe0a, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 0e82f0d725775794caadf903b0d52fde, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 0e82f0d725775794caadf903b0d52fde, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 593804e3e333fdf42a91f3509cfbd056, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 593804e3e333fdf42a91f3509cfbd056, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: f8c5c4c14bef1244e802aca32db1b78d, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: f8c5c4c14bef1244e802aca32db1b78d, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 1845cfca2dbe6bb4c9c9ca6767ff7f04, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 1845cfca2dbe6bb4c9c9ca6767ff7f04, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  - food: {fileID: 11400000, guid: 5a8e141d398dd814aa7b1f4f6ad5a31f, type: 2}
+    weight: 4
+    minShelfLife01: 0
+    maxShelfLife01: 0
+  - food: {fileID: 11400000, guid: 5a8e141d398dd814aa7b1f4f6ad5a31f, type: 2}
+    weight: 1
+    minShelfLife01: 0.2
+    maxShelfLife01: 0.6
+  dropChance: 1
+  minCount: 1
+  maxCount: 2
+  threatWeightBias: 3

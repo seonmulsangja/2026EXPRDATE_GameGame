@@ -8,11 +8,13 @@ namespace ExpiryGame.MapGen
         public string Name => "Default";
         public IFloorRule Floor { get; }
         public IObstacleRule Obstacles { get; }
+        public IDecorRule Decor { get; }
 
         public DefaultBiome(MapGenSettings settings)
         {
             Floor = new PerlinFloorRule(settings);
             Obstacles = new PerlinObstacleRule(settings);
+            Decor = new PerlinDecorRule(settings);
         }
     }
 

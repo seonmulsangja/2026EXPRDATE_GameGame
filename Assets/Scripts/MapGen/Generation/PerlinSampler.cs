@@ -8,6 +8,8 @@ namespace ExpiryGame.MapGen
     {
         public const int FloorChannel = 1;
         public const int ObstacleChannel = 2;
+        public const int GrassChannel = 3;
+        public const int DecorChannel = 4;
 
         private const float PositiveShift = 50000f;
 

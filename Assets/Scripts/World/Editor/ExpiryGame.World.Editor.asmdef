@@ -1,0 +1,26 @@
+{
+    "name": "ExpiryGame.World.Editor",
+    "rootNamespace": "ExpiryGame.World.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual",
+        "ExpiryGame.Visual.Editor",
+        "ExpiryGame.MapGen",
+        "ExpiryGame.MapGen.Editor",
+        "ExpiryGame.World",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
