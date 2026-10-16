@@ -1,7 +1,9 @@
 using System;
+using ExpiryGame;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.U2D.Animation;
+using Random = UnityEngine.Random;
 
 public class Enemy : MonoBehaviour
 {
@@ -40,6 +42,14 @@ public class Enemy : MonoBehaviour
         _spriteLibrary.spriteLibraryAsset = _sprite;
     }
 
+    private void OnEnable()
+    {
+        EnemySO randomData =
+            EnemyPooling.Instance.enemyDatas[Random.Range(0, EnemyPooling.Instance.enemyDatas.Count)];
+
+        this.Initialize(randomData);
+    }
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -51,7 +61,7 @@ public class Enemy : MonoBehaviour
         if (targetTrm == null)
             return;
         Move();
-        //Attack();
+       // Attack();
     }
 
     public void Move()
@@ -73,17 +83,8 @@ public class Enemy : MonoBehaviour
         _dir.Normalize();
         _rb.linearVelocity = _dir * _speed;
     }
-
-    public void TackDamage(int amount)
-    {
-        _health -= amount;
-        if (_health <= 0)
-        {
-            _enemyPooling.ReturnEnemy(gameObject);
-        }
-    }
-
-    // public PlayerHealth Detect()
+    
+    // public Health Detect()
     // {
     //     var detect = Physics2D.OverlapBox(
     //         transform.position,
@@ -92,21 +93,21 @@ public class Enemy : MonoBehaviour
     //         _whatIsPlayer
     //     );
     //
-    //     if (detect != null && detect.TryGetComponent<PlayerHealth>(out var health))
+    //     if (detect != null && detect.TryGetComponent<Health>(out var health))
     //     {
     //         return health;
     //     }
     //
     //     return null;
     // }
-    
+    //
     // public void Attack()
     // {
-    //     PlayerHealth health = Detect();
+    //     Health health = Detect();
     //
     //     if (health != null)
     //     {
-    //         health.TakeDamage(10);
+    //         health.TakeDamage(_damage);
     //     }
     // }
     
@@ -114,5 +115,13 @@ public class Enemy : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(transform.position , new Vector3(_width , _height , 1));
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Player") && other.gameObject.TryGetComponent<Health>(out var health))
+        {
+            health.TakeDamage(_damage);
+        }
     }
 }

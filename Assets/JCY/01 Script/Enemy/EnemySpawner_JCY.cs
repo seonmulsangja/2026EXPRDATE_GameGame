@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
@@ -9,6 +10,14 @@ public class EnemySpawner_JCY : MonoBehaviour
     public Transform[] _spawnPoints;
 
     public bool _isSpawn = true;
+
+    [SerializeField , Min(0.1f)] private float _spawnTime;
+
+
+    private void Start()
+    { 
+        StartCoroutine(SpawnCo());
+    }
 
     private void Update()
     {
@@ -29,5 +38,16 @@ public class EnemySpawner_JCY : MonoBehaviour
         GameObject enemy = _enemyPooling.SpawnRandomEnemy();
         Instantiate(enemy, _spawnPoints[num].position , Quaternion.identity);
         return enemy;
+    }
+
+    public IEnumerator SpawnCo()
+    {
+        yield return new WaitForSeconds(_spawnTime);
+        
+        if(_spawnTime > 0.5)
+            _spawnTime -= 0.01f;
+        
+        SpawnEnemy();
+        StartCoroutine(SpawnCo());
     }
 }
