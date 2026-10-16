@@ -1,16 +1,35 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
+public enum SoundType
+{
+    Attack,
+    Hit,
+    Die,
+    Move,
+    Button,
+    Eat,
+        
+}
+
+[Serializable]
+public class SoundData
+{
+    public SoundType soundName;
+    public AudioClip clip;
+}
 
 public class SoundManager_JCY : MonoBehaviour
 {
     [Header("오디오 클립")]
-    [SerializeField] private AudioClip[] _soundsClips;
-    [SerializeField] private AudioClip[] _bgmsClips;
-    
+    [SerializeField] private List<SoundData> _soundsClips;
+    [SerializeField] private AudioClip _bgmClip;
+
     [Header("오디오 소스")]
     [SerializeField] private AudioSource _soundSources;
     [SerializeField] private AudioSource _bgmSources;
+
     public static SoundManager_JCY Instance { get; private set; }
 
     private void Awake()
@@ -28,16 +47,31 @@ public class SoundManager_JCY : MonoBehaviour
 
     private void Start()
     {
-        //PlayBGM(0);
+        PlayBGM();
     }
 
-    public void PlaySound(int index)
+    public void PlaySound(SoundType soundType)
     {
-        _soundSources.PlayOneShot(_soundsClips[index]);
+        SoundData sound = _soundsClips.Find(x => x.soundName == soundType);
+
+        if (sound != null && sound.clip != null)
+        {
+            _soundSources.PlayOneShot(sound.clip);
+        }
     }
 
-    public void PlayBGM(int index)
+    public void PlayBGM()
     {
-        _bgmSources.PlayOneShot(_bgmsClips[index]);
+        if (_bgmClip != null)
+        {
+            _bgmSources.clip = _bgmClip;
+            _bgmSources.loop = true;
+            _bgmSources.Play();
+        }
+    }
+
+    public void StopBGM()
+    {
+        _bgmSources.Stop();
     }
 }

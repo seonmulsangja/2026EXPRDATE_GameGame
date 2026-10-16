@@ -1,16 +1,20 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemyPooling : MonoBehaviour
 {
     [Header("Enemy Settings")]
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private List<EnemySO> enemyDatas;
+    public List<EnemySO> enemyDatas;
     [SerializeField] private int poolSize = 5;
 
     private Stack<GameObject> enemyPool = new Stack<GameObject>();
     [SerializeField] private Transform _payerTrm;
     [SerializeField] private EnemySpawner_JCY _enemySpawner;
+
+    public static EnemyPooling Instance { get; private set; }
 
     private void Start()
     {
@@ -20,6 +24,11 @@ public class EnemyPooling : MonoBehaviour
             enemy = Instantiate(enemyPrefab , transform.position , Quaternion.identity);
             enemy = EnemyPoolPush(enemy);
         }
+    }
+
+    private void Awake()
+    {
+        Instance = this;
     }
 
     public GameObject SpawnRandomEnemy()
@@ -39,10 +48,7 @@ public class EnemyPooling : MonoBehaviour
         Enemy enemyScript = enemy.GetComponent<Enemy>();
         enemyScript._enemyPooling = this;
 
-        EnemySO randomData =
-            enemyDatas[Random.Range(0, enemyDatas.Count)];
-
-        enemyScript.Initialize(randomData);
+        
         enemyScript.targetTrm = _payerTrm;
         enemyScript._enemyPooling = this;
         
