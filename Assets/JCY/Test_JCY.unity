@@ -2741,6 +2741,7 @@ GameObject:
   - component: {fileID: 1056666228}
   - component: {fileID: 1056666227}
   - component: {fileID: 1056666230}
+  - component: {fileID: 1056666231}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2760,6 +2761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49037f2b7e5df4b4181f6c992f9e4d8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSkillController
+  input: {fileID: 0}
 --- !u!114 &1056666228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2774,8 +2776,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AugmentState
   baseAttackPower: 10
   baseMoveSpeed: 5
+  baseAttackSpeed: 0.4
   attackPower: 0
   moveSpeed: 0
+  attackCooldown: 0
+  foodWeapon: {fileID: 0}
 --- !u!4 &1056666229
 Transform:
   m_ObjectHideFlags: 0
@@ -2809,6 +2814,18 @@ MonoBehaviour:
   extraWidth: 10
   extraHeight: 10
   targetCamera: {fileID: 901514556}
+--- !u!114 &1056666231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056666226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1853a8279e5956f418b7fb82fbad2982, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemMagnetManager
 --- !u!1 &1082160831
 GameObject:
   m_ObjectHideFlags: 0

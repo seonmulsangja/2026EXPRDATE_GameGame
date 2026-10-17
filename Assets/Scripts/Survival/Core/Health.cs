@@ -37,5 +37,16 @@ namespace ExpiryGame
             Current = Mathf.Clamp(value, 0f, maxHealth);
             HealthChanged?.Invoke(Current, maxHealth);
         }
+        
+        public void IncreaseMaxHealth(float amount)
+        {
+            if (amount <= 0f)
+                return;
+
+            maxHealth += amount;
+            Current += amount;
+
+            HealthChanged?.Invoke(Current, maxHealth);
+        }
     }
 }

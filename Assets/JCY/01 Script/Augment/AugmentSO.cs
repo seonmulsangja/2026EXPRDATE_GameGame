@@ -9,7 +9,8 @@ public enum AugmentType
 public enum AugmentEffectType
 {
     AttackPower,
-    MoveSpeed
+    MoveSpeed ,
+    AttackSpeed,
 }
 
 [CreateAssetMenu(fileName = "NewAugment", menuName = "Game/Augment")]
