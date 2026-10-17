@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum SoundType
 {
@@ -48,6 +49,15 @@ public class SoundManager_JCY : MonoBehaviour
     private void Start()
     {
         PlayBGM();
+        
+        Button[] buttons = FindObjectsByType<Button>(
+            FindObjectsSortMode.None
+        );
+
+        foreach (Button button in buttons)
+        {
+            button.onClick.AddListener(ButtonClicked);
+        }
     }
 
     public void PlaySound(SoundType soundType)
@@ -73,5 +83,10 @@ public class SoundManager_JCY : MonoBehaviour
     public void StopBGM()
     {
         _bgmSources.Stop();
+    }
+
+    public void ButtonClicked()
+    {
+        PlaySound(SoundType.Button);
     }
 }

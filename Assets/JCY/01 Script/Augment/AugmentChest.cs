@@ -26,5 +26,6 @@ public class AugmentChest : MonoBehaviour
 
         _isOpened = true;
         _augmentManager.OpenAugmentSelection();
+        Destroy(gameObject);
     }
 }

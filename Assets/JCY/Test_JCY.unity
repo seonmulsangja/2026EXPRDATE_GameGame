@@ -4121,8 +4121,14 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 7ecdcef69b5301e4797c4719cf048169, type: 3}
   - soundName: 5
     clip: {fileID: 8300000, guid: 52a7f3ecb2b4b3747a3f0390e5ffb82e, type: 3}
-  - soundName: 0
-    clip: {fileID: 0}
+  - soundName: 1
+    clip: {fileID: 8300000, guid: a70b663e3f25d884d8824a0c7ee76863, type: 3}
+  - soundName: 3
+    clip: {fileID: 8300000, guid: bd9743b6c3a381b4bb82caf6c959a327, type: 3}
+  - soundName: 2
+    clip: {fileID: 8300000, guid: a70b663e3f25d884d8824a0c7ee76863, type: 3}
+  - soundName: 4
+    clip: {fileID: 8300000, guid: b1866de218f60c44f8eda0ef9a513689, type: 3}
   _bgmClip: {fileID: 0}
   _soundSources: {fileID: 1592762326}
   _bgmSources: {fileID: 1592762325}
