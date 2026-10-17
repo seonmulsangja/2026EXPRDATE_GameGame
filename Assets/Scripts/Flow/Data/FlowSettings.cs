@@ -27,6 +27,9 @@ namespace ExpiryGame.Flow
         public string timeLine = "플레이 시간  {0}";
         public string levelLine = "도달 레벨  {0}";
         public string scoreLine = "점수  {0}";
+        [Tooltip("{0}에 '이름 Lv.N'을 쉼표로 이은 목록")]
+        public string augmentsLine = "증강  {0}";
+        public string noAugmentsText = "없음";
 
         [Header("조작 힌트 (첫 실행만)")]
         public string[] hintLines =

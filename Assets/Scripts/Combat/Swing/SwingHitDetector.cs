@@ -54,7 +54,7 @@ namespace ExpiryGame.Combat
                 hitOnce.Add(target);
                 var point = col.ClosestPoint(origin);
                 var direction = Vector2.Lerp(current.AimDirection, toCenter / dist, feel.knockbackRadialBlend).normalized;
-                var damage = current.Item.CurrentDamage;
+                var damage = current.Item.CurrentDamage + current.DamageBonus;
 
                 target.TakeDamage(damage);
                 HitLanded?.Invoke(new HitInfo(col.gameObject, point, direction, damage, current.Item));

@@ -22,7 +22,7 @@ namespace ExpiryGame.Flow
         [SerializeField] private AudioCatalog audioCatalog;
         [Tooltip("레벨별 필요 경험치. 비면 Resources/ShelfLife/XpCurve, 그것도 없으면 기본값")]
         [SerializeField] private XpCurve xpCurve;
-        [Tooltip("(선택) 팀원의 증강 선택 화면. IAugmentSelectionPresenter를 구현한 컴포넌트. 비면 임시 구현(레벨 업! 배너 + 소량 회복)")]
+        [Tooltip("(선택) 팀원의 증강 선택 화면 어댑터. IAugmentSelectionPresenter를 구현한 컴포넌트(IAugmentPresenterConsumer도 구현하면 증강 적용기와 대체 보상을 받는다). 비면 임시 구현(레벨 업! 배너 + 소량 회복)")]
         [SerializeField] private MonoBehaviour augmentPresenter;
 
         [Header("씬 참조")]
@@ -46,6 +46,10 @@ namespace ExpiryGame.Flow
         private CampfireStageFeedback campfireFeedback;
         private LoadoutGiver loadoutGiver;
         private ExperienceService experience;
+        private PlayerStatSheet statSheet;
+        private PlayerStatApplier statApplier;
+        private AugmentEffectService augmentEffects;
+        private IAugmentSelectionPresenter augmentScreen;
         private KillExperienceBridge killExperience;
         private LevelUpCoordinator levelUps;
         private ExperienceBarView xpBar;
@@ -58,6 +62,11 @@ namespace ExpiryGame.Flow
         public IStatsSource Stats => stats;
         public IExperienceSource Experience => experience;
         public IExperienceSink ExperienceSink => experience;
+        public IPlayerStats PlayerStats => statSheet;
+        public IAugmentEffects Augments => augmentEffects;
+        public IAugmentHistory AugmentHistory => augmentEffects;
+        // F1 디버그 메뉴용. 팀원 어댑터가 아니면 null
+        public IAugmentDebug AugmentDebug => augmentScreen as IAugmentDebug;
 
         private void Awake()
         {
@@ -91,15 +100,23 @@ namespace ExpiryGame.Flow
             if (curve == null) curve = ScriptableObject.CreateInstance<XpCurve>();
             experience = new ExperienceService(curve);
             killExperience = new KillExperienceBridge(experience);
-            stats = new StatsTracker(clock, consumer, experience);
+
+            // 능력치 파이프라인: 기본값 + 증강 수정자 → 이동 속도/공격력/쿨다운. 다시하기(씬 리로드) 때 새로 만들어져 모두 초기화된다
+            statSheet = new PlayerStatSheet();
+            statApplier = new PlayerStatApplier(statSheet, playerHealth.GetComponent<PlayerMover>(), playerHealth.GetComponentInChildren<FoodWeapon>(true));
+            augmentEffects = new AugmentEffectService(statSheet);
+            stats = new StatsTracker(clock, consumer, experience, augmentEffects);
             controller = new GameFlowController(machine, goal, clock, playerHealth);
             screens = new FlowScreens(machine, controller, stats, scoreRules, title, pause, gameOver, clear);
             hurtFeedback = new PlayerHurtFeedback(playerHealth, settings, vignette, cameraShake);
             loadoutGiver = new LoadoutGiver();
 
             // 레벨업 → 증강 선택(팀원 화면이 없으면 임시 구현) → 재개
-            var presenter = augmentPresenter as IAugmentSelectionPresenter ?? new NullAugmentPresenter(playerHealth, levelBanner, settings);
-            levelUps = new LevelUpCoordinator(machine, experience, presenter);
+            var fallback = new NullAugmentPresenter(playerHealth, levelBanner, settings);
+            (augmentPresenter as IAugmentPresenterConsumer)?.Bind(augmentEffects, fallback);
+            augmentScreen = augmentPresenter as IAugmentSelectionPresenter;
+            augmentScreen = augmentScreen ?? fallback;
+            levelUps = new LevelUpCoordinator(machine, experience, augmentScreen);
             controller.RunEnding += OnRunEnding;
             BindExperienceHud();
             InstallHitReceiver();
@@ -160,6 +177,7 @@ namespace ExpiryGame.Flow
             enhanceFeedback?.Dispose();
             campfireFeedback?.Dispose();
             stats?.Dispose();
+            statApplier?.Dispose();
             loadoutGiver?.Release();
             Time.timeScale = 1f;
         }
@@ -207,6 +225,8 @@ namespace ExpiryGame.Flow
         {
             experience.Reset();
             levelUps.Reset();
+            // 능력치 수정자/고른 증강 기록 초기화 (씬을 다시 불러와도 새로 만들어지지만, 다시하기 직전 화면에서 남은 값이 보이지 않게 먼저 비운다)
+            augmentEffects.Reset();
         }
 
         private void OnDayStarted(int day)

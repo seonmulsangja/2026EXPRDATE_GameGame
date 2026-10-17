@@ -9,6 +9,8 @@ namespace ExpiryGame.Flow
         public int FoodEaten;
         public int RottenEaten;
         public float PlaySeconds;
+        // 고른 증강 (처음 고른 순서, "이름 Lv.N"). 없으면 null일 수 있다
+        public string[] Augments;
     }
 
     public interface IStatsSource

@@ -473,3 +473,18 @@ FoodItem : IsEnhanced HealMultiplier DamageMultiplier  TryEnhance(heal, damage, 
 
 ## 검증 범위
 - `dotnet build`로 모든 asmdef/Editor/테스트 프로젝트 에러 0. 순수 로직 30개 검사를 콘솔 하네스로 실행해 통과. `DifficultyAndExperienceTests`는 컴파일만 확인(에디터가 열려 있어 Test Runner 실행 불가). 플레이 동작과 `.asset` 임포트는 확인하지 못했다.
+
+
+---
+
+# 추가: 팀원 증강 시스템 연결 (Augment)
+
+상세: `docs/augment_merge_plan.md`(조사/구조), `docs/connect_todo.md`(못 붙인 것), `docs/meetings.md` D81~D86.
+팀원 파일은 수정하지 않았다. 팀원 타입을 아는 코드는 `Assets/Scripts/Integration/`(`TeammateAugmentPresenter/Chooser/Catalog`, `AugmentIntegrationSettings`).
+
+흐름: 레벨업 → `LevelUpCoordinator` → `AugmentSelect`(정지, 입력 차단) → `TeammateAugmentPresenter`(`IAugmentSelectionPresenter`) → 팀원 선택 화면 → `AugmentEffectService` → `PlayerStatSheet`(StatKey 수정자) → `PlayerStatApplier` → 재개.
+- 설치: `Tools > ShelfLife > Setup Game (All In One)`이 `Install Augments To Open Scene`을 자동 호출(이미 있으면 중복 생성 안 함). 팀원 `Test_JCY.unity`의 `AugmentCanvas`를 읽어 `Assets/ShelfLife/Prefabs/AugmentCanvas.prefab`으로 복사해 쓴다.
+- 수치: `Assets/ShelfLife/Data/Integration/AugmentIntegrationSettings.asset` (공격력/이동/공격속도 변환 배율, 선택 화면 캔버스 정렬 150).
+- F1 디버그: 경험치 +10/+50/+200, 레벨업 즉시/3회, 증강 후보 강제 지정(다음 레벨업 한 번, 최대 3개), 선택한 증강 목록과 현재 능력치.
+- 결과 화면에 "증강 ..." 줄(`StatsTracker`의 `GameStats.Augments`, 문구 `FlowSettings.augmentsLine`).
+- 테스트: EditMode `AugmentFlowTests`(흐름/큐/적용·해제/초기화/대체 보상/에러 복구), PlayMode `ExpiryGame.Tests.AugmentPlay`(Setup Game 후 실제 팀원 UI 클릭).

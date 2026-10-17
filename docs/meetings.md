@@ -32,6 +32,29 @@
 - **일정**: 위 수정은 코드만으로 끝난다. 씬에 실제로 스포너를 붙이는 건 Unity 메뉴라서 사용자가 `Tools > ShelfLife > Setup Game (All In One)` 한 번 실행하고 저장해야 한다(에디터가 열려 있어 배치 실행 불가).
 - **검증 범위**: 에디터가 프로젝트를 열고 있어 테스트 러너/배치 모드를 못 썼다. Unity 번들 Roslyn으로 MapGen/Flow/DebugTools/Assembly-CSharp(Integration+Enemy)/`Tests.Spawn` 컴파일 에러 0까지만 확인. EditMode 테스트 실행은 하지 못했다.
 
+## D81. 팀원 증강 연결: 막힘 없음 → 회의 소집 없이 리드 결정 (D78 번복 포함)
+- 조사 결과 막히는 결정은 없었다(설계 선택지는 아래 D82~D86에 근거와 함께 기록). 그래서 서브에이전트 회의(설계/비판/일정)는 열지 않았다. 비판 관점은 각 항목의 "대가"로 적었다.
+- **D78 번복**: 당시엔 "팀원이 완료 이벤트를 달면 어댑터를 만든다"며 폴링/리플렉션 어댑터를 보류했다. 이번 요청은 팀원 파일을 수정하지 않고 지금 연결하는 것이라, 우회 어댑터를 만든다. 대신 리플렉션은 한 클래스(`TeammateAugmentChooser.ManagerAccess`)에 가두고, 필드가 없으면 에러 로그 + 대체 보상으로 진행한다. 팀원이 이벤트를 달면 그 클래스만 지우면 된다(`connect_todo.md` T5).
+
+## D82. 어셈블리 경계: Flow는 팀원 타입을 모르고, Integration만 안다
+- Flow에 `AugmentDefinition`(팀원 `AugmentSO`를 옮긴 데이터), `IAugmentChooser`(화면 열기), `IAugmentEffects`, `IAugmentPresenterConsumer`, `IAugmentDebug` 계약을 두고, `Integration/`에 `TeammateAugmentCatalog/Chooser/Presenter`만 둔다. 대가: 클래스가 늘지만 후보 부족·에러 복구·중첩·초기화를 팀원 코드 없이 EditMode 테스트로 검증할 수 있다.
+- 능력치 파이프라인은 없던 것이라 새로 만들었다: `StatKey`(AttackPower/MoveSpeed/AttackCooldownReduction), `PlayerStatSheet`(기본값+수정자), `PlayerStatApplier`(PlayerMover/FoodWeapon에 씀). 수정자는 (source,key,op)당 하나라 같은 증강 중첩은 값만 올라간다(레벨 N → perLevel×N, 팀원 규칙과 같음).
+
+## D83. 팀원 `AugmentState`는 플레이어에 붙이지 않는다
+- 이 컴포넌트는 `Awake`에서 이동 속도·쿨다운(감소량을 쿨다운 값으로 잘못 넘김)을 직접 덮어써 우리 파이프라인과 충돌한다. 별도 오브젝트 `AugmentBackend (JCY)`에 두고 매니저의 기록용으로만 쓴다. 대가: 스킬 증강 선택 시 팀원 경고 한 줄(무해, T6). 대안(플레이어에 붙이고 매 프레임 덮어쓰기)은 두 곳이 같은 값을 쓰는 경쟁이라 버렸다.
+
+## D84. 후보는 우리가 뽑고 팀원 매니저에는 그 후보만 넣어 연다
+- 팀원 규칙 그대로(최대 레벨 제외, 스킬은 스킬 최대 레벨도, 3개, 중복 없음) 우리가 뽑아야 "첫 번째 후보" 복구와 디버그 강제 지정이 된다. 완료는 후보의 `GetAugmentLevel` 상승으로, 선택 없이 닫힘은 패널 비활성으로 감지한다(Update라 timeScale 0에서도 동작). 자동 선택 타이머는 없다.
+- 예외: 후보 없음 → `NullAugmentPresenter`(체력 회복) / 화면 에러·선택 없이 닫힘 → 에러 로그 + 첫 후보 적용 후 재개 / 첫 후보도 없으면 대체 보상. 전부 `GuardedAugmentPresenter`에 모았다.
+
+## D85. 큐는 Playing을 거치지 않고 이어 가고, 선택 중 사망은 게임 오버로 끝낸다
+- `LevelUpCoordinator`: 큐가 남았으면 `AugmentSelect`를 유지한 채 다음 선택을 열어 중간 재개(다른 구독자가 Playing 전환을 보는 것)가 없다. `Fail()`은 AugmentSelect에서도 가능(기존 테스트의 "선택 중엔 Fail 불가"를 바꿈): 같은 프레임에 처치 경험치와 접촉 피해가 겹치면 죽은 채로 선택을 마치고 재개되는 문제가 있었다. 사망 시 열린 선택 화면은 `Cancel`로 접는다. 선택 중에는 timeScale 0(물리 접촉 피해 없음).
+
+## D86. 수치 변환 배율과 공격력 경로
+- 팀원 SO의 `value`(이동 1, 공격 속도 1)가 설명 문구(0.5, 0.025)와 달라 SO를 못 고치므로 `AugmentIntegrationSettings`의 배율로 설명에 맞췄다(기본 0.5/0.025). 팀원이 SO를 고치면 배율을 1로.
+- 공격력은 팀원이 `FoodWeapon` 즉발 경로에만 넣어 실제 스윙 경로에서는 무효였다 → `IDamageBonusReceiver`로 스윙 피해에 더한다.
+- 팀원 씬 미배선(루트 비활성, `slots`/`allAugments` 비어 있음)을 설치 메뉴가 프리팹 사본에서 고친다. 팀원 씬은 열어서 읽기만 하고 저장하지 않는다.
+
 ## 검증 범위
 - Unity 에디터가 이미 열려 있어 배치모드 실행을 하지 않았다. 전체 소스를 Unity 참조 DLL로 `dotnet build` 해서 C# 컴파일 에러 0개 확인. 씬/프리팹 생성 도구와 셰이더는 실행해 보지 못함.
 

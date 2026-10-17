@@ -10,6 +10,7 @@ namespace ExpiryGame.Flow
         private readonly IGameClock clock;
         private readonly FoodConsumer consumer;
         private readonly IExperienceSource experience;
+        private readonly IAugmentHistory augments;
         private readonly HashSet<IEnemyActor> subscribed = new HashSet<IEnemyActor>();
 
         private int kills;
@@ -18,11 +19,12 @@ namespace ExpiryGame.Flow
         private float playSeconds;
         private int frozenDays = -1;
 
-        public StatsTracker(IGameClock clock, FoodConsumer consumer, IExperienceSource experience = null)
+        public StatsTracker(IGameClock clock, FoodConsumer consumer, IExperienceSource experience = null, IAugmentHistory augments = null)
         {
             this.clock = clock;
             this.consumer = consumer;
             this.experience = experience;
+            this.augments = augments;
 
             if (consumer != null) consumer.FoodEaten += OnFoodEaten;
             EnemyRegistry.Registered += Subscribe;
@@ -52,6 +54,7 @@ namespace ExpiryGame.Flow
                 FoodEaten = eaten,
                 RottenEaten = rottenEaten,
                 PlaySeconds = playSeconds,
+                Augments = AugmentLines(),
             };
         }
 
@@ -62,6 +65,15 @@ namespace ExpiryGame.Flow
             EnemyRegistry.Unregistered -= Unsubscribe;
             foreach (var enemy in subscribed) enemy.Killed -= OnKilled;
             subscribed.Clear();
+        }
+
+        private string[] AugmentLines()
+        {
+            if (augments == null) return Array.Empty<string>();
+            var records = augments.Records;
+            var lines = new string[records.Count];
+            for (var i = 0; i < lines.Length; i++) lines[i] = $"{records[i].Name} Lv.{records[i].Level}";
+            return lines;
         }
 
         private int CurrentDays() => Math.Max(0, clock.DayCount - 1);

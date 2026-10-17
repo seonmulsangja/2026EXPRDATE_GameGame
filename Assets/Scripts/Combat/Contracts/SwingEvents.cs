@@ -9,14 +9,16 @@ namespace ExpiryGame.Combat
         public readonly Vector2 AimDirection;
         public readonly float AimAngle;
         public readonly int Sign; // +1 반시계, -1 시계
+        public readonly float DamageBonus; // 음식 피해에 더해지는 고정 피해 (공격력 증강)
 
-        public SwingInfo(FoodItem item, Vector2 origin, Vector2 aimDirection, int sign)
+        public SwingInfo(FoodItem item, Vector2 origin, Vector2 aimDirection, int sign, float damageBonus = 0f)
         {
             Item = item;
             Origin = origin;
             AimDirection = aimDirection;
             AimAngle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
             Sign = sign;
+            DamageBonus = damageBonus;
         }
     }
 

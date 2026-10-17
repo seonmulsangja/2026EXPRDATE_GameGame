@@ -12,7 +12,7 @@ namespace ExpiryGame.Flow
         public event Action TitleClicked;
 
         private FlowSettings settings;
-        private TextMeshProUGUI days, level, kills, eaten, rotten, time, score;
+        private TextMeshProUGUI days, level, kills, eaten, rotten, time, score, augments;
 
         public void Build(UITheme theme, FlowSettings flowSettings, string heading, Color headingColor)
         {
@@ -30,6 +30,8 @@ namespace ExpiryGame.Flow
             time = Line(theme, -75f, body);
             score = FlowUi.Text(theme, transform, "", 64, theme != null ? theme.accent : Color.white,
                 new Vector2(0f, -160f), new Vector2(1200f, 90f));
+            // 고른 증강 목록: 길면 박스 안으로 줄어든다. 점수(-205까지)와 버튼(-261부터) 사이
+            augments = FlowUi.Text(theme, transform, "", 34, body, new Vector2(0f, -232f), new Vector2(1700f, 40f));
 
             FlowUi.Button(theme, transform, settings.retryLabel, new Vector2(-230f, -300f), () => RetryClicked?.Invoke());
             FlowUi.Button(theme, transform, settings.toTitleLabel, new Vector2(230f, -300f), () => TitleClicked?.Invoke());
@@ -44,6 +46,8 @@ namespace ExpiryGame.Flow
             rotten.text = string.Format(settings.rottenLine, stats.RottenEaten);
             time.text = string.Format(settings.timeLine, FlowUi.FormatTime(stats.PlaySeconds));
             score.text = string.Format(settings.scoreLine, scoreValue);
+            var picked = stats.Augments != null && stats.Augments.Length > 0 ? string.Join(" · ", stats.Augments) : settings.noAugmentsText;
+            augments.text = string.Format(settings.augmentsLine, picked);
         }
 
         private TextMeshProUGUI Line(UITheme theme, float y, Color color)

@@ -255,11 +255,51 @@ namespace ExpiryGame.DebugTools
 
             var seconds = flowRoot.Stats.Snapshot().PlaySeconds;
             GUILayout.Label($"Lv.{experience.Level}  경험치 {experience.Current}/{experience.Required}  (플레이 {seconds:0}초)");
+            GUILayout.Label("경험치 지급");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("+10")) flowRoot.ExperienceSink.AddExperience(10);
-            if (GUILayout.Button("레벨업 1회")) flowRoot.ExperienceSink.AddExperience(experience.Required - experience.Current);
+            if (GUILayout.Button("+50")) flowRoot.ExperienceSink.AddExperience(50);
+            if (GUILayout.Button("+200")) flowRoot.ExperienceSink.AddExperience(200);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("레벨업 즉시")) flowRoot.ExperienceSink.AddExperience(experience.Required - experience.Current);
             if (GUILayout.Button("레벨업 3회")) flowRoot.ExperienceSink.AddExperience(experience.Required * 3);
             GUILayout.EndHorizontal();
+            DrawAugmentPanel();
+        }
+
+        // 증강: 다음 레벨업에 뜰 후보를 강제로 지정하고(최대 3개), 지금까지 고른 증강을 본다
+        private void DrawAugmentPanel()
+        {
+            GUILayout.Label("증강 후보 강제 지정 (다음 레벨업 한 번만)");
+            var debug = flowRoot.AugmentDebug;
+            if (debug == null)
+            {
+                GUILayout.Label("(팀원 증강 어댑터가 씬에 없음 → Setup Game 실행 필요)");
+            }
+            else
+            {
+                var forced = new List<string>(debug.ForcedIds);
+                var changed = false;
+                foreach (var augment in debug.AllAugments)
+                {
+                    var on = forced.Contains(augment.Id);
+                    var level = flowRoot.Augments.LevelOf(augment.Id);
+                    var want = GUILayout.Toggle(on, $"{augment.Name}  (Lv.{level}/{augment.MaxLevel})");
+                    if (want == on) continue;
+                    if (want && forced.Count < 3) forced.Add(augment.Id);
+                    else if (!want) forced.Remove(augment.Id);
+                    changed = true;
+                }
+                if (changed) debug.ForceNextCandidates(forced);
+                if (forced.Count > 0 && GUILayout.Button("강제 지정 해제")) debug.ForceNextCandidates(new string[0]);
+            }
+
+            GUILayout.Label("선택한 증강 목록");
+            var records = flowRoot.AugmentHistory.Records;
+            if (records.Count == 0) GUILayout.Label("(아직 없음)");
+            foreach (var record in records) GUILayout.Label($"  · {record.Name} Lv.{record.Level}");
+            GUILayout.Label($"이동 속도 {flowRoot.PlayerStats.Get(StatKey.MoveSpeed):0.##} · 공격력 +{flowRoot.PlayerStats.Get(StatKey.AttackPower):0.##} · 쿨다운 -{flowRoot.PlayerStats.Get(StatKey.AttackCooldownReduction):0.###}초");
         }
 
         private void FindDifficulty()

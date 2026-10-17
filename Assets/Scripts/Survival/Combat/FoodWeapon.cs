@@ -66,6 +66,7 @@ namespace ExpiryGame
             if (driver.IsBusy) return;
 
             nextAttackTime = Time.time + Mathf.Max(0.05f, driver.CooldownSeconds - attackCooldown);
+            (driver as IDamageBonusReceiver)?.SetDamageBonus(attackPower);
             driver.Begin(item, hitCount => Commit(item, hitCount));
         }
 

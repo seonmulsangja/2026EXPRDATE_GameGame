@@ -5,7 +5,7 @@ namespace ExpiryGame.Combat
 {
     // 스윙 모션 담당: 손 피벗 기준 호 회전, 3단계(준비/스윙/여운). 판정은 ISwingHitSink에 위임한다.
     // 시간은 Time.deltaTime을 쓰므로 히트스톱 중에는 모션도 함께 멈춘다.
-    public class SwingController : MonoBehaviour, IAttackDriver
+    public class SwingController : MonoBehaviour, IAttackDriver, IDamageBonusReceiver
     {
         [SerializeField] private SwingProfile profile;
         [Tooltip("IAimSource 구현 (AimSource)")]
@@ -27,6 +27,7 @@ namespace ExpiryGame.Combat
         private int nextSign = 1;
         private bool strikeStarted;
         private bool committed;
+        private float damageBonus;
 
         public bool IsBusy { get; private set; }
         public float CooldownSeconds => profile.cooldownSeconds;
@@ -45,6 +46,8 @@ namespace ExpiryGame.Combat
             weaponRenderer.enabled = false;
         }
 
+        public void SetDamageBonus(float bonus) => damageBonus = bonus;
+
         public void Begin(FoodItem item, Action<int> committedCallback)
         {
             if (IsBusy) return;
@@ -59,7 +62,7 @@ namespace ExpiryGame.Combat
             var sign = profile.alternateDirection ? nextSign : 1;
             if (profile.alternateDirection) nextSign = -nextSign;
 
-            info = new SwingInfo(item, origin, dir, sign);
+            info = new SwingInfo(item, origin, dir, sign, damageBonus);
             prevRel = timeline.StrikeStartRel;
             ((ISwingHitSink)hitSink).BeginSwing(info);
 

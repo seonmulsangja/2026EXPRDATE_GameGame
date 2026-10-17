@@ -6,7 +6,7 @@ namespace ExpiryGame.Flow
     // 레벨업을 줄 세워 하나씩 증강 선택으로 연결한다.
     //  - OnLevelUp마다 큐에 쌓는다 (한 번에 여러 레벨이 올라도 레벨마다 선택 한 번)
     //  - Playing일 때만 꺼내 AugmentSelect 상태로 바꾸고 presenter에 선택을 요청한다
-    //  - presenter가 완료를 알려야만 Playing으로 돌아오고, 큐에 남은 게 있으면 곧바로 다음 선택을 연다
+    //  - presenter가 완료를 알려야만 Playing으로 돌아오고, 큐에 남은 게 있으면 Playing을 거치지 않고 곧바로 다음 선택을 연다
     //  - 일시정지/게임오버 등 다른 상태에서 온 레벨업은 Playing이 될 때까지 큐에서 기다린다 (게임오버/클리어면 버린다)
     public sealed class LevelUpCoordinator : IDisposable
     {
@@ -57,6 +57,13 @@ namespace ExpiryGame.Flow
             if (to == GameState.GameOver || to == GameState.Clear)
             {
                 pending.Clear();
+                // 선택 중에 게임이 끝났으면(플레이어 사망) 열려 있는 선택 화면을 접는다
+                if (selecting)
+                {
+                    requestId++;
+                    selecting = false;
+                    presenter.Cancel();
+                }
                 return;
             }
             if (to == GameState.Playing) TryOpenNext();
@@ -67,18 +74,28 @@ namespace ExpiryGame.Flow
             if (selecting || pending.Count == 0) return;
             if (machine.Current != GameState.Playing) return;
 
-            var level = pending.Dequeue();
             selecting = true;
-            var myId = ++requestId;
             machine.BeginAugmentSelect();
+            OpenNext();
+        }
+
+        private void OpenNext()
+        {
+            var level = pending.Dequeue();
+            var myId = ++requestId;
             presenter.RequestSelection(level, () => Complete(myId));
         }
 
         private void Complete(int completedId)
         {
             if (completedId != requestId || !selecting) return;
+            // 큐에 남은 레벨업이 있으면 Playing으로 돌아가지 않고 AugmentSelect를 유지한 채 다음 선택을 연다 (중간에 재개되지 않는다)
+            if (pending.Count > 0 && machine.Current == GameState.AugmentSelect)
+            {
+                OpenNext();
+                return;
+            }
             selecting = false;
-            // EndAugmentSelect가 Playing 전환을 알리면 OnStateChanged → TryOpenNext로 다음 선택이 이어진다
             machine.EndAugmentSelect();
             TryOpenNext();
         }

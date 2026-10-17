@@ -18,6 +18,7 @@ namespace ExpiryGame.Flow.Editor
         private const string GameScenePath = "Assets/ShelfLife/Scenes/Game.unity";
         private const string RootName = "GameFlow";
         private const string EnemyInstallMenu = "Tools/ShelfLife/Install Enemies To Open Scene";
+        private const string AugmentInstallMenu = "Tools/ShelfLife/Install Augments To Open Scene";
 
         // 테스트용으로 깔린 것들. 게임 씬에서는 치운다.
         private static readonly string[] TestObjectPrefixes = { "CombatDummy", "Scarecrow", "DropDummy", "EnemyDummy", "Pickup_", "DebugHud" };
@@ -50,6 +51,10 @@ namespace ExpiryGame.Flow.Editor
             Install();
             if (!EditorApplication.ExecuteMenuItem(EnemyInstallMenu))
                 Debug.LogError($"[ShelfLife] '{EnemyInstallMenu}' 메뉴를 실행하지 못했습니다 (컴파일 에러 확인).");
+
+            // 팀원 증강 선택 화면 (Test_JCY.unity의 AugmentCanvas를 프리팹으로 복사해 얹는다. 이미 있으면 중복 생성하지 않는다)
+            if (!EditorApplication.ExecuteMenuItem(AugmentInstallMenu))
+                Debug.LogError($"[ShelfLife] '{AugmentInstallMenu}' 메뉴를 실행하지 못했습니다 (컴파일 에러 확인).");
 
             SubmissionSettings.Apply();
             EditorSceneManager.SaveOpenScenes();

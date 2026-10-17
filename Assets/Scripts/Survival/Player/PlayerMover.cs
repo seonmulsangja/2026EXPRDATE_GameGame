@@ -8,6 +8,7 @@ namespace ExpiryGame
         [SerializeField] private PlayerInputReader input;
         [SerializeField, Min(0f)] private float moveSpeed = 5f;
 
+        // 적이 "플레이어 속도의 몇 %"로 움직일지 정할 때 읽고, 능력치 파이프라인(PlayerStatApplier)이 쓴다
         public float MoveSpeed
         {
             get => moveSpeed;
@@ -15,9 +16,6 @@ namespace ExpiryGame
         }
 
         private Rigidbody2D body;
-
-        // 적이 "플레이어 속도의 몇 %"로 움직일지 정할 때 읽는다
-        public float MoveSpeed => moveSpeed;
 
         private void Awake()
         {

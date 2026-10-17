@@ -552,8 +552,9 @@ namespace ExpiryGame.Tests
             Assert.IsFalse(machine.BeginAugmentSelect());
             machine.StartGame();
             Assert.IsTrue(machine.BeginAugmentSelect());
-            Assert.IsFalse(machine.Fail(), "선택 중에는 다른 전환이 막힌다");
-            Assert.IsFalse(machine.Win());
+            Assert.IsFalse(machine.Win(), "선택 중에는 클리어/일시정지 같은 전환이 막힌다");
+            Assert.IsFalse(machine.Pause());
+            Assert.IsFalse(machine.Resume(), "선택이 끝나기 전에는 재개할 수 없다");
             Assert.IsTrue(machine.EndAugmentSelect());
             Assert.AreEqual(GameState.Playing, machine.Current);
             Assert.IsFalse(machine.EndAugmentSelect());
