@@ -2,6 +2,7 @@ using System;
 using ExpiryGame.Combat;
 using ExpiryGame.Drop;
 using ExpiryGame.Flow;
+using ExpiryGame.Landmark;
 using UnityEngine;
 
 namespace ExpiryGame.Integration
@@ -11,6 +12,7 @@ namespace ExpiryGame.Integration
     //  - IDropSource      : 죽으면 DropSpawner가 DropTable로 음식을 떨군다
     //  - IEnemyActor      : 처치 통계 / BGM 위험도
     //  - 넉백 중 이동 정지 : KnockbackReceiver가 있으면 그 동안 Enemy가 덮어쓴 속도를 0으로 되돌린다
+    //  - 안전지대 : 모닥불 반경 안으로 들어온 적을 KnockbackReceiver로 밀어낸다 (SafeZoneProfile.repelEnemies로 끈다)
     //  - 접촉 데미지 반복 : Enemy.OnCollisionEnter2D가 첫 1회를 주고, 붙어 있으면 contactInterval마다 다시 준다
     [RequireComponent(typeof(Enemy))]
     public class EnemyAdapter : MonoBehaviour, IDamageable, IDropSource, IEnemyActor
@@ -24,6 +26,7 @@ namespace ExpiryGame.Integration
         private float health;
         private bool dead;
         private float nextContactTime;
+        private float nextRepelTime;
 
         public Vector2Int HomeChunk { get; private set; }
         public float Threat01 { get; private set; }
@@ -89,6 +92,11 @@ namespace ExpiryGame.Integration
             if (!dead) Release();
         }
 
+        private void Update()
+        {
+            RepelFromSafeZone();
+        }
+
         private void LateUpdate()
         {
             // Enemy.Update가 매 프레임 속도를 덮어써서 넉백(MovePosition)과 싸우므로, 넉백 중에는 이동 입력을 지운다
@@ -108,6 +116,21 @@ namespace ExpiryGame.Integration
 
             playerHealth.TakeDamage(enemy._damage);
             nextContactTime = Time.time + settings.contactInterval;
+        }
+
+        // 안전지대 안이면 중심 반대 방향으로 민다. 경계에서 얼마나 안쪽인지만큼 더 밀어 확실히 밖으로 내보낸다.
+        private void RepelFromSafeZone()
+        {
+            if (dead || knockback == null || Time.time < nextRepelTime) return;
+            if (!SafeZoneRegistry.TryFind(transform.position, out var zone) || !zone.RepelEnemies) return;
+
+            nextRepelTime = Time.time + zone.RepelIntervalSeconds;
+            if (knockback.IsKnockedBack) return;
+
+            var away = (Vector2)transform.position - zone.Center;
+            var depth = zone.Radius - away.magnitude;
+            if (away.sqrMagnitude < 0.0001f) away = UnityEngine.Random.insideUnitCircle;
+            knockback.ApplyKnockback(away, Mathf.Max(zone.RepelDistance, depth + 0.25f));
         }
 
         private void Release()

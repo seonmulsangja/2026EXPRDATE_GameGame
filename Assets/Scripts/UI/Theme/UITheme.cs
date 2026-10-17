@@ -38,6 +38,8 @@ namespace ExpiryGame.UI
         public Sprite pipFull;
         public Sprite pipEmpty;
         public Sprite arrow;
+        [Tooltip("강화된 음식 배지. 비어 있으면 임시 도형(마름모)을 쓴다")]
+        public Sprite enhanceBadge;
     }
 
     // UI 폰트/색/간격/문구/스프라이트를 한 곳에서 관리한다.
@@ -80,6 +82,7 @@ namespace ExpiryGame.UI
         public Color ghostHeal = new Color(0.35f, 0.9f, 0.4f, 0.9f);
         public Color ghostDamage = new Color(1f, 0.3f, 0.3f, 0.9f);
         public Color landmarkLabel = new Color(0.45f, 0.9f, 1f);
+        public Color enhancedBadgeColor = new Color(1f, 0.6f, 0.2f);
         public Gradient freshness = new Gradient();   // x: 0 = 썩기 직전(빨강) → 1 = 신선(초록)
 
         [Header("HUD 안전 영역 (UISetup이 실제 패널 크기로 채운다)")]

@@ -15,6 +15,7 @@ namespace ExpiryGame.UI
         [SerializeField] private RectTransform freshFill;
         [SerializeField] private Image freshFillImage;
 
+        private Image enhancedBadge;
         private FoodItem item;
         private float shownFresh = -1f;
 
@@ -29,6 +30,8 @@ namespace ExpiryGame.UI
         {
             item = food;
             frame.sprite = selected ? theme.sprites.slotSelected : theme.sprites.slot;
+            EnsureBadge();
+            enhancedBadge.gameObject.SetActive(food != null && food.IsEnhanced);
             icon.gameObject.SetActive(food != null);
             freshFill.parent.gameObject.SetActive(food != null);
             shownFresh = -1f;
@@ -42,6 +45,13 @@ namespace ExpiryGame.UI
             icon.sprite = food.Data.icon != null ? food.Data.icon : food.Data.sprite;
             RefreshUses();
             RefreshFreshness();
+        }
+
+        // 슬롯 우상단 작은 배지. 슬롯을 다시 설치하지 않아도 되도록 처음 필요할 때 만든다.
+        private void EnsureBadge()
+        {
+            if (enhancedBadge != null) return;
+            enhancedBadge = EnhanceBadge.Create(Rect, theme, new Vector2(1f, 1f), new Vector2(-Rect.sizeDelta.x * 0.16f, -Rect.sizeDelta.y * 0.16f), Rect.sizeDelta.x * 0.17f);
         }
 
         public void RefreshUses()

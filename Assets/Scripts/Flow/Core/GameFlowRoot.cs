@@ -1,5 +1,6 @@
 using ExpiryGame.Combat;
 using ExpiryGame.Drop;
+using ExpiryGame.Landmark;
 using ExpiryGame.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -37,6 +38,7 @@ namespace ExpiryGame.Flow
         private StatsTracker stats;
         private PlayerHurtFeedback hurtFeedback;
         private AudioEventBinder audioBinder;
+        private EnhanceFeedback enhanceFeedback;
         private LoadoutGiver loadoutGiver;
         private DayBannerView banner;
         private ControlsHintView hint;
@@ -80,7 +82,11 @@ namespace ExpiryGame.Flow
             var audio = new GameObject("AudioManager").AddComponent<AudioManager>();
             audio.transform.SetParent(transform, false);
             audio.Initialize(audioCatalog, clock, machine, playerHealth.transform);
-            audioBinder = new AudioEventBinder(audio, audioCatalog, consumer, hitDetector, inventory, dropSpawner);
+
+            // 모닥불/냉장고 이벤트는 씬에 없어도(이전 버전 씬) 그냥 연결하지 않는다
+            var landmarkEvents = FindFirstObjectByType<LandmarkEvents>();
+            audioBinder = new AudioEventBinder(audio, audioCatalog, consumer, hitDetector, inventory, dropSpawner, landmarkEvents);
+            enhanceFeedback = new EnhanceFeedback(landmarkEvents, FindFirstObjectByType<HitFxSpawner>(), settings);
 
             clock.DayStarted += OnDayStarted;
             machine.StateChanged += OnStateChanged;
@@ -117,6 +123,7 @@ namespace ExpiryGame.Flow
             controller?.Dispose();
             hurtFeedback?.Dispose();
             audioBinder?.Dispose();
+            enhanceFeedback?.Dispose();
             stats?.Dispose();
             loadoutGiver?.Release();
             Time.timeScale = 1f;

@@ -11,11 +11,13 @@ namespace ExpiryGame.Integration
     //  - 플레이어 주변에 로드된 청크에서만 스폰, 언로드되면 그 청크 출신 적은 조용히 치운다 (드롭/통계 없음)
     //  - 난이도 배율(IDifficultyService)이 목표 수를 정하고, 위험 구역 안에서는 더 늘린다
     //  - 위험 구역 진입 순간에는 플레이어 주변으로 추가 인원을 내보낸다
+    //  - 모닥불 안전지대(SafeZoneProfile.radius) 안에는 스폰하지 않는다. 청크가 생길 때 "이미 정해진 랜드마크 배치"로 판단한다
     public class EnemyChunkSpawner : MonoBehaviour
     {
         private sealed class ChunkState
         {
             public Bounds Bounds;
+            public SafeZoneSet Safe = SafeZoneSet.Empty;
             public readonly List<EnemyAdapter> Alive = new List<EnemyAdapter>();
         }
 
@@ -25,6 +27,8 @@ namespace ExpiryGame.Integration
         [SerializeField] private GameFlowRoot flow;
         [SerializeField] private Transform player;
         [SerializeField] private DangerZoneEvents dangerEvents;
+        [Tooltip("모닥불 안전지대 판단용 (배치 정보만 읽는다). 비어 있으면 씬에서 찾는다")]
+        [SerializeField] private LandmarkLocator landmarks;
         [Tooltip("적 오브젝트의 부모. 비어 있으면 자기 자신")]
         [SerializeField] private Transform root;
 
@@ -33,11 +37,17 @@ namespace ExpiryGame.Integration
         private readonly List<Vector2Int> order = new List<Vector2Int>();
         private readonly List<EnemyAdapter> buffer = new List<EnemyAdapter>();
         private readonly Collider2D[] overlap = new Collider2D[4];
+        private readonly List<LandmarkInfo> nearbyLandmarks = new List<LandmarkInfo>();
         private int activeCount;
         private float timer;
 
         private bool Playing => flow != null && flow.Machine.Current == GameState.Playing;
         private bool InDanger => dangerEvents != null && dangerEvents.IsPlayerInDanger;
+
+        private void Awake()
+        {
+            if (landmarks == null) landmarks = FindFirstObjectByType<LandmarkLocator>();
+        }
 
         private void Start()
         {
@@ -79,7 +89,7 @@ namespace ExpiryGame.Integration
         private void OnChunkLoaded(Vector2Int coord, Bounds bounds, ChunkRandom rng)
         {
             // 목표 수 채우기는 TopUp이 한다 (Playing이 아닐 때 로드된 청크도 시작하면 곧 채워진다)
-            chunks[coord] = new ChunkState { Bounds = bounds };
+            chunks[coord] = new ChunkState { Bounds = bounds, Safe = FindSafeZones(bounds) };
             if (Playing) timer = Mathf.Min(timer, 0.1f);
         }
 
@@ -102,7 +112,7 @@ namespace ExpiryGame.Integration
                 var angle = Random.value * Mathf.PI * 2f;
                 var distance = settings.minSpawnDistance + Random.value * settings.dangerBurstRadius;
                 var position = (Vector2)player.position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
-                if (TryFindChunk(position, out var coord) && IsFree(position)) Spawn(position, coord);
+                if (TryFindChunk(position, out var coord) && !chunks[coord].Safe.Contains(position) && IsFree(position)) Spawn(position, coord);
             }
         }
 
@@ -148,12 +158,20 @@ namespace ExpiryGame.Integration
                     Random.Range(bounds.min.x + margin, bounds.max.x - margin),
                     Random.Range(bounds.min.y + margin, bounds.max.y - margin));
                 if (((Vector2)player.position - position).sqrMagnitude < settings.minSpawnDistance * settings.minSpawnDistance) continue;
-                if (!IsFree(position)) continue;
+                if (state.Safe.Contains(position) || !IsFree(position)) continue;
 
                 Spawn(position, coord);
                 return true;
             }
             return false;
+        }
+
+        // 청크 주변의 모닥불 배치를 안전 구역으로 모아 둔다 (로케이터가 이웃 지역까지 찾아 준다)
+        private SafeZoneSet FindSafeZones(Bounds bounds)
+        {
+            if (landmarks == null) return SafeZoneSet.Empty;
+            ((ILandmarkLocator)landmarks).GetNearby(bounds.center, nearbyLandmarks);
+            return SafeZoneSet.From(nearbyLandmarks);
         }
 
         private bool IsFree(Vector2 position)

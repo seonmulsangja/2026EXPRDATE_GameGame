@@ -11,6 +11,8 @@ namespace ExpiryGame.Landmark
         public IHealable PlayerHealth;
         public IDropService Drops;
         public IDangerZoneSink Danger;
+        public IFoodInventory Inventory;
+        public ILandmarkEventSink Events;
     }
 
     // 랜드마크 프리팹 안의 컴포넌트가 스폰 직후 컨텍스트를 받는 계약

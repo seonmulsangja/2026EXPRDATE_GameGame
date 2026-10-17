@@ -271,3 +271,55 @@ IStatsSource      : Snapshot() → GameStats{DaysSurvived Kills FoodEaten Rotten
 - [ ] 사망 → 게임 오버(생존 일수/처치/먹은 음식/썩은 음식/시간/점수) → 다시하기(바로 시작) / 타이틀. 6일차 새벽 → 클리어 화면
 - [ ] 다시하기를 여러 번 반복해도 에러·이중 처리(처치 수 2배, 배너 두 번 등)가 없는지
 - [ ] 이 환경에서 확인 못 한 것: 위 전부 + Light2D에서 적 스프라이트 밝기, 버튼 클릭(`InputSystemUIInputModule`)
+
+
+---
+
+# 추가: 냉장고 / 모닥불 상호작용 (Landmark / Survival / Flow / Integration / UI)
+
+설계 근거 `docs/meetings.md` D42~D50, 필요한 도트 `docs/art_needed.md`. **팀원 파일(`Assets/JCY/`) 수정 0건** — 적 쪽은 `EnemyAdapter`(내 코드)가 기존 `KnockbackReceiver`/`IKnockbackable`로만 연결. 기존 이벤트/인터페이스 이름 변경 없음(추가만).
+기존 코드 수정: `FoodItem`(강화 플래그/배율), `FoodInventory`(강화 시 `Changed` 재발행), `LandmarkContext/Spawner`(참조 2개), `DumpDangerEffect`(안전지대 우선), `ZoneRingView`(링 반경), `EnemyChunkSpawner`/`EnemyAdapter`(안전지대), `AudioEventBinder`/`GameFlowRoot`(이벤트 연결), `FoodSlotView`/`FoodDetailPanelView`(배지), `UITheme`(배지 필드), `Flow` asmdef(Landmark 참조 추가).
+
+## 새 이벤트 / 인터페이스
+```csharp
+using ExpiryGame.Landmark;
+ILandmarkEvents     : OnFoodEnhanced(FoodEnhancedInfo{Food Position HealBefore HealAfter})  OnFridgeOpened(FridgeOpenedInfo{Position})   // LandmarkEvents 컴포넌트(씬에 1개, Install Landmarks가 만든다)
+ILandmarkEventSink  : FoodEnhanced(...) FridgeOpened(...)             // 효과 컴포넌트가 발행 (LandmarkContext.Events)
+ISafeZone           : Center Radius RepelEnemies RepelDistance RepelIntervalSeconds   // CampfireSafeZone이 구현
+SafeZoneRegistry    : Register/Unregister / TryFind(pos, out ISafeZone) / IsSafe(pos)  // 로드된 모닥불
+SafeZoneSet         : From(IEnumerable<LandmarkInfo>) / Contains(pos)                  // 배치 정보만으로 (청크 스폰 제외용)
+FoodEnhancer        : Check(FoodItem, cooldownLeft) → EnhanceCheck{Block CooldownLeft HealBefore HealAfter}  Apply(FoodItem)
+CooldownTimer       : Start(now, seconds) Remaining(now) IsReady(now)
+
+using ExpiryGame;   // Survival
+FoodItem : IsEnhanced HealMultiplier DamageMultiplier  TryEnhance(heal, damage, shelfLifeBonusRatio)  event Enhanced(FoodItem)
+```
+- `CurrentHeal/CurrentDamage`는 신선할 때 `Stats × 배율`. 유통기한→스탯 변환(`FoodStatCalculator`)은 그대로이고 복사하지 않았다.
+- 팀원 쪽에서 쓸 만한 것: 강화/냉장고 개봉은 `FindFirstObjectByType<LandmarkEvents>()`의 `OnFoodEnhanced/OnFridgeOpened` 구독. 안전지대 판단은 `SafeZoneRegistry.IsSafe(pos)`.
+
+## 클래스 / SO
+| 클래스 | 책임 |
+|---|---|
+| `FridgeLootEffect` | F로 `fridgeTable` 1회 드롭 → "비어 있음", 글로우 끔 |
+| `FridgeDecayEffect` | (기존) 반경 안 유통기한 ×0.3. 이제 `decayEnabled`로 끌 수 있음 |
+| `CampfireEnhanceEffect` | F로 선택 슬롯 음식 강화 + 쿨다운 + 프롬프트(변화량/사유) |
+| `CampfireSafeZone` | 안전지대 등록 (`SafeZoneProfile`) |
+| `EnemyChunkSpawner` / `EnemyAdapter` | 안전지대 안 스폰 제외 / 들어온 적 밀어내기 |
+| `EnhanceFeedback`, `AudioEventBinder` | 불꽃 파티클 / 효과음 (이벤트 구독만) |
+| `EnhanceBadge` | 슬롯·상세 패널의 작은 배지 (임시 도형) |
+
+## 수치 위치
+| 무엇 | 에셋 / 필드 |
+|---|---|
+| 강화 배율 1.3/1.3, 유통기한 +50%, 쿨다운(10초), 프롬프트·사유 문구 | `Assets/ShelfLife/Data/Landmark/EnhanceProfile.asset` |
+| 안전지대 반경(4.5), 밀어내기 ON/OFF·거리·간격 | `…/Landmark/SafeZoneProfile.asset` |
+| 냉장고 드롭 표 (신선도 90~100%, 2~3개) | `…/Landmark/DropTable_Fridge.asset` |
+| 냉장고: 유통기한 감소 on/off·0.3배, 드롭 굴림 수·위협도, 빈 문구 / 상호작용 거리 | `…/Landmark/Landmark_Fridge.asset` |
+| 모닥불: 위 두 SO 연결, 회복량, 상호작용 거리 | `…/Landmark/Landmark_Campfire.asset` |
+| 불꽃 파티클 개수·속도, 효과음 클립(강화/냉장고 열기) | `…/Flow/FlowSettings.asset`, `…/Flow/AudioCatalog.asset` |
+| 배지 색/스프라이트 | `Assets/ShelfLife/UI/UITheme.asset` (`enhancedBadgeColor`, `sprites.enhanceBadge`) |
+
+## 유니티에서 할 일
+- [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 Unity 없이 `dotnet build`로만 검증)
+- [ ] **열려 있는 씬마다** `Tools > ShelfLife > Install Landmarks To Open Scene` 한 번 더 (새 SO 3개 생성, 냉장고/모닥불 프리팹에 컴포넌트 추가, 씬에 `LandmarkEvents` 추가). HUD/적 재설치는 필요 없음
+- [ ] Test Runner > EditMode > `FridgeCampfireTests` (13개)

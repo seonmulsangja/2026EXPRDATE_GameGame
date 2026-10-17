@@ -24,6 +24,7 @@ namespace ExpiryGame.UI
         [SerializeField] private PipRow pips;
         [SerializeField] private TMP_Text shelfText;
 
+        private Image enhancedBadge;
         private FoodItem watched;
         private int shownSecond = -1;
         private bool pinned;
@@ -112,6 +113,10 @@ namespace ExpiryGame.UI
         {
             icon.sprite = watched.Data.icon != null ? watched.Data.icon : watched.Data.sprite;
             nameText.text = watched.Data.displayName;
+            if (enhancedBadge == null)
+                enhancedBadge = EnhanceBadge.Create((RectTransform)icon.transform.parent, theme, new Vector2(0f, 1f), new Vector2(0f, 0f), 22f);
+            enhancedBadge.rectTransform.anchoredPosition = icon.rectTransform.anchoredPosition + new Vector2(icon.rectTransform.sizeDelta.x, -icon.rectTransform.sizeDelta.y);
+            enhancedBadge.gameObject.SetActive(watched.IsEnhanced);
 
             var heal = Mathf.RoundToInt(watched.CurrentHeal);
             eatText.color = heal >= 0 ? theme.healText : theme.dangerText;

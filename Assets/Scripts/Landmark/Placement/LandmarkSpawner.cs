@@ -15,6 +15,8 @@ namespace ExpiryGame.Landmark
         [SerializeField] private Health playerHealth;
         [SerializeField] private DropSpawner drops;
         [SerializeField] private DangerZoneEvents danger;
+        [SerializeField] private FoodInventory inventory;
+        [SerializeField] private LandmarkEvents events;
         [Tooltip("스폰된 랜드마크의 부모. 비어 있으면 자기 자신")]
         [SerializeField] private Transform root;
 
@@ -24,6 +26,9 @@ namespace ExpiryGame.Landmark
         private void Awake()
         {
             planner = new LandmarkPlanner(settings);
+            // 이전 버전 씬에는 새 참조가 비어 있을 수 있어 한 번 찾아 둔다 (설치 메뉴를 다시 실행하면 채워진다)
+            if (inventory == null) inventory = FindFirstObjectByType<FoodInventory>();
+            if (events == null) events = FindFirstObjectByType<LandmarkEvents>();
         }
 
         private void OnEnable()
@@ -57,6 +62,8 @@ namespace ExpiryGame.Landmark
                 PlayerHealth = playerHealth,
                 Drops = drops,
                 Danger = danger,
+                Inventory = inventory,
+                Events = events,
             };
             foreach (var part in instance.GetComponentsInChildren<ILandmarkPart>(true)) part.Bind(context);
             spawned.Add(chunk, instance);

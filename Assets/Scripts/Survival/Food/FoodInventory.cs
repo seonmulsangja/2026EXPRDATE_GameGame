@@ -41,6 +41,7 @@ namespace ExpiryGame
             if (items.Count >= capacity) return false;
             items.Add(item);
             item.Anchor = transform;
+            item.Enhanced += OnItemEnhanced;
             ((IShelfLifeTracker)tracker).Register(item);
             Changed?.Invoke();
             return true;
@@ -50,10 +51,17 @@ namespace ExpiryGame
         {
             if (!items.Remove(item)) return false;
             item.Anchor = null;
+            item.Enhanced -= OnItemEnhanced;
             ((IShelfLifeTracker)tracker).Unregister(item);
             selectedIndex = items.Count == 0 ? 0 : Mathf.Min(selectedIndex, items.Count - 1);
             Changed?.Invoke();
             return true;
+        }
+
+        // 가방 안 음식이 강화되면 UI(슬롯/상세)가 다시 그리도록 알린다
+        private void OnItemEnhanced(FoodItem item)
+        {
+            Changed?.Invoke();
         }
 
         public void SelectNext()

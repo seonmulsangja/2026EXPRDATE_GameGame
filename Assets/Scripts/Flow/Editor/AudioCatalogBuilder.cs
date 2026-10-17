@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ExpiryGame.Flow.Editor
 {
     // Assets/Audio 안의 클립을 파일 이름으로 AudioCatalog에 채워 넣는다. 비어 있는 칸만 채우므로 직접 지정한 값은 유지된다.
-    // 이름 규칙(대소문자 무시): day / night / danger / gameover, eat / hit(attack) / rot / pickup / break.
+    // 이름 규칙(대소문자 무시): day / night / danger / gameover, eat / hit(attack) / rot / pickup / break / enhance(grill) / fridge.
     // Assets/Audio에 없을 때만 팀원 효과음(Assets/JCY/06 Sounds)을 먹기/타격에 임시로 연결한다.
     public static class AudioCatalogBuilder
     {
@@ -32,6 +32,8 @@ namespace ExpiryGame.Flow.Editor
             if (catalog.sfxRot == null) catalog.sfxRot = Find(AudioDir, "sfx", "rot");
             if (catalog.sfxPickup == null) catalog.sfxPickup = Find(AudioDir, "sfx", "pickup") ?? Find(AudioDir, "sfx", "pick");
             if (catalog.sfxBreak == null) catalog.sfxBreak = Find(AudioDir, "sfx", "break");
+            if (catalog.sfxEnhance == null) catalog.sfxEnhance = Find(AudioDir, "sfx", "enhance") ?? Find(AudioDir, "sfx", "grill");
+            if (catalog.sfxFridgeOpen == null) catalog.sfxFridgeOpen = Find(AudioDir, "sfx", "fridge");
 
             EditorUtility.SetDirty(catalog);
             return catalog;

@@ -49,5 +49,12 @@ namespace ExpiryGame.Flow
         [Min(0f)] public float hurtShakeAmplitude = 0.25f;
         [Min(0.01f)] public float hurtShakeSeconds = 0.2f;
         [Min(0.01f)] public float hurtFlashSeconds = 0.12f;
+
+        [Header("모닥불 강화 연출 (기존 스파크 파티클 재사용)")]
+        [Min(0)] public int enhanceSparkCount = 14;
+        [Min(0.1f)] public float enhanceSparkSpeedScale = 0.7f;
+        [Range(0f, 180f)] public float enhanceSparkSpread = 70f;
+        [Tooltip("모닥불 발밑 기준 불꽃이 나오는 높이 (타일)")]
+        [Min(0f)] public float enhanceSparkHeight = 0.5f;
     }
 }

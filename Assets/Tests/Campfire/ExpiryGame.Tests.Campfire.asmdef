@@ -1,0 +1,26 @@
+{
+    "name": "ExpiryGame.Tests.Campfire",
+    "rootNamespace": "ExpiryGame.Tests",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Landmark",
+        "ExpiryGame.Drop",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

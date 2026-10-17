@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ExpiryGame.Combat;
 using ExpiryGame.Drop;
+using ExpiryGame.Landmark;
 
 namespace ExpiryGame.Flow
 {
@@ -14,11 +15,12 @@ namespace ExpiryGame.Flow
         private readonly SwingHitDetector hitDetector;
         private readonly IFoodInventory inventory;
         private readonly IDropService drops;
+        private readonly ILandmarkEvents landmarks;
         private readonly HashSet<FoodItem> watched = new HashSet<FoodItem>();
         private readonly List<FoodItem> buffer = new List<FoodItem>();
 
         public AudioEventBinder(AudioManager audio, AudioCatalog catalog, FoodConsumer consumer, SwingHitDetector hitDetector,
-            IFoodInventory inventory, IDropService drops)
+            IFoodInventory inventory, IDropService drops, ILandmarkEvents landmarks = null)
         {
             this.audio = audio;
             this.catalog = catalog;
@@ -26,6 +28,7 @@ namespace ExpiryGame.Flow
             this.hitDetector = hitDetector;
             this.inventory = inventory;
             this.drops = drops;
+            this.landmarks = landmarks;
 
             if (consumer != null) consumer.FoodEaten += OnEaten;
             if (hitDetector != null) hitDetector.HitLanded += OnHit;
@@ -35,6 +38,11 @@ namespace ExpiryGame.Flow
                 OnInventoryChanged();
             }
             if (drops != null) drops.FoodCollected += OnCollected;
+            if (landmarks != null)
+            {
+                landmarks.OnFoodEnhanced += OnEnhanced;
+                landmarks.OnFridgeOpened += OnFridgeOpened;
+            }
         }
 
         public void Dispose()
@@ -43,6 +51,11 @@ namespace ExpiryGame.Flow
             if (hitDetector != null) hitDetector.HitLanded -= OnHit;
             if (inventory != null) inventory.Changed -= OnInventoryChanged;
             if (drops != null) drops.FoodCollected -= OnCollected;
+            if (landmarks != null)
+            {
+                landmarks.OnFoodEnhanced -= OnEnhanced;
+                landmarks.OnFridgeOpened -= OnFridgeOpened;
+            }
             foreach (var item in watched)
             {
                 item.Rotted -= OnRotted;
@@ -56,6 +69,8 @@ namespace ExpiryGame.Flow
         private void OnCollected(FoodItem item) => audio.PlaySfx(catalog.sfxPickup);
         private void OnRotted(FoodItem item) => audio.PlaySfx(catalog.sfxRot);
         private void OnBroken(FoodItem item) => audio.PlaySfx(catalog.sfxBreak);
+        private void OnEnhanced(FoodEnhancedInfo info) => audio.PlaySfx(catalog.sfxEnhance);
+        private void OnFridgeOpened(FridgeOpenedInfo info) => audio.PlaySfx(catalog.sfxFridgeOpen);
 
         // 가방에 들어온 음식의 Rotted/Broken만 구독하고, 나간 음식은 해제한다
         private void OnInventoryChanged()

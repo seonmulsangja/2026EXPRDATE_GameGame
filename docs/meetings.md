@@ -224,3 +224,51 @@
 ## 검증 범위
 - Unity 에디터가 열려 있어(자동 새로고침 없음) 컴파일은 `dotnet build`로 어셈블리별 확인: `ExpiryGame.Flow`, `ExpiryGame.Flow.Editor`, `Assembly-CSharp`(팀원 + Integration + DOTween 모듈), `Assembly-CSharp-Editor`, `ExpiryGame.Tests.Flow`, 그리고 릴리스 분기(`UNITY_EDITOR` 미정의: Survival/Flow/Assembly-CSharp) 모두 에러 0.
 - 실행하지 못함: 설치 메뉴, 플레이 동작, EditMode 테스트(`FlowTests`).
+
+
+---
+
+# 냉장고 / 모닥불 상호작용 (2026-10-17)
+
+막혀서 서브에이전트 회의를 열 만한 지점은 없었다. 요구가 두 가지로 읽히는 곳은 아래처럼 혼자 정하고 근거를 남긴다. (회의를 열지 않은 이유: 모두 수치/문구 선택이라 SO 값 하나로 바꿀 수 있고, 구조상 막히는 곳은 없었다.)
+
+## D42. 기존 랜드마크 패턴 그대로: 효과 = 독립 컴포넌트, 수치 = SO, 서비스 접근 = `LandmarkContext`
+- 새 효과는 `FridgeLootEffect`, `CampfireEnhanceEffect`, `CampfireSafeZone`(각각 `ILandmarkPart` + 필요하면 `ILandmarkInteractable`). `LandmarkInteractor`(F)와 `InteractableRegistry`는 수정하지 않았다.
+- 컨텍스트에 `Inventory`(`IFoodInventory`)와 `Events`(`ILandmarkEventSink`)만 추가. 이미 만든 에셋/프리팹은 `Install Landmarks To Open Scene`이 비어 있는 참조와 빠진 컴포넌트만 채운다(직접 고친 값은 유지).
+
+## D43. 상호작용 거리는 `interactRange`, 효과 반경(`effectRadius`)이 아니다
+- "반경 안에서 F"의 반경을 효과 반경(냉장고 5 / 모닥불 4.5)으로 읽으면 멀리서도 눌려 어색하다. 편의점과 같은 `LandmarkData.interactRange`(기본 2, 신규 에셋 2.5)를 쓴다. 헷갈리지 않게 이 필드의 헤더를 "상호작용 공통"으로 바꿨다.
+
+## D44. 냉장고/모닥불은 "불가능해도 대상" — 프롬프트로 사유를 보여준다
+- `LandmarkInteractor`는 `CanInteract == false`인 대상을 건너뛴다(편의점은 열고 나면 프롬프트도 사라짐). 요구가 "비어 있음 표시"와 "굽기 불가 사유 표시"라서, 냉장고(`fridgeEmptyPrompt`)와 모닥불은 범위 안이면 항상 대상으로 두고 `PromptText`만 상태에 따라 바꾼다. 누르면 아무 일도 안 일어난다.
+- 프롬프트 문자열은 상태(선택 음식/사유/남은 초)가 바뀔 때만 다시 만든다(Interactor가 매 프레임 읽으므로).
+
+## D45. 냉장고 수치 분리 = 전용 `DropTable_Fridge` + `LandmarkData.fridge*`
+- 편의점: `DropTable_Store`(신선도 50~100%, 한 번에 2~3개 × `lootRolls` 3 = 6~9개, 다량). 냉장고: `DropTable_Fridge`(남은 유통기한 90~100%, 2~3개 × `fridgeRolls` 1). 표/굴림 수/위협도(`fridgeThreat01` 0)/빈 문구를 서로 다른 필드·에셋으로 둬서 한쪽을 만져도 다른 쪽이 안 변한다.
+- 유통기한 감소 배율은 `decayEnabled`(체크박스) + 기존 `decayMultiplier`. 꺼도 드롭은 한다.
+- "글로우 끔"은 프리팹의 `Glow` 자식 오브젝트를 비활성화(재방문 리셋은 편의점처럼 청크 재로드 때 허용).
+
+## D46. 강화 = `FoodItem`의 플래그 + 배율, 변환 로직은 건드리지 않음
+- `FoodStatCalculator`(유통기한→스탯)는 그대로. `FoodItem.CurrentHeal/CurrentDamage`가 신선할 때 값에 `HealMultiplier/DamageMultiplier`(기본 1)를 곱할 뿐이다. 썩은 값은 강화와 무관(강화된 음식이 나중에 썩어도 썩은 쪽 값은 그대로).
+- `FoodItem.TryEnhance`가 "음식당 1회 / 썩은 음식 불가"를 최종 보장하고, `FoodEnhancer`(순수 클래스)가 같은 규칙으로 "가능 여부 + 사유 + 회복 변화량"을 미리 계산해 프롬프트에 쓴다. 쿨다운은 `CooldownTimer`(시간을 인자로 받음, 모닥불마다 하나).
+- **"남은 유통기한 +50%"** = 남은 값 × 1.5, 음식의 최대 유통기한을 넘지 않는다(`shelfLifeBonusRatio` 0.5). 최대치의 +50%로 읽으면 거의 항상 가득 차서 의미가 없다. 바꾸려면 `FoodItem.TryEnhance` 한 줄.
+- 쿨다운 기본 10초(요구에 값이 없어서 임의로 정함 → `EnhanceProfile.cooldownSeconds`). 쿨다운은 모닥불 인스턴스마다라 청크 재로드 시 리셋된다.
+- 가방 안 음식이 강화되면 `FoodInventory`가 `Changed`를 다시 발행해 슬롯/상세 패널이 기존 구독만으로 갱신된다(UI 쪽 새 구독 없음).
+
+## D47. 안전지대: 스폰은 "배치 정보", 밀어내기는 "로드된 모닥불"로 판단
+- 스폰 제외: `EnemyChunkSpawner`가 청크가 생길 때 `LandmarkLocator`(순수 계산, 프리팹 로드와 무관)로 주변 모닥불을 받아 `SafeZoneSet`을 청크에 붙여 둔다. 보충 스폰과 위험 구역 추가 스폰(burst) 모두 이 집합으로 걸러낸다. 순수 클래스라 EditMode 테스트가 된다(`Integration`은 asmdef가 없어 테스트가 못 닿는다 → 로직을 Landmark 쪽에 둔 이유).
+- 밀어내기: 이미 있는 적은 `EnemyAdapter`가 `SafeZoneRegistry`(로드된 모닥불 등록소)에서 자기 위치를 찾아 `IKnockbackable.ApplyKnockback`으로 민다. 팀원 `Enemy`는 수정하지 않았다. 간격(`repelIntervalSeconds`), 최소 거리(`repelDistance`), 켜고 끄기(`repelEnemies`, 기본 ON), 반경(`radius`)은 전부 `SafeZoneProfile` SO.
+- 반경 링은 `LandmarkData.RingRadius`(안전지대가 있으면 그 반경)로 그리고, 모닥불 `ringTint`가 이미 주황이라 틴트는 그대로다.
+
+## D48. 위험 구역(쓰레기 더미)과 겹치면 안전이 우선 — 플레이어가 안전지대 안일 때 위험 이벤트를 내지 않는다
+- `DumpDangerEffect`가 진입/이탈 이벤트 대신 매 프레임 `zone.IsInside && !SafeZoneRegistry.IsSafe(player)`로 위험 상태를 계산하고, 바뀔 때만 `Enter/Exit`을 발행한다. 그러면 `DangerZoneEvents.IsPlayerInDanger`(스포너의 위험 배율)와 `OnDangerZoneEntered`(burst)가 둘 다 자동으로 따라온다. 음식이 쏟아지는 건 위험이 아니라 그대로 한다.
+
+## D49. 연출/소리는 이벤트만: `ILandmarkEvents.OnFoodEnhanced / OnFridgeOpened`
+- 모닥불/냉장고 코드는 연출을 모른다. `AudioEventBinder`가 `AudioCatalog.sfxEnhance/sfxFridgeOpen`을 재생(비어 있으면 무음), 새 `EnhanceFeedback`이 기존 `HitFxSpawner`의 스파크 파티클(`IHitFx.BurstParticles`)로 불꽃을 낸다(수치는 `FlowSettings`). 이벤트 허브가 씬에 없으면 그냥 연결하지 않는다.
+
+## D50. 강화 배지: `UITheme` 스프라이트가 비면 임시 도형(마름모)
+- `EnhanceBadge`가 슬롯 우상단/상세 패널 아이콘 오른쪽 아래에 작은 배지를 필요할 때 만든다 → HUD를 다시 설치하지 않아도 된다. 아트가 생기면 `UITheme.sprites.enhanceBadge`만 채우면 된다(`docs/art_needed.md`).
+
+## 검증 범위
+- Unity 에디터가 이 프로젝트를 열고 있어 배치 모드를 쓰지 못했다. `dotnet build`로 Survival/Landmark/UI/Flow/Assembly-CSharp(Integration 포함)/각 Editor/테스트 어셈블리 에러 0.
+- 실행하지 못함: 설치 메뉴, 플레이 동작, EditMode 테스트(`FridgeCampfireTests` 13개를 만들고 컴파일만 확인).
