@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ExpiryGame.Flow;
 using ExpiryGame.Landmark;
 using ExpiryGame.World;
 
@@ -23,6 +24,8 @@ namespace ExpiryGame.DebugTools
         [SerializeField] private float teleportOffset = 2.5f;
 
         private readonly List<LandmarkInfo> nearby = new List<LandmarkInfo>();
+        private ISpawnDebug spawn;
+        private float nextSpawnLookup;
         private bool open;
         private Vector2 scroll;
 
@@ -70,6 +73,8 @@ namespace ExpiryGame.DebugTools
                 if (GUILayout.Button($"가장 가까운 곳으로: {nearest.Data.displayName} ({nearest.Distance:0}m)")) Teleport(nearest);
             }
 
+            DrawSpawnPanel();
+
             GUILayout.Label("음식 지급 (가방에 추가)");
             foreach (var food in foods)
             {
@@ -81,6 +86,42 @@ namespace ExpiryGame.DebugTools
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        // 스포너는 Assembly-CSharp에 있어 직접 참조할 수 없으므로 ISpawnDebug 계약으로 찾는다 (1초마다 재탐색)
+        private void FindSpawn()
+        {
+            if (spawn != null && !(spawn is Object o && o == null)) return;
+            spawn = null;
+            if (Time.unscaledTime < nextSpawnLookup) return;
+            nextSpawnLookup = Time.unscaledTime + 1f;
+            foreach (var behaviour in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (behaviour is ISpawnDebug found) { spawn = found; return; }
+        }
+
+        private void DrawSpawnPanel()
+        {
+            GUILayout.Label("적 스폰 상태");
+            FindSpawn();
+            if (spawn == null)
+            {
+                GUILayout.Label("(EnemyChunkSpawner가 씬에 없음 → Setup Game 실행 필요)");
+                return;
+            }
+
+            var d = spawn.Diagnostics;
+            GUILayout.Label($"활성 적 {spawn.ActiveEnemies} / 최대 {spawn.MaxEnemies}   로드된 청크 {spawn.LoadedChunks}");
+            GUILayout.Label($"스폰 배율 x{spawn.SpawnMultiplier:0.##} (일차/낮밤 반영)");
+            GUILayout.Label($"직전 시도: {d.LastResult}");
+            GUILayout.Label($"시도 {d.Ticks}회 / 성공 {d.Spawned}회 / 막힘 {d.TotalBlocked}회");
+            foreach (var pair in d.All())
+                if (pair.Value > 0) GUILayout.Label($"  · {SpawnDiagnostics.Label(pair.Key)}: {pair.Value}");
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("적 강제 스폰(플레이어 근처)")) spawn.ForceSpawnNearPlayer();
+            if (GUILayout.Button("카운터 초기화", GUILayout.Width(100))) d.Reset();
+            GUILayout.EndHorizontal();
+            spawn.Paused = GUILayout.Toggle(spawn.Paused, spawn.Paused ? "스폰 정지 중 (눌러서 재개)" : "스폰 전체 정지");
         }
 
         private void Jump(DayPart part, float progress)

@@ -22,6 +22,16 @@
 - SpriteRenderer.color 곱셈으로는 "흰색 번쩍"이 안 돼서 `ShelfLife/SpriteFlash`(URP 2D unlit) 머티리얼 교체 방식 채택. 위험: 이 환경에서 셰이더 컴파일은 검증 불가 → 유니티 Console 확인 필요.
 - 적 AI가 velocity를 매 프레임 덮어쓸 수 있어 넉백은 `MovePosition` 가산 + `IsKnockedBack` 플래그 제공.
 
+## D51. 적이 안 나오는 문제: 증거 기반 진단 → 설치 누락 확정 + 방어/진단 영구화 (회의 기록)
+- **진행 방식**: 서브에이전트 회의는 열지 않았다. 막히는 지점이 없었고(원인이 파일 증거로 확정됨), 결정할 설계 쟁점도 아래 두 가지뿐이라 설계/비판/일정 관점을 이 기록에서 직접 따졌다.
+- **증거(디스크 기준)**: `EnemyChunkSpawner`/`DifficultyService`/`GameFlowRoot`의 스크립트 GUID를 가진 씬·프리팹이 **하나도 없다**(grep). 저장된 씬 5개 중 `ChunkStreamer`가 있는 건 ArtV2Test/DropMapTest뿐이고 거기에도 스포너·난이도·플로우는 없다. `Game.unity`는 git 이력에도 없고, `Enemy_Integrated.prefab`, `Data/Integration`, `DifficultyProfile`/`FlowSettings` 에셋도 없다. 즉 `Setup Game (All In One)`(= Flow 설치 + 적 설치)의 결과가 저장된 적이 없다 → 스포너가 씬에 없으니 스폰 시도 자체가 0회. 코드 경로(타이틀→Playing 전환, 곡선 값 0.35~1.9, 모닥불 반경 4.5 vs 청크 16, 스폰 거리 11)는 읽어서 막는 지점을 못 찾았다.
+- **같은 계열 잠재 문제(코드로 막음)**: ① 스포너가 `OnEnable` 시점 이후에 청크가 로드된 경우만 처리 → 구독 전에 로드된 시작 청크는 영구히 빈다. ② `AnimationCurve`가 비면 `Evaluate`가 0 → 스폰/체력/속도 배율 0(적이 안 나오거나 안 움직임). ③ 필수 참조(프리팹·설정 등)가 null이면 조용히 아무 일도 안 함.
+- **결정 1 (설계)**: 소급 처리는 `IChunkEvents.BoundsOf` + 확장 메서드 `ForEachLoaded`(MapGen)로. 스포너 로직을 새 클래스로 쪼개지 않고, 순수 계산만 `SpawnMath`/`SpawnDiagnostics`(Flow)로 빼서 Integration(asmdef 없음)에서도 테스트가 닿게 했다(D47과 같은 이유).
+- **결정 2 (비판 → 반영)**: "배율이 0이면 최소 1마리 강제 스폰" 같은 임시방편은 거부. 대신 곡선이 비면 기본값으로 채우고(`DifficultyProfile.EnsureCurves`, 설치/OnValidate/Awake), 스폰 배율에 하한(`minSpawnMultiplier` 0.2)을 둔다. 하한은 곡선을 의도적으로 낮춘 경우에도 0이 되지 않게 하는 안전망이다.
+- **진단(영구)**: `SpawnDiagnostics`가 막힘 이유별(상태 아님/정지/프리팹·참조 없음/난이도 0/상한/청크 없음/안전지대/너무 가까움/장애물/후보 없음)로 센다. F1 디버그 메뉴(`DebugMenu`, UNITY_EDITOR/DEVELOPMENT_BUILD)에 패널: 활성/최대 수, 스폰 배율, 직전 시도 결과, 이유별 카운터, 강제 스폰, 전체 정지 토글. `DebugTools`가 Assembly-CSharp의 스포너를 직접 못 보므로 `ISpawnDebug` 계약(Flow)으로 찾는다.
+- **일정**: 위 수정은 코드만으로 끝난다. 씬에 실제로 스포너를 붙이는 건 Unity 메뉴라서 사용자가 `Tools > ShelfLife > Setup Game (All In One)` 한 번 실행하고 저장해야 한다(에디터가 열려 있어 배치 실행 불가).
+- **검증 범위**: 에디터가 프로젝트를 열고 있어 테스트 러너/배치 모드를 못 썼다. Unity 번들 Roslyn으로 MapGen/Flow/DebugTools/Assembly-CSharp(Integration+Enemy)/`Tests.Spawn` 컴파일 에러 0까지만 확인. EditMode 테스트 실행은 하지 못했다.
+
 ## 검증 범위
 - Unity 에디터가 이미 열려 있어 배치모드 실행을 하지 않았다. 전체 소스를 Unity 참조 DLL로 `dotnet build` 해서 C# 컴파일 에러 0개 확인. 씬/프리팹 생성 도구와 셰이더는 실행해 보지 못함.
 

@@ -323,3 +323,11 @@ FoodItem : IsEnhanced HealMultiplier DamageMultiplier  TryEnhance(heal, damage, 
 - [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 Unity 없이 `dotnet build`로만 검증)
 - [ ] **열려 있는 씬마다** `Tools > ShelfLife > Install Landmarks To Open Scene` 한 번 더 (새 SO 3개 생성, 냉장고/모닥불 프리팹에 컴포넌트 추가, 씬에 `LandmarkEvents` 추가). HUD/적 재설치는 필요 없음
 - [ ] Test Runner > EditMode > `FridgeCampfireTests` (13개)
+
+
+## 추가: 적 스폰 진단 / 방어 (Flow / Integration / MapGen / DebugTools)
+- `IChunkEvents.BoundsOf(coord)` + `ForEachLoaded(...)`: 구독 전에 이미 로드된 청크를 소급 처리 (`EnemyChunkSpawner.OnEnable`이 사용). 새 `IChunkEvents` 구현은 `BoundsOf`를 구현해야 한다.
+- `DifficultyProfile.EnsureCurves()`: 비어 있는 곡선을 기본값으로 채움 (설치 / OnValidate / `DifficultyService.Awake`). `minSpawnMultiplier`(기본 0.2)가 스폰 배율의 하한.
+- `SpawnDiagnostics` / `SpawnBlockReason` / `ISpawnDebug` (`Flow/Spawning`): 막힌 이유별 카운터. `EnemyChunkSpawner`가 구현. 시작 시 필수 참조가 비면 `Debug.LogError`로 무엇이 비었는지 한 번에 알려 주고 스폰을 멈춘다.
+- F1 디버그 메뉴에 "적 스폰 상태" 패널: 활성/최대, 배율, 직전 결과, 이유별 카운터, 강제 스폰, 전체 정지/재개.
+- **유니티에서 할 일**: `Tools > ShelfLife > Setup Game (All In One)` 실행 후 저장 → `Assets/ShelfLife/Scenes/Game.unity`를 열고 Play. 테스트는 Test Runner > EditMode > `SpawnPathTests`.

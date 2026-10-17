@@ -5,6 +5,7 @@
         "ExpiryGame.Survival",
         "ExpiryGame.Landmark",
         "ExpiryGame.World",
+        "ExpiryGame.Flow",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

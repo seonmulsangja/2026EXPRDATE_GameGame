@@ -44,6 +44,7 @@ namespace ExpiryGame.Integration.Editor
             inventory.gameObject.tag = "Player";
             var settings = LoadOrCreateSettings();
             settings.enemyPrefab = CreateVariant(prefab);
+            if (settings.enemyPrefab == null) { Debug.LogError("[ShelfLife] 적 프리팹 변형을 만들지 못했습니다. 위 오류를 확인하세요."); return; }
             EditorUtility.SetDirty(settings);
 
             InstallPooling(inventory.transform);

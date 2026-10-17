@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3a1c89c408c1944199f6582e9c5ffcb, type: 3}
+  m_Name: AudioCatalog
+  m_EditorClassIdentifier: ExpiryGame.Flow::ExpiryGame.Flow.AudioCatalog
+  bgmDay: {fileID: 0}
+  bgmNight: {fileID: 0}
+  bgmDanger: {fileID: 0}
+  bgmGameOver: {fileID: 0}
+  bgmVolume: 0.6
+  crossfadeSeconds: 1.5
+  dangerRadius: 8
+  dangerEnemyCount: 4
+  sfxEat: {fileID: 0}
+  sfxHit: {fileID: 0}
+  sfxRot: {fileID: 0}
+  sfxPickup: {fileID: 0}
+  sfxBreak: {fileID: 0}
+  sfxEnhance: {fileID: 0}
+  sfxFridgeOpen: {fileID: 0}
+  sfxVolume: 0.8
