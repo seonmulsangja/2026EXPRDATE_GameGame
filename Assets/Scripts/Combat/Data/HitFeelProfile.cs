@@ -43,8 +43,7 @@ namespace ExpiryGame.Combat
         public FloatRange shakeAmplitude = new FloatRange(0.05f, 0.28f);
         public FloatRange shakeSeconds = new FloatRange(0.08f, 0.18f);
 
-        [Header("Knockback")]
-        public FloatRange knockbackDistance = new FloatRange(0.3f, 1.4f);
+        [Header("Knockback 방향 (거리/시간/경직 수치는 KnockbackProfile)")]
         [Tooltip("0=스윙(조준) 방향 그대로, 1=플레이어→적 방향")]
         [Range(0f, 1f)] public float knockbackRadialBlend = 0.4f;
 

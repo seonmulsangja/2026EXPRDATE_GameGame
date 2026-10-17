@@ -41,6 +41,10 @@ namespace ExpiryGame.Integration
         [Min(0f)] public float edgeMargin = 1f;
         [Min(0f)] public float obstacleCheckRadius = 0.5f;
 
+        [Header("넉백")]
+        [Tooltip("모닥불 안전지대가 이미 있는 적을 밀어낼 때 쓰는 수치 (타격 넉백과 별개). 비우면 Resources/ShelfLife/Knockback_SafeZone")]
+        public ExpiryGame.Combat.KnockbackProfile safeZoneKnockback;
+
         [Header("위험 구역 (쓰레기 더미)")]
         [Tooltip("위험 구역 안에서 청크 목표 적 수에 곱하는 배율")]
         [Min(1f)] public float dangerSpawnMultiplier = 2f;

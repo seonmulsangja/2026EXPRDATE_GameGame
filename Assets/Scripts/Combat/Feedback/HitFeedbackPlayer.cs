@@ -8,6 +8,8 @@ namespace ExpiryGame.Combat
     {
         [SerializeField] private HitFeelProfile feel;
         [SerializeField] private SwingProfile swing;
+        [Tooltip("타격 넉백 수치. 비우면 Resources/ShelfLife/Knockback_Hit")]
+        [SerializeField] private KnockbackProfile hitKnockback;
         [SerializeField] private SwingController swingController;
         [SerializeField] private SwingHitDetector hitDetector;
         [Tooltip("IHitStop 구현 (HitStop)")]
@@ -74,7 +76,11 @@ namespace ExpiryGame.Combat
             ((ICameraShaker)cameraShake).Shake(hit.Direction, feel.shakeAmplitude.Evaluate(intensity), feel.shakeSeconds.Evaluate(intensity));
 
             var knockable = hit.Target.GetComponentInParent<IKnockbackable>();
-            knockable?.ApplyKnockback(hit.Direction, feel.knockbackDistance.Evaluate(intensity));
+            if (knockable != null)
+            {
+                var knockback = KnockbackProfile.ResolveHit(hitKnockback);
+                knockable.ApplyKnockback(hit.Direction, knockback.DistanceFor(hit.Damage), knockback);
+            }
 
             var flashable = hit.Target.GetComponentInParent<IFlashable>();
             flashable?.Flash(feel.flashSeconds);

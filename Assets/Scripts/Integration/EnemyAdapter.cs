@@ -11,12 +11,18 @@ namespace ExpiryGame.Integration
     //  - IDamageable      : 휘두르기/타격감이 때릴 수 있게 (체력은 여기서 관리, 팀원 Enemy에는 피격 처리가 없음)
     //  - IDropSource      : 죽으면 DropSpawner가 DropTable로 음식을 떨군다
     //  - IEnemyActor      : 처치 통계 / BGM 위험도
-    //  - 넉백 중 이동 정지 : KnockbackReceiver가 있으면 그 동안 Enemy가 덮어쓴 속도를 0으로 되돌린다
+    //  - 넉백 중 이동 정지 : KnockbackReceiver가 있으면 그 동안(밀림 + 경직) Enemy가 덮어쓴 속도를 0으로 되돌리고 접촉 데미지도 주지 않는다
+    //  - 넉백 저항 : knockbackResistance(0~1)를 EnemySO(같은 이름의 필드가 있을 때) → 프리팹 값 순으로 읽어 리시버에 넣는다. 없으면 0
     //  - 안전지대 : 모닥불 반경 안으로 들어온 적을 KnockbackReceiver로 밀어낸다 (SafeZoneProfile.repelEnemies로 끈다)
     //  - 접촉 데미지 반복 : Enemy.OnCollisionEnter2D가 첫 1회를 주고, 붙어 있으면 contactInterval마다 다시 준다
     [RequireComponent(typeof(Enemy))]
     public class EnemyAdapter : MonoBehaviour, IDamageable, IDropSource, IEnemyActor
     {
+        private const string ResistanceFieldName = "knockbackResistance";
+
+        [Tooltip("0~1. 1이면 넉백 면역. EnemySO에 knockbackResistance 필드가 있으면 그 값이 우선")]
+        [Range(0f, 1f)] [SerializeField] private float knockbackResistance;
+
         private Enemy enemy;
         private Rigidbody2D body;
         private IKnockbackable knockback;
@@ -67,6 +73,7 @@ namespace ExpiryGame.Integration
             nextContactTime = 0f;
 
             enemy.targetTrm = target;
+            if (knockback != null) knockback.Resistance = ResolveKnockbackResistance();
             Threat01 = ComputeThreat();
 
             health = Mathf.Max(1f, enemy._health * integration.healthScale * difficulty.HealthMultiplier);
@@ -111,6 +118,7 @@ namespace ExpiryGame.Integration
         private void OnCollisionStay2D(Collision2D other)
         {
             if (dead || settings == null || Time.time < nextContactTime) return;
+            if (knockback != null && knockback.IsKnockedBack) return; // 맞아서 경직 중에는 바로 반격하지 못한다
             if (!other.gameObject.CompareTag("Player")) return;
             if (!other.gameObject.TryGetComponent<Health>(out var playerHealth)) return;
 
@@ -130,7 +138,25 @@ namespace ExpiryGame.Integration
             var away = (Vector2)transform.position - zone.Center;
             var depth = zone.Radius - away.magnitude;
             if (away.sqrMagnitude < 0.0001f) away = UnityEngine.Random.insideUnitCircle;
-            knockback.ApplyKnockback(away, Mathf.Max(zone.RepelDistance, depth + 0.25f));
+            var repel = KnockbackProfile.ResolveSafeZone(settings != null ? settings.safeZoneKnockback : null);
+            knockback.ApplyKnockback(away, Mathf.Max(zone.RepelDistance, depth + 0.25f), repel);
+        }
+
+        // EnemySO(팀원 파일, 수정하지 않음)에 knockbackResistance 필드가 생기면 읽고, 없으면 프리팹 값(기본 0)
+        private float ResolveKnockbackResistance()
+        {
+            var pool = EnemyPooling.Instance;
+            if (pool != null && pool.enemyDatas != null)
+            {
+                foreach (var data in pool.enemyDatas)
+                {
+                    if (data == null || data.enemyName != enemy._enemyName) continue;
+                    var field = data.GetType().GetField(ResistanceFieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                    if (field != null && field.FieldType == typeof(float)) return Mathf.Clamp01((float)field.GetValue(data));
+                    break;
+                }
+            }
+            return Mathf.Clamp01(knockbackResistance);
         }
 
         private void Release()

@@ -14,6 +14,8 @@ namespace ExpiryGame.Combat.Editor
         private const string PrefabDir = "Assets/ShelfLife/Prefabs";
         private const string SwingProfilePath = CombatDir + "/SwingProfile.asset";
         private const string HitFeelProfilePath = CombatDir + "/HitFeelProfile.asset";
+        // Resources 아래라 연결을 안 해도 런타임이 같은 에셋을 찾는다 (KnockbackProfile.ResolveHit)
+        private const string KnockbackHitPath = "Assets/Resources/ShelfLife/Knockback_Hit.asset";
         private const string FlashMaterialPath = CombatDir + "/SpriteFlash.mat";
         private const string FxRootName = "CombatFx";
         private const string EnemyLayerName = "Enemy";
@@ -105,11 +107,14 @@ namespace ExpiryGame.Combat.Editor
             var held = player.transform.Find("HeldFood");
             SetArray(controller, "hideWhileSwinging", held != null ? new Object[] { held.gameObject } : new Object[0]);
 
+            var knockbackProfile = AssetDatabase.LoadAssetAtPath<KnockbackProfile>(KnockbackHitPath);
             var knockback = DarkArtSceneInstaller.GetOrAdd<KnockbackReceiver>(player);
+            DarkArtSceneInstaller.SetObject(knockback, "defaultProfile", knockbackProfile);
 
             var feedback = DarkArtSceneInstaller.GetOrAdd<HitFeedbackPlayer>(player);
             DarkArtSceneInstaller.SetObject(feedback, "feel", feel);
             DarkArtSceneInstaller.SetObject(feedback, "swing", swing);
+            DarkArtSceneInstaller.SetObject(feedback, "hitKnockback", knockbackProfile);
             DarkArtSceneInstaller.SetObject(feedback, "swingController", controller);
             DarkArtSceneInstaller.SetObject(feedback, "hitDetector", detector);
             DarkArtSceneInstaller.SetObject(feedback, "hitStop", hitStop);

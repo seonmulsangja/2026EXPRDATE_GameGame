@@ -12,6 +12,7 @@ namespace ExpiryGame
         [SerializeField] private InputActionReference nextFood;
 
         public Vector2 Move => move.action.ReadValue<Vector2>();
+        public bool EatHeld => eat.action.IsPressed();
 
         public event Action EatPerformed;
         public event Action AttackPerformed;

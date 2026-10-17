@@ -30,6 +30,7 @@ MonoBehaviour:
   healTickSeconds: 0.5
   enhanceProfile: {fileID: 0}
   safeZone: {fileID: 0}
+  fuelProfile: {fileID: 0}
   lootTable: {fileID: 0}
   lootThreat01: 0.4
   lootRolls: 3
