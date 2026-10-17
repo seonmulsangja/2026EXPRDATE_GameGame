@@ -175,6 +175,9 @@ namespace ExpiryGame.UI.Editor
             Set(view, "ghostImage", ghost.GetComponent<Image>());
             Set(view, "hpText", hp);
             Set(view, "previewText", preview);
+
+            // 체력바 아래 경험치 바 (패널이 그만큼 길어진다. 점유 영역은 이 뒤의 RecordHudZones가 실제 크기로 기록)
+            ExperienceBarView.Install(theme, panel);
         }
 
         // ---------- 우상단: 일차 / 낮밤 ----------

@@ -10,6 +10,9 @@ namespace ExpiryGame
 
         private Rigidbody2D body;
 
+        // 적이 "플레이어 속도의 몇 %"로 움직일지 정할 때 읽는다
+        public float MoveSpeed => moveSpeed;
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();

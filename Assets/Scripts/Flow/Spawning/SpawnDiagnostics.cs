@@ -16,6 +16,9 @@ namespace ExpiryGame.Flow
         TooClose,       // 후보 위치가 플레이어에게 너무 가까움
         Obstacle,       // 후보 위치에 장애물/콜라이더가 있음
         NoCandidate,    // 한 청크에서 시도를 다 썼는데 쓸 만한 위치가 없음
+        Grace,          // 게임 시작 직후 스폰 유예 시간
+        OnScreen,       // 후보 위치가 카메라 화면 안
+        TooFar,         // 후보 위치가 너무 멀어 플레이어가 만날 일이 없음
     }
 
     // 디버그 메뉴(F1)가 스포너를 들여다보고 조작하는 계약. 게임 로직은 이 인터페이스를 몰라도 동작한다.
@@ -98,6 +101,9 @@ namespace ExpiryGame.Flow
                 case SpawnBlockReason.TooClose: return "플레이어와 너무 가까움";
                 case SpawnBlockReason.Obstacle: return "장애물";
                 case SpawnBlockReason.NoCandidate: return "후보 위치 없음";
+                case SpawnBlockReason.Grace: return "시작 유예";
+                case SpawnBlockReason.OnScreen: return "화면 안";
+                case SpawnBlockReason.TooFar: return "너무 멂";
                 default: return reason.ToString();
             }
         }
@@ -112,6 +118,21 @@ namespace ExpiryGame.Flow
             if (perChunk <= 0f) return 0;
             var whole = (int)System.Math.Floor(perChunk);
             return whole + (roll < perChunk - whole ? 1 : 0);
+        }
+
+        // 게임 시작 후 경과 시간(플레이 시간)에 따른 동시 적 수 상한.
+        // 유예 시간 동안은 0, 그 뒤 singleSeconds까지는 1마리, 그 후에는 일차별 상한(dayCap)
+        public static int EarlyCap(float runSeconds, float graceSeconds, float singleSeconds, int dayCap)
+        {
+            if (runSeconds < graceSeconds) return 0;
+            if (runSeconds < singleSeconds) return System.Math.Min(1, dayCap);
+            return dayCap;
+        }
+
+        // 카메라가 보는 사각형(중심, 절반 크기)을 margin만큼 넓힌 영역 안인가
+        public static bool IsOnScreen(float x, float y, float camX, float camY, float halfWidth, float halfHeight, float margin)
+        {
+            return System.Math.Abs(x - camX) <= halfWidth + margin && System.Math.Abs(y - camY) <= halfHeight + margin;
         }
 
         public static int Cap(int maxAlive, int hardCap, float multiplier)

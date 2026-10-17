@@ -20,6 +20,10 @@ namespace ExpiryGame.Flow
         [SerializeField] private ScoreRules scoreRules;
         [SerializeField] private StartingLoadout loadout;
         [SerializeField] private AudioCatalog audioCatalog;
+        [Tooltip("레벨별 필요 경험치. 비면 Resources/ShelfLife/XpCurve, 그것도 없으면 기본값")]
+        [SerializeField] private XpCurve xpCurve;
+        [Tooltip("(선택) 팀원의 증강 선택 화면. IAugmentSelectionPresenter를 구현한 컴포넌트. 비면 임시 구현(레벨 업! 배너 + 소량 회복)")]
+        [SerializeField] private MonoBehaviour augmentPresenter;
 
         [Header("씬 참조")]
         [SerializeField] private GameClock clock;
@@ -41,12 +45,19 @@ namespace ExpiryGame.Flow
         private EnhanceFeedback enhanceFeedback;
         private CampfireStageFeedback campfireFeedback;
         private LoadoutGiver loadoutGiver;
+        private ExperienceService experience;
+        private KillExperienceBridge killExperience;
+        private LevelUpCoordinator levelUps;
+        private ExperienceBarView xpBar;
+        private LevelUpBannerView levelBanner;
         private DayBannerView banner;
         private ControlsHintView hint;
         private bool runBegan;
 
         public IGameStateMachine Machine => machine;
         public IStatsSource Stats => stats;
+        public IExperienceSource Experience => experience;
+        public IExperienceSink ExperienceSink => experience;
 
         private void Awake()
         {
@@ -64,6 +75,8 @@ namespace ExpiryGame.Flow
             hint.Build(theme, settings);
             banner = Child<DayBannerView>(canvas, "DayBanner");
             banner.Build(theme, settings);
+            levelBanner = Child<LevelUpBannerView>(canvas, "LevelUpBanner");
+            levelBanner.Build(theme, settings);
 
             var title = Child<TitleView>(canvas, "Title");
             title.Build(theme, settings);
@@ -74,11 +87,22 @@ namespace ExpiryGame.Flow
             var clear = Child<ResultView>(canvas, "Clear");
             clear.Build(theme, settings, settings.clearTitle, theme != null ? theme.healText : Color.green);
 
-            stats = new StatsTracker(clock, consumer);
+            var curve = xpCurve != null ? xpCurve : Resources.Load<XpCurve>("ShelfLife/XpCurve");
+            if (curve == null) curve = ScriptableObject.CreateInstance<XpCurve>();
+            experience = new ExperienceService(curve);
+            killExperience = new KillExperienceBridge(experience);
+            stats = new StatsTracker(clock, consumer, experience);
             controller = new GameFlowController(machine, goal, clock, playerHealth);
             screens = new FlowScreens(machine, controller, stats, scoreRules, title, pause, gameOver, clear);
             hurtFeedback = new PlayerHurtFeedback(playerHealth, settings, vignette, cameraShake);
             loadoutGiver = new LoadoutGiver();
+
+            // 레벨업 → 증강 선택(팀원 화면이 없으면 임시 구현) → 재개
+            var presenter = augmentPresenter as IAugmentSelectionPresenter ?? new NullAugmentPresenter(playerHealth, levelBanner, settings);
+            levelUps = new LevelUpCoordinator(machine, experience, presenter);
+            controller.RunEnding += OnRunEnding;
+            BindExperienceHud();
+            InstallHitReceiver();
 
             var audio = new GameObject("AudioManager").AddComponent<AudioManager>();
             audio.transform.SetParent(transform, false);
@@ -120,6 +144,14 @@ namespace ExpiryGame.Flow
         private void OnDestroy()
         {
             if (clock != null) clock.DayStarted -= OnDayStarted;
+            if (experience != null)
+            {
+                experience.OnExperienceChanged -= OnExperienceChanged;
+                experience.OnLevelUp -= OnLevelUp;
+            }
+            if (controller != null) controller.RunEnding -= OnRunEnding;
+            levelUps?.Dispose();
+            killExperience?.Dispose();
             if (machine != null) machine.StateChanged -= OnStateChanged;
             screens?.Dispose();
             controller?.Dispose();
@@ -145,6 +177,36 @@ namespace ExpiryGame.Flow
             loadoutGiver.Give(inventory, loadout);
             hint.BeginIfFirstRun();
             banner.Show(clock.DayCount, goal.surviveDays == 1);
+        }
+
+        // 체력 패널 아래에 경험치 바를 붙이고 값을 이어 준다 (저장된 씬에 없어도 여기서 만든다)
+        private void BindExperienceHud()
+        {
+            var healthBar = FindFirstObjectByType<HealthBarView>();
+            xpBar = ExperienceBarView.Install(theme, healthBar != null ? healthBar.transform as RectTransform : null);
+            if (xpBar == null) return;
+
+            xpBar.SetProgress(experience.Level, experience.Current, experience.Required);
+            experience.OnExperienceChanged += OnExperienceChanged;
+            experience.OnLevelUp += OnLevelUp;
+        }
+
+        private void OnExperienceChanged(int current, int required) => xpBar.SetProgress(experience.Level, current, required);
+
+        private void OnLevelUp(int level) => xpBar.Flash(settings.xpBarFlashSeconds);
+
+        // 적 접촉 피해는 무적 시간을 지키는 수신기를 거친다 (없으면 어댑터가 Health에 직접 준다)
+        private void InstallHitReceiver()
+        {
+            var receiver = playerHealth.GetComponent<PlayerHitReceiver>();
+            if (receiver == null) receiver = playerHealth.gameObject.AddComponent<PlayerHitReceiver>();
+            receiver.Bind(FindFirstObjectByType<DifficultyService>());
+        }
+
+        private void OnRunEnding()
+        {
+            experience.Reset();
+            levelUps.Reset();
         }
 
         private void OnDayStarted(int day)

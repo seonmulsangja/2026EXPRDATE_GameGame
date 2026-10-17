@@ -12,7 +12,7 @@ namespace ExpiryGame.Flow
         public event Action TitleClicked;
 
         private FlowSettings settings;
-        private TextMeshProUGUI days, kills, eaten, rotten, time, score;
+        private TextMeshProUGUI days, level, kills, eaten, rotten, time, score;
 
         public void Build(UITheme theme, FlowSettings flowSettings, string heading, Color headingColor)
         {
@@ -21,13 +21,15 @@ namespace ExpiryGame.Flow
             FlowUi.Text(theme, transform, heading, 110, headingColor, new Vector2(0f, 330f), new Vector2(1400f, 160f));
 
             var body = theme != null ? theme.body.color : Color.white;
-            days = Line(theme, 190f, body);
-            kills = Line(theme, 130f, body);
-            eaten = Line(theme, 70f, body);
-            rotten = Line(theme, 10f, body);
-            time = Line(theme, -50f, body);
+            // 줄 간격 55: 글자 크기 44에서 겹치지 않는 가장 촘촘한 간격 (버튼과 제목 자리는 그대로)
+            days = Line(theme, 200f, body);
+            level = Line(theme, 145f, body);
+            kills = Line(theme, 90f, body);
+            eaten = Line(theme, 35f, body);
+            rotten = Line(theme, -20f, body);
+            time = Line(theme, -75f, body);
             score = FlowUi.Text(theme, transform, "", 64, theme != null ? theme.accent : Color.white,
-                new Vector2(0f, -140f), new Vector2(1200f, 90f));
+                new Vector2(0f, -160f), new Vector2(1200f, 90f));
 
             FlowUi.Button(theme, transform, settings.retryLabel, new Vector2(-230f, -300f), () => RetryClicked?.Invoke());
             FlowUi.Button(theme, transform, settings.toTitleLabel, new Vector2(230f, -300f), () => TitleClicked?.Invoke());
@@ -36,6 +38,7 @@ namespace ExpiryGame.Flow
         public void SetResult(GameStats stats, int scoreValue)
         {
             days.text = string.Format(settings.daysLine, stats.DaysSurvived);
+            level.text = string.Format(settings.levelLine, stats.LevelReached);
             kills.text = string.Format(settings.killsLine, stats.Kills);
             eaten.text = string.Format(settings.eatenLine, stats.FoodEaten);
             rotten.text = string.Format(settings.rottenLine, stats.RottenEaten);
@@ -45,7 +48,7 @@ namespace ExpiryGame.Flow
 
         private TextMeshProUGUI Line(UITheme theme, float y, Color color)
         {
-            return FlowUi.Text(theme, transform, "", 44, color, new Vector2(0f, y), new Vector2(1200f, 60f));
+            return FlowUi.Text(theme, transform, "", 44, color, new Vector2(0f, y), new Vector2(1200f, 54f));
         }
     }
 }

@@ -9,7 +9,9 @@ namespace ExpiryGame.Integration
     // 청크 이벤트(OnChunkLoaded/Unloaded)에 연결한 적 스포너. 팀원의 EnemySpawner_JCY/EnemyPooling 풀은 쓰지 않는다
     // (고정 스폰 포인트 + 풀 push가 서로 얽혀 있어서). 대신 팀원 Enemy 프리팹만 가져와 청크 단위로 내보내고 치운다.
     //  - 플레이어 주변에 로드된 청크에서만 스폰, 언로드되면 그 청크 출신 적은 조용히 치운다 (드롭/통계 없음)
-    //  - 난이도 배율(IDifficultyService)이 목표 수를 정하고, 위험 구역 안에서는 더 늘린다
+    //  - 난이도(IDifficultyService)가 목표 수와 동시 적 수 상한을 정하고, 위험 구역 안에서는 목표 수를 늘린다
+    //  - 게임 시작 직후에는 유예 시간 동안 스폰하지 않고, 그 뒤 일정 시간까지는 동시에 1마리만 둔다 (초반 완화)
+    //  - 카메라가 보는 영역 바깥에서만 나타난다 (화면 안 스폰 금지)
     //  - 위험 구역 진입 순간에는 플레이어 주변으로 추가 인원을 내보낸다
     //  - 모닥불 안전지대(SafeZoneProfile.radius) 안에는 스폰하지 않는다. 청크가 생길 때 "이미 정해진 랜드마크 배치"로 판단한다
     public class EnemyChunkSpawner : MonoBehaviour, ISpawnDebug
@@ -46,6 +48,7 @@ namespace ExpiryGame.Integration
         private bool Playing => flow != null && flow.Machine.Current == GameState.Playing;
         public int ActiveEnemies => activeCount;
         public int MaxEnemies => wired ? Cap() : 0;
+        private float RunSeconds => flow != null && flow.Stats != null ? flow.Stats.Snapshot().PlaySeconds : 0f;
         public int LoadedChunks => chunks.Count;
         public bool Paused { get; set; }
         public float SpawnMultiplier => difficulty != null ? difficulty.SpawnMultiplier : 0f;
@@ -149,13 +152,18 @@ namespace ExpiryGame.Integration
             var count = Mathf.Max(1, Mathf.RoundToInt(settings.dangerBurstCount * difficulty.SpawnMultiplier));
             for (var i = 0; i < count && activeCount < Cap(); i++)
             {
-                var angle = Random.value * Mathf.PI * 2f;
-                var distance = settings.minSpawnDistance + Random.value * settings.dangerBurstRadius;
-                var position = (Vector2)player.position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
-                if (TryFindChunk(position, out var coord) && !chunks[coord].Safe.Contains(position) && IsFree(position))
+                for (var attempt = 0; attempt < 4; attempt++) // 화면 안에 걸리면 다시 굴린다
                 {
-                    Spawn(position, coord);
-                    diagnostics.RecordSpawn("위험 구역 진입");
+                    var angle = Random.value * Mathf.PI * 2f;
+                    var distance = settings.minSpawnDistance + Random.value * settings.dangerBurstRadius;
+                    var position = (Vector2)player.position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
+                    if (IsOnScreen(position)) continue;
+                    if (TryFindChunk(position, out var coord) && !chunks[coord].Safe.Contains(position) && IsFree(position))
+                    {
+                        Spawn(position, coord);
+                        diagnostics.RecordSpawn("위험 구역 진입");
+                        break;
+                    }
                 }
             }
         }
@@ -166,6 +174,7 @@ namespace ExpiryGame.Integration
             diagnostics.RecordTick();
             if (Paused) { diagnostics.RecordBlocked(SpawnBlockReason.Paused); return; }
             if (!Playing) { diagnostics.RecordBlocked(SpawnBlockReason.NotPlaying, flow.Machine.Current.ToString()); return; }
+            if (RunSeconds < difficulty.SpawnGraceSeconds) { diagnostics.RecordBlocked(SpawnBlockReason.Grace, $"{RunSeconds:0}/{difficulty.SpawnGraceSeconds:0}초"); return; }
             if (settings.enemyPrefab == null) { diagnostics.RecordBlocked(SpawnBlockReason.NoPrefab); return; }
             if (chunks.Count == 0) { diagnostics.RecordBlocked(SpawnBlockReason.NoChunks); return; }
 
@@ -180,7 +189,7 @@ namespace ExpiryGame.Integration
         private void TopUp(float perChunk)
         {
             var cap = Cap();
-            var budget = settings.spawnsPerTick;
+            var budget = Mathf.Min(settings.spawnsPerTick, cap - activeCount);
 
             // 매번 같은 청크부터 채우지 않도록 순서를 섞는다
             order.Clear();
@@ -204,7 +213,19 @@ namespace ExpiryGame.Integration
 
         private int Cap()
         {
-            return SpawnMath.Cap(settings.maxAlive, settings.hardCap, difficulty.SpawnMultiplier);
+            // 일차별 상한(DifficultyProfile.maxAlive)을 hardCap으로 한 번 더 제한하고, 초반에는 유예/1마리 규칙을 얹는다
+            var dayCap = Mathf.Min(settings.hardCap, difficulty.MaxAlive);
+            return SpawnMath.EarlyCap(RunSeconds, difficulty.SpawnGraceSeconds, difficulty.SingleEnemySeconds, dayCap);
+        }
+
+        // 카메라가 보는 영역(+여유)이면 true. 카메라가 없으면 판단하지 않는다
+        private bool IsOnScreen(Vector2 position)
+        {
+            var cam = Camera.main;
+            if (cam == null || !cam.orthographic) return false;
+            var center = cam.transform.position;
+            var halfHeight = cam.orthographicSize;
+            return SpawnMath.IsOnScreen(position.x, position.y, center.x, center.y, halfHeight * cam.aspect, halfHeight, settings.offscreenMargin);
         }
 
         private bool TrySpawnIn(Vector2Int coord, ChunkState state)
@@ -216,11 +237,14 @@ namespace ExpiryGame.Integration
                 var position = new Vector2(
                     Random.Range(bounds.min.x + margin, bounds.max.x - margin),
                     Random.Range(bounds.min.y + margin, bounds.max.y - margin));
-                if (((Vector2)player.position - position).sqrMagnitude < settings.minSpawnDistance * settings.minSpawnDistance)
+                var sqrDistance = ((Vector2)player.position - position).sqrMagnitude;
+                if (sqrDistance < settings.minSpawnDistance * settings.minSpawnDistance)
                 {
                     diagnostics.RecordBlocked(SpawnBlockReason.TooClose);
                     continue;
                 }
+                if (sqrDistance > settings.maxSpawnDistance * settings.maxSpawnDistance) { diagnostics.RecordBlocked(SpawnBlockReason.TooFar); continue; }
+                if (IsOnScreen(position)) { diagnostics.RecordBlocked(SpawnBlockReason.OnScreen); continue; }
                 if (state.Safe.Contains(position)) { diagnostics.RecordBlocked(SpawnBlockReason.SafeZone); continue; }
                 if (!IsFree(position)) { diagnostics.RecordBlocked(SpawnBlockReason.Obstacle); continue; }
 

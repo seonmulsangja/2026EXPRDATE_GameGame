@@ -25,6 +25,7 @@ namespace ExpiryGame.Flow
         public string eatenLine = "먹은 음식  {0}개";
         public string rottenLine = "썩은 음식 먹은 횟수  {0}";
         public string timeLine = "플레이 시간  {0}";
+        public string levelLine = "도달 레벨  {0}";
         public string scoreLine = "점수  {0}";
 
         [Header("조작 힌트 (첫 실행만)")]
@@ -39,6 +40,17 @@ namespace ExpiryGame.Flow
 
         [Header("일차 배너")]
         [Min(0.5f)] public float dayBannerSeconds = 2.5f;
+
+        [Header("레벨업 (임시 증강 화면: NullAugmentPresenter)")]
+        public string levelUpTitle = "레벨 업!";
+        [Tooltip("{0}에 새 레벨")]
+        public string levelUpSubtitle = "Lv.{0}";
+        [Tooltip("팀원의 증강 화면이 없을 때 배너를 보여 주는 시간 (초, 실시간). 이 시간이 지나면 자동으로 재개")]
+        [Min(0.2f)] public float levelUpBannerSeconds = 1.2f;
+        [Tooltip("레벨업 때 회복하는 체력 비율 (최대 체력 기준). 0이면 회복 없음")]
+        [Range(0f, 1f)] public float levelUpHealRatio = 0.1f;
+        [Tooltip("경험치 바가 레벨업 순간 번쩍이는 시간 (초)")]
+        [Min(0.05f)] public float xpBarFlashSeconds = 0.5f;
 
         [Header("피격 연출")]
         public Color hurtColor = new Color(0.85f, 0.05f, 0.05f, 1f);

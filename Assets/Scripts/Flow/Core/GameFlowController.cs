@@ -29,6 +29,9 @@ namespace ExpiryGame.Flow
             clock.DayStarted -= OnDayStarted;
         }
 
+        // 다시하기/타이틀로 가기 직전 (씬을 다시 불러오기 전에 경험치/레벨업 큐 같은 한 판짜리 상태를 비운다)
+        public event Action RunEnding;
+
         public void StartGame() => machine.StartGame();
 
         public void TogglePause()
@@ -38,8 +41,17 @@ namespace ExpiryGame.Flow
         }
 
         public void Resume() => machine.Resume();
-        public void Retry() => FlowLaunch.Restart();
-        public void ToTitle() => FlowLaunch.ToTitle();
+        public void Retry()
+        {
+            RunEnding?.Invoke();
+            FlowLaunch.Restart();
+        }
+
+        public void ToTitle()
+        {
+            RunEnding?.Invoke();
+            FlowLaunch.ToTitle();
+        }
 
         public void Quit()
         {

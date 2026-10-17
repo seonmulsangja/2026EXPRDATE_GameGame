@@ -15,5 +15,9 @@ namespace ExpiryGame.Flow
         bool Resume();
         bool Fail();
         bool Win();
+
+        // 레벨업 증강 선택: Playing ↔ AugmentSelect. 선택이 끝나기 전에는 Resume으로 풀 수 없다
+        bool BeginAugmentSelect();
+        bool EndAugmentSelect();
     }
 }

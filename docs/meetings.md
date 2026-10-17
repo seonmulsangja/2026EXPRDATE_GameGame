@@ -388,3 +388,73 @@
 
 ## 검증 범위
 - Unity 에디터가 열려 있어 배치 모드를 쓰지 못했다. 각 asmdef/Editor/테스트 프로젝트를 `dotnet build`로 컴파일해 에러 0 확인(Unity 참조 DLL 사용). `CampfireFuelTests`는 컴파일만 확인했고 실행은 못 했다. 설치 메뉴, 폰트 메뉴, 플레이 동작은 실행하지 못했다.
+
+
+---
+
+# 초반 난이도 완화 + 경험치/레벨업 (2026-10-17)
+
+**서브에이전트 회의(설계/비판/일정)는 열지 않았다.** 막혀서 멈춘 지점이 없었다 — 갈림길마다 대안과 비용을 직접 비교해 결정했고, "대안/비용" 줄이 그 비판 몫이다. 시작 전 미커밋 변경은 없었다(`git status` clean). 팀원 파일(`Enemy.cs`, `EnemySO`, 프리팹, `Augment*`)은 수정하지 않았다. 진단 수치와 변경 전후 표는 `docs/balance.md`.
+
+## D69. 난이도 값은 두 종류로 나눈다: 배율 곡선(이어짐) / 일차별 값(계단)
+- `spawn/health/damage`는 기존대로 하루 안에서도 다음 날 값으로 이어지는 곡선. `speedRatio/speedCapRatio/maxAlive/contactInterval/detectRadius`는 **일차 번호로만** 읽는다(`Evaluate(일차 인덱스)`).
+- 이유: "1일차 동시 3마리, 2일차 4마리…"를 곡선으로 두면 1일차 끝 무렵에 3.9 → 4마리가 되어 약속이 깨진다. 속도 60~70%/85% 이하도 날짜 안에서 흔들리면 검증이 어렵다.
+- 대안/비용: 전부 계단식으로 통일 → 체력/피해가 날짜 경계에서 툭 뛴다(기존 곡선 사용자 체감 변화가 큼). 그래서 나눴다. `DifficultyProfile`의 `speed` 곡선은 `speedRatio`(플레이어 대비 비율)로 의미가 바뀌어 이름도 바꿨다 → 저장된 에셋 값은 새 값으로 다시 썼다.
+
+## D70. 속도 = 플레이어 속도 × 일반 비율 × 종류 보정, 상한, 빠른 적 슬롯
+- `EnemySO.speed`가 3~10이라 그대로 비율로 쓰면 5종 중 3종이 1일차부터 플레이어보다 빠르다. 종류 보정 = `(SO속도 ÷ 5)^0.5`(0.77~1.41배로 압축)에 일차 상한(`speedCapRatio`)을 얹고, 상한을 넘으려는 종류는 `EnemySpeedPolicy`의 슬롯(3일차부터 동시 1마리, 상한 1.10배)을 얻어야만 한다.
+- 속도는 매 프레임 다시 계산한다(`enemy._speed`). 낮→밤, 날짜 변경, 디버그 슬라이더가 이미 나와 있는 적에게도 바로 반영된다. 비용: 적 수 × 몇 번의 속성 읽기(상한 12마리면 무시할 수준).
+- 대안: 종류마다 속도 필드를 따로 둔다 → `EnemySO`가 팀원 파일이라 불가. SO 이름 키 표 → 이름이 바뀌면 조용히 깨짐. 그래서 SO 속도 자체에서 보정을 유도했다.
+
+## D71. 팀원 `Enemy.OnCollisionEnter2D`의 즉시 피해는 `_damage = 0`으로 무력화한다
+- 문제: 팀원 코드가 닿는 즉시 `health.TakeDamage(_damage)`를 줘서 "첫 타격 지연 0.4초"가 불가능하다. 프리팹/스크립트는 수정할 수 없다.
+- 검토한 대안: ① `Enemy` 컴포넌트 비활성화 — 비활성 컴포넌트의 물리 콜백이 불리는지 보장할 수 없고 `Update`(이동)도 같이 꺼진다. ② `Health` 쪽에서 가로채기 — 호출자를 알 수 없어 썩은 음식 자해와 구분이 안 된다. ③ 충돌을 끈다 — 적이 플레이어를 막는 물리가 사라진다.
+- 선택: 어댑터가 `Setup`에서 `_damage`를 0으로 만든다(`Health.TakeDamage`는 0 이하를 무시). 실제 피해량은 어댑터가 `baseContactDamage`로 따로 들고 맞히는 순간의 난이도 배율로 계산한다. 위협도 계산은 0으로 만들기 전에 끝낸다.
+- 비용: `Enemy._damage` 값을 다른 곳에서 읽는 코드가 생기면 0이 보인다(지금은 없음 — `Attack()`은 주석 처리됨).
+
+## D72. 무적은 "맞는 쪽"이 갖는다: `IContactDamageReceiver` + 순수 `HitInvulnerability`
+- 플레이어의 `PlayerHitReceiver`(`GameFlowRoot`가 런타임에 붙임, D61 방식)가 무적 창을 지키고 깜빡이며 `Health`를 때린다. 적은 수신기가 있으면 거기로, 없으면 `Health`로 직접 준다.
+- 무적에 막힌 공격도 "공격은 한 것"으로 보고 적의 주기를 다시 센다(막힌 뒤 즉시 재시도하면 3마리가 0.8초마다 번갈아 때리는 꼴이 된다). 막힌 시도는 무적 창을 늘리지 않는다.
+- `Health`는 건드리지 않았다 → 썩은 음식을 먹은 자해 피해는 무적과 무관.
+- 무적 시간은 `DifficultyProfile.playerInvulnerableSeconds`(디버그 슬라이더로 임시 변경 가능).
+
+## D73. 접촉 시간은 `Update`에서 센다, `OnCollisionStay2D`에 의존하지 않는다
+- 첫 타격 지연 동안 적이 멈추면 리지드바디가 잠들어(슬립) `Stay` 콜백이 끊길 수 있다. `Enter/Exit`으로 "닿아 있나"만 기록하고, 타격 시점은 `Update`의 `Time.time`으로 본다. 예고 중에는 `targetTrm`을 비우고 `LateUpdate`에서 속도를 0으로 눌러 멈춘다(넉백 경직과 같은 방식). 떨어지면 예고 취소, 다시 닿으면 처음부터.
+
+## D74. 추격 감지: `Enemy.targetTrm`을 비우면 팀원 이동이 멈추는 점을 이용한다
+- 감지 반경 밖(+히스테리시스 ×1.3)에서는 `targetTrm = null`이라 `Enemy.Update`가 속도를 건드리지 않는다. 그 사이에 어댑터가 걷기/멈추기를 반복하는 배회 속도를 직접 준다. 팀원 파일 수정 없음.
+- 스폰이 화면 밖이라 처음엔 대부분 감지 반경 바깥이다: 위/아래 스폰(약 8.5칸)은 1일차 감지 반경 9 안이라 곧장 다가오고, 좌우(13.9칸 이상)는 배회한다 → 방향에 따라 다른 긴장감. 너무 한가하면 `detectRadius` 곡선을 키우면 된다.
+
+## D75. 스폰 제한은 순수 함수로 뽑고, "화면 밖"은 카메라 사각형 + 여유로 판정한다
+- `SpawnMath.EarlyCap(경과, 유예, 1마리 구간, 일차 상한)`과 `SpawnMath.IsOnScreen`. 경과 시간은 `StatsTracker`의 플레이 시간(Playing에서만 누적 — 일시정지/레벨업 선택 시간은 안 센다).
+- 기존 `minSpawnDistance` 11은 화면 절반 폭(12.4)보다 작아서 좌우로 화면 안에 스폰되던 **기존 버그**였다. 이제 화면 밖 판정이 하한을 정하고 `minSpawnDistance`는 8로 낮춘 안전망이다. 위험 구역 진입 추가 스폰도 같은 판정을 쓴다.
+- `maxSpawnDistance`(22)를 새로 뒀다: 청크 안 무작위 위치라 로드된 25청크 어디든 후보가 되어, 너무 멀어 만날 일 없는 적이 상한을 차지하는 걸 막는다.
+- 새 막힘 이유 3개(유예/화면 안/너무 멂)를 진단 카운터에 추가 → F1 "적 스폰 상태"에 이유별로 보인다.
+
+## D76. 디버그 슬라이더 = 임시 값(`DifficultyTuning`)만 바꾸고, 버튼으로 프로필에 굽는다
+- 슬라이더가 에셋을 직접 건드리면 플레이 중 실수가 곧바로 저장된다. 임시 값을 `DifficultyEvaluator`가 곡선 값에 곱하거나 덮어쓰고, "현재 값을 DifficultyProfile에 반영"을 눌러야 곡선 키에 곱해 굽는다(에디터 전용 `SetDirty` + 저장, Development Build에서는 비활성). 굽고 나면 임시 값은 초기화된다.
+- 속도 배율은 `min(비율×종류, 상한)×배율`이라 `speedRatio`, `speedCapRatio`, `fastSpeedRatio`를 같이 곱해야 같은 결과가 된다. 최대 동시 적 수 고정은 "지금 일차의 곡선 값 → 입력값"이 되도록 곡선 전체에 배율을 곱한다.
+
+## D77. 경험치: 계산/표/전달을 셋으로 나눈다
+- `ExperienceService`(누적과 레벨 계산만), `XpCurve`(SO, `IXpTable`로 주입), `KillExperienceBridge`(처치 이벤트 → 경험치). 적이 얼마를 주는지는 어댑터가 `IExperienceReward`로 알린다(`IEnemyActor`에 멤버를 추가하면 기존 구현/테스트 가짜가 전부 깨져서 별도 인터페이스). 종류별 지급량은 `EnemyIntegrationSettings.experienceByEnemy`, 없으면 기본 8.
+- 한 번에 여러 레벨이 오르면 `OnLevelUp(level)`을 오른 순서대로 여러 번, `OnExperienceChanged`는 최종 값으로 한 번. 필요량이 0 이하로 새는 표가 있어도 한 번에 100레벨까지만 올린다(무한 루프 방지).
+- 첫 레벨업 시점은 추정이다(`balance.md` §3) — 곡선 값만 바꾸면 되도록 SO로 뺐다.
+
+## D78. 레벨업 → 증강 선택: 상태 하나 추가 + 큐 코디네이터 + 요청 번호
+- `GameState.AugmentSelect`(Playing ↔ AugmentSelect만 오갈 수 있음). 정지/입력 차단은 기존 `GameplayGate`가 "Playing이 아니면 정지"라 그대로 동작하고, 선택 중 ESC(일시정지)는 무시된다 → 선택이 끝나기 전에는 재개되지 않는다.
+- `LevelUpCoordinator`: 레벨업을 큐에 쌓고 Playing일 때 하나씩 꺼낸다. 선택 요청마다 번호를 올려 **늦게 오거나 두 번 불린 완료 콜백은 무시**한다(중복 호출이 다음 선택을 건너뛰는 사고 방지).
+- 다시하기/타이틀: 씬을 다시 불러오므로 모든 게 새로 만들어지지만, `GameFlowController.RunEnding` 이벤트로 경험치/큐/열린 선택을 명시적으로도 비운다(테스트 가능, 씬 리로드 방식이 바뀌어도 안전).
+- `IAugmentSelectionPresenter`(`RequestSelection(level, onComplete)`, `Cancel()`). 슬롯: `GameFlowRoot.augmentPresenter`(없으면 `NullAugmentPresenter`: "레벨 업!" 배너 + 최대 체력의 10% 회복(`FlowSettings.levelUpHealRatio`) 후 1.2초 뒤 자동 재개).
+- 팀원 `AugmentManager`/`AugmentUI`는 현재 **선택 완료를 알리는 이벤트가 없고** 상자(`AugmentChest`)가 열도록 되어 있다. 억지 어댑터(리플렉션으로 `_isSelecting` 폴링)는 만들지 않았다 — 팀원이 완료 이벤트를 달면 얇은 어댑터 하나(`OpenAugmentSelection()` 호출 + 완료 시 `onComplete`)로 끝난다. `AugmentUI.ShowAugments`가 `Time.timeScale`을 직접 0/복원하는 점은 주의: 우리 쪽이 먼저 정지시킨 뒤 호출되므로 "이전 값 = 0"을 저장했다가 복원하면 0이 된다. 우리 `Playing` 전환이 1로 되돌리므로, 어댑터는 **팀원 UI가 `timeScale`을 복원한 뒤에** `onComplete`를 불러야 한다(순서가 반대면 복원이 1을 다시 0으로 덮는다).
+
+## D79. 경험치 바는 체력 패널 안에 붙이고, 도트 단위로만 채운다
+- 체력 패널 아래에 행 하나를 더해 패널이 `pixelScale × 20`(2배율에서 40px) 길어진다. 새 패널을 따로 두지 않아 화면 요소 수는 그대로. 프레임/채움은 `ui_bar_frame/fill` 그대로, 높이 10도트(테두리 4+4, 속 2), 체력바와 같은 x/폭. 채움 길이는 안쪽 도트 수 단위로 끊어 반 픽셀이 안 생긴다.
+- D61과 같은 방식: 저장된 씬에 없어도 `GameFlowRoot`가 런타임에 만들고(`ExperienceBarView.Install`, 이미 있으면 재사용), `UISetup`도 같은 코드를 써서 재설치와 결과가 같다. HUD 점유 영역(`hudZones`)은 `UISetup`이 실제 패널 크기로 다시 기록하고, 저장된 에셋은 직접 156으로 고쳤다(화살표/라벨이 새 높이를 피한다).
+- 레벨업 순간 바가 가득 찬 채 0.06초 간격으로 번쩍인다(실시간 기준이라 정지 중에도 보임). `UITheme`에 `xpFill`, `xpFlash`, `levelFormat`을 추가했다.
+
+## D80. 통계/결과 화면
+- `GameStats.LevelReached`(`StatsTracker`가 `IExperienceSource`에서 읽음, 없으면 1). 게임오버/클리어 화면에 "도달 레벨 N" 줄을 추가했다 — 줄 간격을 60→55로 줄여 제목/버튼 자리는 그대로 두었다.
+
+## 검증 범위
+- 실행한 것: 모든 asmdef/Editor/Assembly-CSharp/테스트 프로젝트 `dotnet build` **에러 0**(새 파일이 csproj에 아직 없어 임시 csproj로 파일을 포함해 빌드). 순수 로직(무적, 경험치, 다중 레벨업 큐, 중복 콜백, 일시정지 중 레벨업, 재시작 초기화, 빠른 적 슬롯, 스폰 유예, 처치 경험치 전달) 30개 검사를 Unity 없이 콘솔 하네스로 **실제 실행해 전부 통과**.
+- 실행하지 못한 것: Unity 에디터가 열려 있어 Test Runner(NUnit) 실행 불가 — `DifficultyAndExperienceTests`(32개)는 컴파일만 확인. 곡선 평가(`DifficultyEvaluator`)는 네이티브 `AnimationCurve`가 필요해 하네스에서 못 돌렸다(NUnit 쪽에만 있음). 어댑터의 접촉/추격/배회, 스폰 화면 밖 판정, 경험치 바 레이아웃, 배너, F1 슬라이더는 플레이로만 확인할 수 있다.

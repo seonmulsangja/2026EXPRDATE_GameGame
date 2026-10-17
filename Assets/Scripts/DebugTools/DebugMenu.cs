@@ -42,6 +42,9 @@ namespace ExpiryGame.DebugTools
         private readonly List<LandmarkInfo> nearby = new List<LandmarkInfo>();
         private ISpawnDebug spawn;
         private float nextSpawnLookup;
+        private DifficultyService difficulty;
+        private GameFlowRoot flowRoot;
+        private float nextDifficultyLookup;
         private bool open;
         private Vector2 scroll;
         private LandmarkInteractor interactor;
@@ -97,6 +100,8 @@ namespace ExpiryGame.DebugTools
 
             DrawPromptPanel();
             DrawSpawnPanel();
+            DrawTuningPanel();
+            DrawExperiencePanel();
 
             GUILayout.Label("음식 지급 (가방에 추가)");
             foreach (var food in foods)
@@ -186,6 +191,82 @@ namespace ExpiryGame.DebugTools
             if (GUILayout.Button("카운터 초기화", GUILayout.Width(100))) d.Reset();
             GUILayout.EndHorizontal();
             spawn.Paused = GUILayout.Toggle(spawn.Paused, spawn.Paused ? "스폰 정지 중 (눌러서 재개)" : "스폰 전체 정지");
+        }
+
+        // 난이도를 실시간으로 바꾼다. 바꾼 값은 DifficultyTuning(임시)에만 들어가고, 버튼으로 DifficultyProfile에 굽는다
+        private void DrawTuningPanel()
+        {
+            GUILayout.Label("난이도 실시간 조절");
+            FindDifficulty();
+            if (difficulty == null)
+            {
+                GUILayout.Label("(DifficultyService가 씬에 없음)");
+                return;
+            }
+
+            var tuning = difficulty.Tuning;
+            GUILayout.Label($"{difficulty.DayNumber}일차 · 일반 적 속도 {difficulty.EnemySpeedRatio * 100f:0}% (상한 {difficulty.NormalSpeedCapRatio * 100f:0}%) · 감지 {difficulty.DetectRadius:0.#}타일");
+            GUILayout.Label($"접촉 주기 {difficulty.ContactInterval:0.##}초 · 데미지 배율 x{difficulty.DamageMultiplier:0.##} · 빠른 적 슬롯 {difficulty.FastEnemySlots}");
+
+            tuning.SpeedScale = LabeledSlider("적 속도 배율", tuning.SpeedScale, 0f, 2.5f, "x{0:0.00}");
+            tuning.DamageScale = LabeledSlider("적 데미지 배율", tuning.DamageScale, 0f, 4f, "x{0:0.00}");
+            tuning.SpawnScale = LabeledSlider("스폰 배율", tuning.SpawnScale, 0f, 4f, "x{0:0.00}");
+
+            var fixedAlive = tuning.MaxAliveOverride >= 0;
+            var wantFixedAlive = GUILayout.Toggle(fixedAlive, fixedAlive ? "최대 동시 적 수 고정 중" : $"최대 동시 적 수 고정 (지금 {difficulty.MaxAlive})");
+            if (wantFixedAlive != fixedAlive) tuning.MaxAliveOverride = wantFixedAlive ? difficulty.MaxAlive : DifficultyTuning.NoOverride;
+            if (tuning.MaxAliveOverride >= 0)
+                tuning.MaxAliveOverride = Mathf.RoundToInt(LabeledSlider("최대 동시 적 수", tuning.MaxAliveOverride, 0f, 30f, "{0:0}마리"));
+
+            var fixedInvuln = tuning.InvulnerableOverride >= 0f;
+            var wantFixedInvuln = GUILayout.Toggle(fixedInvuln, fixedInvuln ? "플레이어 무적 시간 고정 중" : $"플레이어 무적 시간 고정 (지금 {difficulty.PlayerInvulnerableSeconds:0.##}초)");
+            if (wantFixedInvuln != fixedInvuln) tuning.InvulnerableOverride = wantFixedInvuln ? difficulty.PlayerInvulnerableSeconds : -1f;
+            if (tuning.InvulnerableOverride >= 0f)
+                tuning.InvulnerableOverride = LabeledSlider("플레이어 무적 시간", tuning.InvulnerableOverride, 0f, 3f, "{0:0.00}초");
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("초기화", GUILayout.Width(70))) tuning.Reset();
+#if UNITY_EDITOR
+            GUI.enabled = tuning.HasChanges;
+            if (GUILayout.Button("현재 값을 DifficultyProfile에 반영")) difficulty.BakeTuning();
+            GUI.enabled = true;
+#else
+            GUILayout.Label("(프로필 반영은 에디터 전용)");
+#endif
+            GUILayout.EndHorizontal();
+        }
+
+        private static float LabeledSlider(string label, float value, float min, float max, string format)
+        {
+            GUILayout.Label($"{label}: {string.Format(format, value)}");
+            return GUILayout.HorizontalSlider(value, min, max);
+        }
+
+        private void DrawExperiencePanel()
+        {
+            GUILayout.Label("경험치 / 레벨");
+            if (flowRoot == null) flowRoot = FindFirstObjectByType<GameFlowRoot>();
+            var experience = flowRoot != null ? flowRoot.Experience : null;
+            if (experience == null)
+            {
+                GUILayout.Label("(GameFlowRoot가 씬에 없음)");
+                return;
+            }
+
+            var seconds = flowRoot.Stats.Snapshot().PlaySeconds;
+            GUILayout.Label($"Lv.{experience.Level}  경험치 {experience.Current}/{experience.Required}  (플레이 {seconds:0}초)");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("+10")) flowRoot.ExperienceSink.AddExperience(10);
+            if (GUILayout.Button("레벨업 1회")) flowRoot.ExperienceSink.AddExperience(experience.Required - experience.Current);
+            if (GUILayout.Button("레벨업 3회")) flowRoot.ExperienceSink.AddExperience(experience.Required * 3);
+            GUILayout.EndHorizontal();
+        }
+
+        private void FindDifficulty()
+        {
+            if (difficulty != null || Time.unscaledTime < nextDifficultyLookup) return;
+            nextDifficultyLookup = Time.unscaledTime + 1f;
+            difficulty = FindFirstObjectByType<DifficultyService>();
         }
 
         private void Jump(DayPart part, float progress)

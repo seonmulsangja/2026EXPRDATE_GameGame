@@ -19,6 +19,8 @@ namespace ExpiryGame.Flow
         public bool Resume() => Move(GameState.Paused, GameState.Playing);
         public bool Fail() => Move(GameState.Playing, GameState.GameOver);
         public bool Win() => Move(GameState.Playing, GameState.Clear);
+        public bool BeginAugmentSelect() => Move(GameState.Playing, GameState.AugmentSelect);
+        public bool EndAugmentSelect() => Move(GameState.AugmentSelect, GameState.Playing);
 
         private bool Move(GameState from, GameState to)
         {

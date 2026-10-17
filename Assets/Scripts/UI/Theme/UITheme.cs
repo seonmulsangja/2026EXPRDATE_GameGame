@@ -98,6 +98,8 @@ namespace ExpiryGame.UI
         public Color accent = new Color(0.878f, 0.475f, 0.227f);   // #E0793A
         public Color healthFill = new Color(0.85f, 0.2f, 0.2f);
         public Color timeFill = new Color(0.878f, 0.475f, 0.227f);
+        public Color xpFill = new Color(0.36f, 0.72f, 0.95f);
+        public Color xpFlash = new Color(1f, 1f, 1f);
         public Color healText = new Color(0.35f, 0.85f, 0.4f);
         public Color shelfText = new Color(0.95f, 0.78f, 0.25f);
         public Color dangerText = new Color(0.95f, 0.3f, 0.3f);
@@ -124,6 +126,7 @@ namespace ExpiryGame.UI
         public string dayLabel = "낮";
         public string nightLabel = "밤";
         public string hpFormat = "{0} / {1}";
+        public string levelFormat = "Lv.{0}";
         public string previewFormat = "{0} 예상";
         public string eatLine = "먹으면 HP {0}";
         public string weaponLine = "무기 데미지 {0}";

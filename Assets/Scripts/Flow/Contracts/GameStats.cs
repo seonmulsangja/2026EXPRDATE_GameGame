@@ -5,6 +5,7 @@ namespace ExpiryGame.Flow
     {
         public int DaysSurvived;       // 끝까지 버틴 날 수 (완료한 날)
         public int Kills;
+        public int LevelReached;       // 도달한 레벨 (1부터)
         public int FoodEaten;
         public int RottenEaten;
         public float PlaySeconds;

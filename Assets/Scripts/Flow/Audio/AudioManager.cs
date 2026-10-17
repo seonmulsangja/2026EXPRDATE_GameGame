@@ -59,6 +59,7 @@ namespace ExpiryGame.Flow
                     return catalog.bgmGameOver;
                 case GameState.Playing:
                 case GameState.Paused:
+                case GameState.AugmentSelect:
                     if (catalog.bgmDanger != null && listener != null &&
                         EnemyRegistry.CountWithin(listener.position, catalog.dangerRadius) >= catalog.dangerEnemyCount)
                         return catalog.bgmDanger;

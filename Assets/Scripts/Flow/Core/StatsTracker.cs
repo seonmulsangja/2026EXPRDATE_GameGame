@@ -9,6 +9,7 @@ namespace ExpiryGame.Flow
     {
         private readonly IGameClock clock;
         private readonly FoodConsumer consumer;
+        private readonly IExperienceSource experience;
         private readonly HashSet<IEnemyActor> subscribed = new HashSet<IEnemyActor>();
 
         private int kills;
@@ -17,10 +18,11 @@ namespace ExpiryGame.Flow
         private float playSeconds;
         private int frozenDays = -1;
 
-        public StatsTracker(IGameClock clock, FoodConsumer consumer)
+        public StatsTracker(IGameClock clock, FoodConsumer consumer, IExperienceSource experience = null)
         {
             this.clock = clock;
             this.consumer = consumer;
+            this.experience = experience;
 
             if (consumer != null) consumer.FoodEaten += OnFoodEaten;
             EnemyRegistry.Registered += Subscribe;
@@ -46,6 +48,7 @@ namespace ExpiryGame.Flow
             {
                 DaysSurvived = frozenDays >= 0 ? frozenDays : CurrentDays(),
                 Kills = kills,
+                LevelReached = experience != null ? experience.Level : 1,
                 FoodEaten = eaten,
                 RottenEaten = rottenEaten,
                 PlaySeconds = playSeconds,

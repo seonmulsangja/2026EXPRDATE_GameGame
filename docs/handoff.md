@@ -422,3 +422,54 @@ FoodItem : IsEnhanced HealMultiplier DamageMultiplier  TryEnhance(heal, damage, 
 - [ ] 열린 씬마다 `Tools > ShelfLife > Install Landmarks To Open Scene` 한 번 (연료 SO 생성, 모닥불 프리팹에 연료/게이지/외형 컴포넌트와 단계 스프라이트 연결). HUD 재설치는 필수 아님 — 새 HUD 설치 코드를 쓰려면 `Install HUD To Open Scene`
 - [ ] Test Runner > EditMode > `CampfireFuelTests` (15개), `FridgeCampfireTests`
 - [ ] (제출 전) 위 폰트 안내 참고
+
+
+---
+
+# 추가: 초반 난이도 완화 + 경험치/레벨업
+
+코드: `Assets/Scripts/Flow/`(난이도·경험치·레벨업), `Assets/Scripts/Integration/`(어댑터·스포너), `Assets/Scripts/UI/Views/ExperienceBarView.cs`. 결정 근거는 `docs/meetings.md` D69~D80, 진단 수치와 변경 전후는 `docs/balance.md`.
+
+## 수치를 바꾸는 곳 (전부 SO)
+| 바꾸고 싶은 것 | 에셋 / 필드 |
+|---|---|
+| 적 속도(플레이어 대비), 상한, 빠른 적 슬롯 | `DifficultyProfile` `speedRatio` `speedCapRatio` `fastEnemy*` `fastSpeedRatio` |
+| 동시 적 수, 접촉 주기, 추격 감지 반경 | `DifficultyProfile` `maxAlive` `contactInterval` `detectRadius` (일차별, 1일차 = x 0) |
+| 적 체력/피해 | `EnemyIntegrationSettings` `healthScale` `damageScale` × `DifficultyProfile` `health` `damage` 곡선 |
+| 첫 타격 지연, 번쩍임 | `EnemyIntegrationSettings` `firstHitDelay` `telegraphFlashSeconds` |
+| 플레이어 무적 시간 | `DifficultyProfile.playerInvulnerableSeconds` |
+| 시작 유예(25초) / 초반 1마리(40초) | `DifficultyProfile` `spawnGraceSeconds` `singleEnemySeconds` |
+| 스폰 거리(화면 밖 여유, 최대 거리) | `EnemyIntegrationSettings` `offscreenMargin` `minSpawnDistance` `maxSpawnDistance` |
+| 배회 | `EnemyIntegrationSettings` `wander*` |
+| 필요 경험치 | `Assets/Resources/ShelfLife/XpCurve.asset` (x = 레벨, y = 다음 레벨까지 필요량) |
+| 종류별 경험치 | `EnemyIntegrationSettings.experienceByEnemy` (없으면 `defaultExperience`) |
+| 레벨업 배너 시간 / 회복량 / 바 반짝임 | `FlowSettings` `levelUpBannerSeconds` `levelUpHealRatio` `xpBarFlashSeconds` |
+
+실시간으로 만져 볼 때는 **F1 → "난이도 실시간 조절"** 슬라이더(적 속도/데미지/스폰 배율, 최대 동시 적 수, 플레이어 무적 시간). 값은 임시이고 "현재 값을 DifficultyProfile에 반영"을 눌러야 에셋에 굽힌다(에디터 전용). "경험치 / 레벨"에는 +10 / 레벨업 버튼이 있다.
+
+## 구조 한눈에
+| 클래스 | 역할 |
+|---|---|
+| `DifficultyProfile` / `DifficultyEvaluator` / `DifficultyService` | 곡선 데이터 / 계산(순수) / 시계에서 일차·낮밤을 읽는 얇은 MonoBehaviour |
+| `DifficultyTuning` | 디버그 임시 값과 프로필에 굽기 |
+| `EnemySpeedPolicy` (`IEnemySpeedPolicy`) | 속도 비율 계산 + 빠른 적 슬롯 |
+| `EnemyAdapter` | 속도, 추격/배회, 접촉(지연·번쩍임·주기), 경험치 보상. 팀원 `Enemy`는 수정 없음 |
+| `PlayerHitReceiver` (`IContactDamageReceiver`) + `HitInvulnerability` | 적 접촉 피해의 무적 시간/깜빡임. `GameFlowRoot`가 플레이어에 런타임으로 붙임 |
+| `SpawnMath.EarlyCap / IsOnScreen` | 시작 유예·초반 1마리, 화면 안 판정 |
+| `ExperienceService` / `XpCurve` / `KillExperienceBridge` | 경험치 누적·레벨 / 필요량 표 / 처치 → 경험치 |
+| `LevelUpCoordinator` + `GameState.AugmentSelect` | 레벨업 큐 → 정지 → 증강 선택 → 재개 |
+| `IAugmentSelectionPresenter` / `NullAugmentPresenter` / `LevelUpBannerView` | 증강 화면 계약 / 임시 구현(배너 + 소량 회복) / 배너 |
+| `ExperienceBarView` | 체력바 아래 경험치 바 + Lv.N (런타임 설치, `UISetup`도 같은 코드) |
+
+## 팀원 증강 화면을 붙이려면
+1. `IAugmentSelectionPresenter`를 구현하는 MonoBehaviour를 만든다: `RequestSelection(int level, Action onComplete)`에서 선택 화면을 열고, 선택이 **끝난 뒤** `onComplete`를 정확히 한 번 부른다. `Cancel()`은 다시하기 때 화면을 접는다.
+2. `GameFlowRoot.augmentPresenter` 슬롯에 끼우면 `NullAugmentPresenter` 대신 쓰인다. 호출 시점에 게임은 이미 멈춰(`AugmentSelect`) 있다.
+3. 현재 팀원 `AugmentManager`에는 선택 완료 이벤트가 없다(`AugmentChest`가 열도록 되어 있음). 팀원이 완료 이벤트를 달면 어댑터는 `OpenAugmentSelection()` 호출 + 완료 시 `onComplete` 호출뿐이다. `AugmentUI`가 `Time.timeScale`을 직접 0/복원하므로 `onComplete`는 그 복원 **뒤에** 부를 것.
+
+## 유니티에서 할 일
+- [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 `dotnet build`로만 검증)
+- [ ] 플레이로 확인 (기대값은 `docs/balance.md`). 재설치는 필수 아님 — 경험치 바/무적 수신기/배너는 런타임에 붙는다. 새로 설치하는 HUD에도 경험치 바가 들어가게 하려면 `Install HUD To Open Scene`
+- [ ] Test Runner > EditMode > `DifficultyAndExperienceTests`(32개)
+
+## 검증 범위
+- `dotnet build`로 모든 asmdef/Editor/테스트 프로젝트 에러 0. 순수 로직 30개 검사를 콘솔 하네스로 실행해 통과. `DifficultyAndExperienceTests`는 컴파일만 확인(에디터가 열려 있어 Test Runner 실행 불가). 플레이 동작과 `.asset` 임포트는 확인하지 못했다.
