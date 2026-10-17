@@ -20,9 +20,16 @@ MonoBehaviour:
   effectRadius: 5
   ringTint: {r: 0.45, g: 0.85, b: 1, a: 0.9}
   ringRevealDistance: 3
+  decayEnabled: 1
   decayMultiplier: 0.3
+  fridgeTable: {fileID: 11400000, guid: 9db3447ecc5876f4c9f34176b1bdd52a, type: 2}
+  fridgeThreat01: 0
+  fridgeRolls: 1
+  fridgeEmptyPrompt: "\uBE44\uC5B4 \uC788\uC74C"
   healPerSecond: 2
   healTickSeconds: 0.5
+  enhanceProfile: {fileID: 0}
+  safeZone: {fileID: 0}
   lootTable: {fileID: 0}
   lootThreat01: 0.4
   lootRolls: 3
