@@ -1,5 +1,8 @@
 # Handoff — 이동 / 음식 / 낮밤
 
+> ⚠️ **제출 전 필수: 폰트 교체.** 지금 한글 폰트(`Assets/ShelfLife/UI/Fonts/PlaceholderKorean*`)는 **OS 맑은 고딕을 복사한 임시 폰트**라 배포 라이선스 문제가 있다. 배포 가능한 한글 픽셀 폰트(.ttf/.otf)를 `Assets/ShelfLife/UI/Fonts/`에 넣고 `Tools > ShelfLife > UI > Create TMP Font From Project Font`를 실행하면 `UITheme.font` 한 곳만 바뀌어 HUD와 게임 흐름 화면(타이틀/결과 등)이 모두 따라간다. 교체 후 `PlaceholderKorean*`은 삭제.
+> (팀원 폰트 `Assets/JCY/08 Font/DOSIyagiBoldface`가 있다 — 라이선스를 확인해 쓸 수 있으면 이걸 `UITheme.font`로 지정해도 된다.)
+
 설계 상세·이름 확정 목록은 `docs/spec.md` 참고. 코드: `Assets/Scripts/Survival/` (네임스페이스 `ExpiryGame`, asmdef `ExpiryGame.Survival`).
 
 ## 1. 구현 요약
@@ -198,3 +201,73 @@ IObstacleFilter.IsBlocked(Vector2)   ChunkStreamer.SetObstacleFilter(...)
 - **폰트**: 폰트 파일(.ttf/.otf)을 `Assets/ShelfLife/UI/Fonts/`에 넣고 `Tools > ShelfLife > UI > Create TMP Font From Project Font`를 실행하면 TMP 폰트 에셋이 만들어져 `UITheme.font`에 연결된다 (Project 창에서 폰트를 선택해도 됨). 이제 HUD 설치는 OS 폰트를 복사하지 않는다.
   - ⚠️ **제출 전 폰트 교체 필수**: 지금 프로젝트에 남아 있는 `PlaceholderKorean`은 OS 맑은 고딕을 복사한 임시 폰트라 배포 라이선스 문제가 있다. 제출 전에 한글 픽셀 폰트로 교체하고 `Assets/ShelfLife/UI/Fonts/PlaceholderKorean*`을 삭제할 것. (폰트 파일이 없는 새 환경에서는 TMP 기본 폰트가 연결돼 한글이 네모로 보인다.)
 - **HUD 재설치**: `Install HUD To Open Scene`는 이미 HUD가 있으면 덮어쓸지 확인창을 띄운다 (취소하면 기존 레이아웃 유지).
+
+
+---
+
+# 추가: 팀원 적 통합 + 시작 아이템 + 게임 흐름 (Flow / Integration)
+
+코드: `Assets/Scripts/Flow/`(asmdef `ExpiryGame.Flow`, 에디터 `.Flow.Editor`), `Assets/Scripts/Integration/`(**asmdef 없음** — 팀원 `Assembly-CSharp` 코드를 알아야 해서). 설계 근거 `docs/meetings.md` D32~D41, 팀원 코드 조사/연결 방식 `docs/merge_plan.md`, 필요한 도트 `docs/art_needed.md`.
+**팀원 파일(`Assets/JCY/`) 수정 0건.** 기존 코드 수정은 `DebugHud`를 `#if UNITY_EDITOR || DEVELOPMENT_BUILD`로 감싼 것뿐. 기존 이벤트/인터페이스 이름 변경 없음.
+
+## 새 이벤트 / 인터페이스
+```csharp
+using ExpiryGame.Flow;
+IGameStateMachine : Current(GameState: Title/Playing/Paused/GameOver/Clear)  StateChanged(prev, next)  StartGame/Pause/Resume/Fail/Win
+IEnemyActor       : Position Threat01  Killed(IEnemyActor)          // 적 어댑터가 구현. EnemyRegistry.Register/Unregister
+IDifficultyService: DayPosition SpawnMultiplier HealthMultiplier SpeedMultiplier DamageMultiplier
+IStatsSource      : Snapshot() → GameStats{DaysSurvived Kills FoodEaten RottenEaten PlaySeconds}
+```
+- 통계(`StatsTracker`)는 기존 이벤트만 구독한다: 처치 = `IEnemyActor.Killed`, 먹기 = `FoodConsumer.FoodEaten`(썩음 여부는 `item.IsRotten`).
+- 팀원 적: `EnemyAdapter`가 `IDamageable`(휘두르기 피격) + `IDropSource`(죽으면 DropTable 드롭) + `IEnemyActor`를 구현. 스폰은 `EnemyChunkSpawner`가 `IChunkEvents`에 연결. 위험 구역은 스포너가 `IDangerZoneEvents.OnDangerZoneEntered` 구독.
+
+## 클래스
+| 클래스 | 책임 |
+|---|---|
+| `GameStateMachine` | 상태와 허용 전환만 |
+| `GameFlowController` | 사망→GameOver, 목표 일수→Clear, Esc 토글, 다시하기/타이틀/종료 |
+| `GameplayGate` | 상태별 `timeScale` + 플레이어 입력 on/off |
+| `FlowScreens` + `TitleView/PauseView/ResultView/DayBannerView/ControlsHintView/HurtVignetteView` | 화면 (UITheme 폰트·색, 코드로 생성) |
+| `StatsTracker`, `ScoreCalculator` | 통계 수집 / 점수 공식(수치는 `ScoreRules`) |
+| `DifficultyService` | 일차·낮밤 배율 (`DifficultyProfile`) |
+| `LoadoutGiver` | 시작 음식 지급 (`StartingLoadout`) |
+| `PlayerHurtFeedback` | 체력 감소 시 비네트 + 카메라 흔들림 + 플래시 |
+| `AudioManager`, `AudioEventBinder` | BGM 크로스페이드(낮/밤/위험/게임오버) / 효과음 이벤트 연결 (`AudioCatalog`) |
+| `GameFlowRoot` | 위 전부를 조립만 하는 지점 (씬에 `GameFlow` 오브젝트 1개) |
+| `EnemyAdapter`, `EnemyChunkSpawner`, `EnemyIntegrationSettings` | 팀원 적 연결 (Integration) |
+
+## 유니티에서 할 일 (순서대로)
+- [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 Unity 없이 `dotnet build`로만 검증)
+- [ ] `Tools > ShelfLife > Setup Game (All In One)` — ArtV2Test를 복사해 `Assets/ShelfLife/Scenes/Game.unity`를 만들고 흐름·적·소리·제출 설정까지 설치 (테스트 더미/픽업/DebugHud는 이 씬에서 제거). 이미 만든 씬에는 개별 메뉴: `Install Game Flow To Open Scene` → `Install Enemies To Open Scene`
+- [ ] `Game.unity`를 열고 Play (Title부터 시작). EditMode 테스트: Test Runner > `FlowTests`(9개)
+- [ ] Build Settings에 씬이 없어도 에디터에서는 다시하기가 동작한다(`LoadSceneInPlayMode`)
+
+## 수치 위치
+| 무엇 | 에셋 |
+|---|---|
+| 시작 음식 (통조림 300 / 빵 120 / 생선 45초) | `Assets/ShelfLife/Data/Flow/StartingLoadout.asset` |
+| 목표 일수(5) | `…/Flow/SurvivalGoal.asset` |
+| 일차별 스폰량/체력/속도/데미지 곡선 + 밤 배율 | `…/Flow/DifficultyProfile.asset` (x = 경과 일수, 0 = 1일차 새벽) |
+| 점수 공식 | `…/Flow/ScoreRules.asset` |
+| 문구, 조작 힌트(10초), 일차 배너 시간, 피격 연출 | `…/Flow/FlowSettings.asset` |
+| BGM/효과음 클립, 위험 BGM 기준(반경 8, 적 4마리) | `…/Flow/AudioCatalog.asset` |
+| 적 체력·데미지 단위 변환, 청크당 적 수, 최대 수, 스폰 거리, 위험 구역 증가량 | `Assets/ShelfLife/Data/Integration/EnemyIntegrationSettings.asset` |
+| 적 종류별 원본 수치(체력/속도/데미지) | 팀원 `Assets/JCY/02 SO/Enemy/EnemySO*.asset` (건드리지 않음) |
+
+## 빌드 방법 (제출용)
+1. `Tools > ShelfLife > Prepare Submission Settings` (올인원에 포함됨): Build Settings 씬 목록 = `Game` 하나, 1920×1080, 전체화면 창(Alt+Enter 전환).
+2. 폰트 교체 (이 문서 맨 위 경고).
+3. Build Profiles/Build Settings → Windows → Build. **Development Build를 끄면** F1 디버그 메뉴, `DebugHud`, `MapDebugOverlay`가 빈 껍데기가 된다(켜면 동작).
+4. 종료 버튼: 빌드에서는 `Application.Quit()`, 에디터에서는 Play 중지.
+5. 확인된 것: 릴리스 분기(`UNITY_EDITOR` 미정의) 컴파일 에러 0. **실제 빌드는 해보지 못했다.**
+
+## 플레이해서 확인할 항목
+- [ ] 타이틀: 어두운 낮 맵 위에 제목/시작/종료/조작법 한 줄. 시작 버튼(또는 Enter/Space)으로 시작, 종료 버튼 동작
+- [ ] 시작: 슬롯 1~3에 통조림/빵/생선 (신선도 100%), 첫 실행에만 10초 조작 힌트 (다시 보려면 PlayerPrefs `ShelfLife.ControlsHintShown` 삭제), "1일차" 배너
+- [ ] 적: 화면 밖에서 나타나 추격, 휘두르면 맞고 넉백·플래시, 죽으면 음식 드롭(강한 적 → 짧은 유통기한 음식 쪽), 쓰레기 더미 근처에서 적이 늘어남
+- [ ] 적에게 맞으면 체력 감소 + 화면 붉은 비네트 + 짧은 흔들림 + 플레이어 플래시. 붙어 있으면 `contactInterval`마다 반복
+- [ ] 난이도: 1일차가 확실히 쉽다(적 적고 약함), 밤이 낮보다 어렵다, 일차가 갈수록 증가
+- [ ] Esc 일시정지 → 재개 / 타이틀로 / 종료. 일시정지 중 먹기·휘두르기 안 됨, 시계 멈춤
+- [ ] 사망 → 게임 오버(생존 일수/처치/먹은 음식/썩은 음식/시간/점수) → 다시하기(바로 시작) / 타이틀. 6일차 새벽 → 클리어 화면
+- [ ] 다시하기를 여러 번 반복해도 에러·이중 처리(처치 수 2배, 배너 두 번 등)가 없는지
+- [ ] 이 환경에서 확인 못 한 것: 위 전부 + Light2D에서 적 스프라이트 밝기, 버튼 클릭(`InputSystemUIInputModule`)

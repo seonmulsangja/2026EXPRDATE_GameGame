@@ -175,3 +175,52 @@
 
 ## 검증 범위
 - `ExpiryGame.Landmark/UI/UI.Editor/DebugTools` `dotnet build` 에러 0. 릴리스 분기(`#else`)는 별도로 빌드하지 않았다. Unity 실행, 씬 재설치, 플레이 동작은 확인하지 못했다.
+
+
+---
+
+# 적 통합 + 시작 아이템 + 게임 흐름 (2026-10-16)
+
+막혀서 서브에이전트 회의(설계/비판/일정)를 열 만한 지점은 없었다. 갈림길은 혼자 판단해 근거를 남긴다. (회의를 열지 않은 이유: 구조적 장애물은 어셈블리 경계 하나였고 Unity 규칙상 답이 하나뿐이었다 — D32.)
+
+## D32. 팀원 코드(Assembly-CSharp)를 아는 코드는 asmdef 없이 `Integration/`에, 나머지는 인터페이스로 뒤집기
+- 내 asmdef는 `Assembly-CSharp`를 참조할 수 없다. 팀원 폴더에 asmdef를 넣으면 팀원이 새 스크립트를 폴더 밖에 추가할 때 깨지고 참조를 전부 손봐야 한다 → 폴더 무수정.
+- `EnemyAdapter`/`EnemyChunkSpawner`만 팀원 타입을 알고, 흐름 쪽(통계·BGM)은 `IEnemyActor`/`EnemyRegistry`(Flow), 드롭은 `IDropSource`(Drop)로만 본다. 설치기도 같은 이유로 `Integration/Editor`(Assembly-CSharp-Editor)에 두고, 올인원은 `EditorApplication.ExecuteMenuItem`으로 호출한다 (내 Editor asmdef는 autoReferenced=false라 직접 참조 불가).
+
+## D33. 팀원 스포너/풀은 쓰지 않고 `Enemy` 프리팹만 가져온다
+- `EnemySpawner_JCY`는 고정 포인트 + 타이머이고 `SpawnEnemy`가 풀에서 꺼낸 오브젝트를 다시 `Instantiate`한다(복제 버그). 청크 이벤트 방식과 맞지 않아 `EnemyChunkSpawner`를 새로 만들었다.
+- 단 `Enemy.OnEnable`이 `EnemyPooling.Instance.enemyDatas`를 읽으므로 `EnemyPooling`은 `poolSize=0`으로 씬에 둔다(풀/스폰 로직은 돌지 않는다).
+
+## D34. 피격·체력은 어댑터가 가진다 (팀원 `Enemy`에 피격 처리가 없음)
+- 최신 `Enemy`에는 `TackDamage`도 사망 처리도 없다. `EnemyAdapter`가 `IDamageable`로 체력을 관리하고 죽으면 `IDropSource.Died` → 기존 `DropSpawner`가 드롭. 팀원 SO 수치(체력 3~15, 데미지 1)는 안 건드리고 `EnemyIntegrationSettings.healthScale/damageScale`로 이 프로젝트 단위(플레이어 체력 100)에 맞춘다.
+- 접촉 데미지는 팀원 코드가 첫 1회, 어댑터가 `contactInterval`마다 반복 — 붙어 있으면 계속 맞아야 위협이 되기 때문.
+- 프리팹은 원본을 건드리지 않고 **변형(Variant)** `Enemy_Integrated.prefab`에 컴포넌트를 얹는다.
+
+## D35. 스폰 목표 수는 "청크당 기대값 × 난이도 배율"을 확률 반올림, 보충은 주기적으로
+- 1일차 배율이 0.35라 청크당 0.42마리 → 정수 반올림하면 0마리가 된다. 소수부를 확률로 올려 평균이 맞게 했다. 청크 로드 순간만 스폰하면 가만히 있는 플레이어에게 아무것도 안 오므로 `topUpInterval`마다 부족한 청크를 채운다(플레이어 `minSpawnDistance` 밖, 장애물 없는 자리, 틱당 `spawnsPerTick`마리 상한).
+- 청크 난수(`ChunkRandom`)는 쓰지 않는다: 적 위치까지 결정적일 필요가 없고(죽인 적이 같은 자리에 다시 나오는 쪽이 오히려 어색함) 보충 스폰은 어차피 청크 로드와 무관한 시점이다.
+
+## D36. 게임 흐름은 씬 리로드로 초기화, 리로드를 넘는 값은 "타이틀 건너뛰기" 1비트
+- 다시하기/타이틀로 = `SceneManager.LoadScene`(에디터에서 Build Settings에 없는 씬이면 `LoadSceneInPlayMode`). 살아 있는 객체·이벤트 구독이 전부 새로 만들어지는 가장 확실한 방법. 정적 상태는 `DropSourceRegistry`/`EnemyRegistry`(OnDisable에서 해제 + 도메인 리로드를 꺼도 `SubsystemRegistration`에서 초기화), `FlowLaunch.skipTitleOnce`뿐.
+- 플레인 C# 객체(`StatsTracker`, `GameFlowController`, `FlowScreens`, `PlayerHurtFeedback`, `AudioEventBinder`)는 전부 `IDisposable`이고 `GameFlowRoot.OnDestroy`에서 해제한다. 단위 테스트 `StatsTracker_...StopsAfterDispose`가 해제를 확인한다.
+
+## D37. `GameStateMachine`은 상태만, 시간/입력/화면/규칙은 각자
+- `GameStateMachine`(상태·허용 전환) / `GameFlowController`(사망→GameOver, 목표 달성→Clear, 일시정지 토글, 종료) / `GameplayGate`(timeScale·플레이어 입력) / `FlowScreens`(상태→화면) / 각 View(`TitleView`, `PauseView`, `ResultView`×2, `DayBannerView`, `ControlsHintView`, `HurtVignetteView`) / `GameFlowRoot`(조립만).
+- 일시정지는 `Time.timeScale=0` + `PlayerInputReader.enabled=false`. 히트스톱이 복구 시점에 timeScale을 1로 돌려 일시정지를 풀 수 있어서 `GameplayGate.Enforce()`가 매 프레임 확인한다(플레이 중의 0은 히트스톱이 정당하게 만든 것이라 건드리지 않는다).
+
+## D38. "5일 생존" = 1일차 새벽에 시작해 6일차 새벽이 되는 순간 Clear
+- 요구문 "마지막 날 새벽에 Clear"가 두 가지로 읽힌다(5일차 새벽 / 5일을 다 버틴 뒤). "5일 생존"을 기준으로 5일을 완주(=`DayStarted(6)`)하면 Clear로 했다. 5일차 새벽에 끝내고 싶으면 `SurvivalGoal.IsCleared`의 `dayStarted - 1`을 `dayStarted`로 바꾸면 된다(테스트 `SurvivalGoal_ClearsWhenTargetDaysCompleted`도 같이).
+- 결과 화면의 "생존 일수"는 완료한 날 수(`DayCount-1`).
+
+## D39. 난이도는 연속 곡선(AnimationCurve) + 밤 배율, 값은 `DifficultyProfile` 한 곳
+- x = 경과 일수(0 = 1일차 새벽, 연속). 낮밤 경계에서 갑자기 변하지 않게 일차 곡선은 연속값, 밤은 별도 배율을 곱한다. 소비자는 `IDifficultyService` 하나만 본다(스포너·어댑터).
+
+## D40. 시작 아이템은 복사본 FoodData로 유통기한 덮어쓰기
+- 생선 `FoodData`는 30초인데 요구는 45초다. 원본 SO를 바꾸면 드롭 표(`DropTable.Strength01`)와 다른 곳이 같이 바뀐다 → `StartingLoadout`의 항목에 `shelfLifeSeconds`를 두고, 다를 때만 `FoodData` 복사본을 만들어 `TryAdd(FoodData)`로 지급한다. 스탯은 기존 `FoodFactory`가 그 값으로 계산한다.
+
+## D41. 소리: 카탈로그 SO + 이벤트 바인더, 파일 없으면 무시
+- `Assets/Audio`가 없다. `AudioCatalog`의 빈 칸은 건너뛰고, 설치기가 `Assets/Audio`의 파일 이름(day/night/danger/gameover, eat/hit/rot/pickup/break)을 보고 채운다. 먹기·타격만 팀원 효과음(`Assets/JCY/06 Sounds`)을 임시로 연결. BGM 선택은 상태 > 위험(플레이어 반경 내 적 수 ≥ 기준) > 밤 > 낮.
+
+## 검증 범위
+- Unity 에디터가 열려 있어(자동 새로고침 없음) 컴파일은 `dotnet build`로 어셈블리별 확인: `ExpiryGame.Flow`, `ExpiryGame.Flow.Editor`, `Assembly-CSharp`(팀원 + Integration + DOTween 모듈), `Assembly-CSharp-Editor`, `ExpiryGame.Tests.Flow`, 그리고 릴리스 분기(`UNITY_EDITOR` 미정의: Survival/Flow/Assembly-CSharp) 모두 에러 0.
+- 실행하지 못함: 설치 메뉴, 플레이 동작, EditMode 테스트(`FlowTests`).
