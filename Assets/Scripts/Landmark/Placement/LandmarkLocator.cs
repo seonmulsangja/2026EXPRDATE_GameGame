@@ -9,6 +9,9 @@ namespace ExpiryGame.Landmark
         public readonly Vector2 Position;
         public readonly float Distance;
 
+        // 종류+위치로 정해지는 ID (CampfireStateStore의 키)
+        public string Id => LandmarkId.Of(Data, Position);
+
         public LandmarkInfo(LandmarkData data, Vector2 position, float distance)
         {
             Data = data;

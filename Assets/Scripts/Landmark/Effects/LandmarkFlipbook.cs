@@ -12,6 +12,16 @@ namespace ExpiryGame.Landmark
         private SpriteRenderer sr;
         private float elapsed;
 
+        public Sprite[] Frames => frames;
+
+        // 다른 프레임 묶음으로 갈아끼운다 (모닥불 연료 단계 등)
+        public void SetFrames(Sprite[] newFrames)
+        {
+            if (newFrames == null || newFrames.Length == 0) return;
+            frames = newFrames;
+            elapsed = 0f;
+        }
+
         private void Awake()
         {
             sr = GetComponent<SpriteRenderer>();

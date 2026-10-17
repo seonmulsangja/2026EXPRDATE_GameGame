@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d2c9918fe55ba34aa596ede1dd55912, type: 3}
+  m_Name: EnemyIntegrationSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ExpiryGame.Integration.EnemyIntegrationSettings
+  enemyPrefab: {fileID: 8049471502895218463, guid: 45598c20e144c454081d32741780caee, type: 3}
+  dropTable: {fileID: 11400000, guid: 41e075e429684d345a5789192a2af283, type: 2}
+  healthScale: 6
+  damageScale: 5
+  contactInterval: 0.8
+  threatHealthWeight: 0.5
+  threatSpeedWeight: 0.3
+  threatDamageWeight: 0.2
+  enemiesPerChunk: 1.2
+  maxAlive: 24
+  hardCap: 60
+  minSpawnDistance: 11
+  topUpInterval: 2.5
+  spawnsPerTick: 3
+  spawnAttempts: 6
+  edgeMargin: 1
+  obstacleCheckRadius: 0.5
+  dangerSpawnMultiplier: 2
+  dangerBurstCount: 4
+  dangerBurstRadius: 5

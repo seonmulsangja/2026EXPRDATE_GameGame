@@ -42,6 +42,7 @@ namespace ExpiryGame.Landmark.Editor
             var root = DarkArtSceneInstaller.GetOrCreateChild(host.transform, RootName);
 
             var danger = DarkArtSceneInstaller.GetOrAdd<DangerZoneEvents>(host);
+            var events = DarkArtSceneInstaller.GetOrAdd<LandmarkEvents>(host);
 
             var spawner = DarkArtSceneInstaller.GetOrAdd<LandmarkSpawner>(host);
             DarkArtSceneInstaller.SetObject(spawner, "settings", settings);
@@ -50,6 +51,8 @@ namespace ExpiryGame.Landmark.Editor
             DarkArtSceneInstaller.SetObject(spawner, "playerHealth", player.GetComponent<Health>());
             DarkArtSceneInstaller.SetObject(spawner, "drops", drops);
             DarkArtSceneInstaller.SetObject(spawner, "danger", danger);
+            DarkArtSceneInstaller.SetObject(spawner, "inventory", inventory);
+            DarkArtSceneInstaller.SetObject(spawner, "events", events);
             DarkArtSceneInstaller.SetObject(spawner, "root", root.transform);
 
             var filter = DarkArtSceneInstaller.GetOrAdd<LandmarkObstacleFilter>(host);
@@ -77,6 +80,10 @@ namespace ExpiryGame.Landmark.Editor
             var additive = WorldSetup.LoadOrCreateAdditiveMaterial();
             var storeTable = LoadOrCreateTable("DropTable_Store", StoreTable);
             var dumpTable = LoadOrCreateTable("DropTable_Dump", DumpTable);
+            var fridgeTable = LoadOrCreateTable("DropTable_Fridge", FridgeTable);
+            var enhance = LoadOrCreateAsset<EnhanceProfile>("EnhanceProfile");
+            var safeZone = LoadOrCreateAsset<SafeZoneProfile>("SafeZoneProfile");
+            var fuelProfile = LoadOrCreateAsset<CampfireFuelProfile>("CampfireFuelProfile");
 
             var fridge = LoadOrCreateData("Landmark_Fridge", d =>
             {
@@ -87,6 +94,7 @@ namespace ExpiryGame.Landmark.Editor
                 d.effectRadius = 5f;
                 d.ringTint = new Color(0.45f, 0.85f, 1f, 0.9f);
                 d.decayMultiplier = 0.3f;
+                d.interactRange = 2.5f;
             });
             var campfire = LoadOrCreateData("Landmark_Campfire", d =>
             {
@@ -98,6 +106,7 @@ namespace ExpiryGame.Landmark.Editor
                 d.ringTint = new Color(1f, 0.6f, 0.25f, 0.9f);
                 d.healPerSecond = 2f;
                 d.healTickSeconds = 0.5f;
+                d.interactRange = 2.5f;
             });
             var store = LoadOrCreateData("Landmark_Store", d =>
             {
@@ -126,6 +135,12 @@ namespace ExpiryGame.Landmark.Editor
                 d.dumpRolls = 2;
             });
 
+            // 이미 만든 에셋/프리팹에도 새 참조·컴포넌트를 채운다 (비어 있는 칸만, 직접 고친 값은 유지)
+            if (fridge.fridgeTable == null) fridge.fridgeTable = fridgeTable;
+            if (campfire.enhanceProfile == null) campfire.enhanceProfile = enhance;
+            if (campfire.safeZone == null) campfire.safeZone = safeZone;
+            if (campfire.fuelProfile == null) campfire.fuelProfile = fuelProfile;
+
             BuildPrefab(fridge, "landmark_fridge", additive, root =>
             {
                 root.AddComponent<FridgeDecayEffect>();
@@ -135,6 +150,10 @@ namespace ExpiryGame.Landmark.Editor
                 root.AddComponent<CampfireHealEffect>();
                 AddCampfireVisuals(root, additive);
             });
+            EnsureParts(fridge, typeof(FridgeLootEffect));
+            EnsureParts(campfire, typeof(CampfireEnhanceEffect), typeof(CampfireSafeZone),
+                typeof(CampfireFuel), typeof(CampfireFuelGauge), typeof(CampfireAppearance));
+            LinkCampfireFuelAssets(campfire);
             BuildPrefab(store, "landmark_store", additive, root => root.AddComponent<StoreLootEffect>());
             BuildPrefab(dump, "landmark_dump", additive, root => root.AddComponent<DumpDangerEffect>());
 
@@ -163,6 +182,16 @@ namespace ExpiryGame.Landmark.Editor
             return data;
         }
 
+        private static T LoadOrCreateAsset<T>(string name) where T : ScriptableObject
+        {
+            var path = $"{DataDir}/{name}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset != null) return asset;
+            asset = ScriptableObject.CreateInstance<T>();
+            AssetDatabase.CreateAsset(asset, path);
+            return asset;
+        }
+
         private static DropTable LoadOrCreateTable(string name, System.Action<SerializedObject, FoodData[]> fill)
         {
             var path = $"{DataDir}/{name}.asset";
@@ -179,6 +208,16 @@ namespace ExpiryGame.Landmark.Editor
         private static void StoreTable(SerializedObject so, FoodData[] foods)
         {
             WriteEntries(so, foods, new[] { (1f, 0.5f, 1f) });
+            so.FindProperty("dropChance").floatValue = 1f;
+            so.FindProperty("minCount").intValue = 2;
+            so.FindProperty("maxCount").intValue = 3;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // 냉장고: 모든 음식 균등, 전부 신선(남은 유통기한 90~100%) — 한 번 열면 2~3개. 편의점(신선도 50~100%, 다량)과 별도 표
+        private static void FridgeTable(SerializedObject so, FoodData[] foods)
+        {
+            WriteEntries(so, foods, new[] { (1f, 0.9f, 1f) });
             so.FindProperty("dropChance").floatValue = 1f;
             so.FindProperty("minCount").intValue = 2;
             so.FindProperty("maxCount").intValue = 3;
@@ -246,6 +285,77 @@ namespace ExpiryGame.Landmark.Editor
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             data.prefab = prefab;
             EditorUtility.SetDirty(data);
+        }
+
+        // 프리팹을 새로 만들지 않고(수치/배치 보존) 없는 컴포넌트만 추가한다
+        private static void EnsureParts(LandmarkData data, params System.Type[] parts)
+        {
+            var path = $"{PrefabDir}/{data.name}.prefab";
+            var contents = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var changed = false;
+                foreach (var part in parts)
+                {
+                    if (contents.GetComponent(part) != null) continue;
+                    contents.AddComponent(part);
+                    changed = true;
+                }
+                if (changed) PrefabUtility.SaveAsPrefabAsset(contents, path);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
+        }
+
+        // 모닥불 연료 단계 스프라이트(약해짐/잉걸불/꺼짐)와 게이지 머티리얼을 프리팹에 연결한다 (비어 있는 칸만)
+        private static void LinkCampfireFuelAssets(LandmarkData data)
+        {
+            var path = $"{PrefabDir}/{data.name}.prefab";
+            var contents = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var changed = false;
+                var appearance = contents.GetComponent<CampfireAppearance>();
+                if (appearance != null)
+                {
+                    var so = new SerializedObject(appearance);
+                    changed |= FillFrames(so, "weakFrames", "landmark_campfire_low_0", "landmark_campfire_low_1");
+                    changed |= FillFrames(so, "embersFrames", "landmark_campfire_embers");
+                    changed |= FillFrames(so, "outFrames", "landmark_campfire_out");
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                var gauge = contents.GetComponent<CampfireFuelGauge>();
+                if (gauge != null)
+                {
+                    var so = new SerializedObject(gauge);
+                    var material = so.FindProperty("material");
+                    if (material.objectReferenceValue == null)
+                    {
+                        material.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>(ArtAssets.UnlitMaterialPath);
+                        so.ApplyModifiedPropertiesWithoutUndo();
+                        changed = true;
+                    }
+                }
+
+                if (changed) PrefabUtility.SaveAsPrefabAsset(contents, path);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
+        }
+
+        private static bool FillFrames(SerializedObject so, string field, params string[] spriteNames)
+        {
+            var frames = so.FindProperty(field);
+            if (frames.arraySize > 0) return false;
+            frames.arraySize = spriteNames.Length;
+            for (var i = 0; i < spriteNames.Length; i++)
+                frames.GetArrayElementAtIndex(i).objectReferenceValue = ArtAssets.Load("landmarks", spriteNames[i]);
+            return true;
         }
 
         private static void AddGlow(GameObject root, string spriteName, Material additive, bool campfire)

@@ -20,6 +20,16 @@ namespace ExpiryGame.Landmark
         public string CurrentPrompt { get; private set; }
         public event Action<string> PromptChanged;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private string debugPrompt;
+
+        // 디버그 메뉴 전용: 박스에 글자가 들어오는지 보려고 안내 문구를 강제로 띄운다 (null이면 끔)
+        public void SetDebugPrompt(string prompt)
+        {
+            debugPrompt = prompt;
+        }
+#endif
+
         private void OnEnable()
         {
             action = new InputAction("LandmarkInteract", InputActionType.Button, binding);
@@ -37,7 +47,11 @@ namespace ExpiryGame.Landmark
         private void Update()
         {
             target = FindNearest();
-            SetPrompt(target != null ? $"{keyLabel}  {target.PromptText}" : null);
+            var prompt = target != null ? $"{keyLabel}  {target.PromptText}" : null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (debugPrompt != null) prompt = debugPrompt;
+#endif
+            SetPrompt(prompt);
         }
 
         private void OnPerformed(InputAction.CallbackContext context)

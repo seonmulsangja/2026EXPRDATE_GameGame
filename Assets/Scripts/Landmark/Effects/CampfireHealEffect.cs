@@ -7,6 +7,7 @@ namespace ExpiryGame.Landmark
     public class CampfireHealEffect : MonoBehaviour, ILandmarkPart
     {
         private LandmarkZone zone;
+        private CampfireFuel fuel;
         private LandmarkContext context;
         private float timer;
 
@@ -18,6 +19,7 @@ namespace ExpiryGame.Landmark
         public void Bind(LandmarkContext ctx)
         {
             context = ctx;
+            fuel = GetComponent<CampfireFuel>();
         }
 
         private void Update()
@@ -32,7 +34,10 @@ namespace ExpiryGame.Landmark
             var tick = context.Data.healTickSeconds;
             if (timer < tick) return;
             timer -= tick;
-            context.PlayerHealth.Heal(context.Data.healPerSecond * tick);
+            // 연료가 줄면 회복도 느려지고, 꺼지면 멈춘다 (연료가 없는 모닥불은 항상 1배)
+            var strength = fuel != null && fuel.HasProfile ? fuel.Strength(fuel.Profile.healAtEmpty) : 1f;
+            if (strength <= 0f) return;
+            context.PlayerHealth.Heal(context.Data.healPerSecond * tick * strength);
         }
     }
 }

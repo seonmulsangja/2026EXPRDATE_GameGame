@@ -420,6 +420,11 @@ GameObject:
   - component: {fileID: 8063592878740375842}
   - component: {fileID: 4264631108180103872}
   - component: {fileID: 1083843344773805213}
+  - component: {fileID: 1482642490030493674}
+  - component: {fileID: 9088221209377257343}
+  - component: {fileID: 7982513964434322745}
+  - component: {fileID: 8350008592537565975}
+  - component: {fileID: 5732405423770220201}
   m_Layer: 0
   m_Name: Landmark_Campfire
   m_TagString: Untagged
@@ -529,3 +534,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2642f1e818ac0f74cb1941e79fd224d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireHealEffect
+--- !u!114 &1482642490030493674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019406517973715885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad731accebe95154a868a2d6c3c0933e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireEnhanceEffect
+--- !u!114 &9088221209377257343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019406517973715885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7d9703e320bfe644ab17763643e1ee5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireSafeZone
+--- !u!114 &7982513964434322745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019406517973715885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63833886128f7944bad0362898d69505, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireFuel
+--- !u!114 &8350008592537565975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019406517973715885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2761e85f72d88f448e11fe7fca3b287, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireFuelGauge
+  material: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  barThickness: 0.14
+  sortingOrder: 6
+--- !u!114 &5732405423770220201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019406517973715885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a7d8149f24d6ea4abb84c1b9572c970, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireAppearance
+  weakFrames:
+  - {fileID: 21300000, guid: 865c9b1dec0150b479a408ab4243473a, type: 3}
+  - {fileID: 21300000, guid: cc577ec768e945445b7cde5a0bd1a994, type: 3}
+  embersFrames:
+  - {fileID: 21300000, guid: 1db399f77443eb549bd743a519dd394f, type: 3}
+  outFrames:
+  - {fileID: 21300000, guid: 55495ac4ce7cf5f42a27105e76d28a06, type: 3}

@@ -22,6 +22,16 @@
 - SpriteRenderer.color 곱셈으로는 "흰색 번쩍"이 안 돼서 `ShelfLife/SpriteFlash`(URP 2D unlit) 머티리얼 교체 방식 채택. 위험: 이 환경에서 셰이더 컴파일은 검증 불가 → 유니티 Console 확인 필요.
 - 적 AI가 velocity를 매 프레임 덮어쓸 수 있어 넉백은 `MovePosition` 가산 + `IsKnockedBack` 플래그 제공.
 
+## D51. 적이 안 나오는 문제: 증거 기반 진단 → 설치 누락 확정 + 방어/진단 영구화 (회의 기록)
+- **진행 방식**: 서브에이전트 회의는 열지 않았다. 막히는 지점이 없었고(원인이 파일 증거로 확정됨), 결정할 설계 쟁점도 아래 두 가지뿐이라 설계/비판/일정 관점을 이 기록에서 직접 따졌다.
+- **증거(디스크 기준)**: `EnemyChunkSpawner`/`DifficultyService`/`GameFlowRoot`의 스크립트 GUID를 가진 씬·프리팹이 **하나도 없다**(grep). 저장된 씬 5개 중 `ChunkStreamer`가 있는 건 ArtV2Test/DropMapTest뿐이고 거기에도 스포너·난이도·플로우는 없다. `Game.unity`는 git 이력에도 없고, `Enemy_Integrated.prefab`, `Data/Integration`, `DifficultyProfile`/`FlowSettings` 에셋도 없다. 즉 `Setup Game (All In One)`(= Flow 설치 + 적 설치)의 결과가 저장된 적이 없다 → 스포너가 씬에 없으니 스폰 시도 자체가 0회. 코드 경로(타이틀→Playing 전환, 곡선 값 0.35~1.9, 모닥불 반경 4.5 vs 청크 16, 스폰 거리 11)는 읽어서 막는 지점을 못 찾았다.
+- **같은 계열 잠재 문제(코드로 막음)**: ① 스포너가 `OnEnable` 시점 이후에 청크가 로드된 경우만 처리 → 구독 전에 로드된 시작 청크는 영구히 빈다. ② `AnimationCurve`가 비면 `Evaluate`가 0 → 스폰/체력/속도 배율 0(적이 안 나오거나 안 움직임). ③ 필수 참조(프리팹·설정 등)가 null이면 조용히 아무 일도 안 함.
+- **결정 1 (설계)**: 소급 처리는 `IChunkEvents.BoundsOf` + 확장 메서드 `ForEachLoaded`(MapGen)로. 스포너 로직을 새 클래스로 쪼개지 않고, 순수 계산만 `SpawnMath`/`SpawnDiagnostics`(Flow)로 빼서 Integration(asmdef 없음)에서도 테스트가 닿게 했다(D47과 같은 이유).
+- **결정 2 (비판 → 반영)**: "배율이 0이면 최소 1마리 강제 스폰" 같은 임시방편은 거부. 대신 곡선이 비면 기본값으로 채우고(`DifficultyProfile.EnsureCurves`, 설치/OnValidate/Awake), 스폰 배율에 하한(`minSpawnMultiplier` 0.2)을 둔다. 하한은 곡선을 의도적으로 낮춘 경우에도 0이 되지 않게 하는 안전망이다.
+- **진단(영구)**: `SpawnDiagnostics`가 막힘 이유별(상태 아님/정지/프리팹·참조 없음/난이도 0/상한/청크 없음/안전지대/너무 가까움/장애물/후보 없음)로 센다. F1 디버그 메뉴(`DebugMenu`, UNITY_EDITOR/DEVELOPMENT_BUILD)에 패널: 활성/최대 수, 스폰 배율, 직전 시도 결과, 이유별 카운터, 강제 스폰, 전체 정지 토글. `DebugTools`가 Assembly-CSharp의 스포너를 직접 못 보므로 `ISpawnDebug` 계약(Flow)으로 찾는다.
+- **일정**: 위 수정은 코드만으로 끝난다. 씬에 실제로 스포너를 붙이는 건 Unity 메뉴라서 사용자가 `Tools > ShelfLife > Setup Game (All In One)` 한 번 실행하고 저장해야 한다(에디터가 열려 있어 배치 실행 불가).
+- **검증 범위**: 에디터가 프로젝트를 열고 있어 테스트 러너/배치 모드를 못 썼다. Unity 번들 Roslyn으로 MapGen/Flow/DebugTools/Assembly-CSharp(Integration+Enemy)/`Tests.Spawn` 컴파일 에러 0까지만 확인. EditMode 테스트 실행은 하지 못했다.
+
 ## 검증 범위
 - Unity 에디터가 이미 열려 있어 배치모드 실행을 하지 않았다. 전체 소스를 Unity 참조 DLL로 `dotnet build` 해서 C# 컴파일 에러 0개 확인. 씬/프리팹 생성 도구와 셰이더는 실행해 보지 못함.
 
@@ -224,3 +234,157 @@
 ## 검증 범위
 - Unity 에디터가 열려 있어(자동 새로고침 없음) 컴파일은 `dotnet build`로 어셈블리별 확인: `ExpiryGame.Flow`, `ExpiryGame.Flow.Editor`, `Assembly-CSharp`(팀원 + Integration + DOTween 모듈), `Assembly-CSharp-Editor`, `ExpiryGame.Tests.Flow`, 그리고 릴리스 분기(`UNITY_EDITOR` 미정의: Survival/Flow/Assembly-CSharp) 모두 에러 0.
 - 실행하지 못함: 설치 메뉴, 플레이 동작, EditMode 테스트(`FlowTests`).
+
+
+---
+
+# 냉장고 / 모닥불 상호작용 (2026-10-17)
+
+막혀서 서브에이전트 회의를 열 만한 지점은 없었다. 요구가 두 가지로 읽히는 곳은 아래처럼 혼자 정하고 근거를 남긴다. (회의를 열지 않은 이유: 모두 수치/문구 선택이라 SO 값 하나로 바꿀 수 있고, 구조상 막히는 곳은 없었다.)
+
+## D42. 기존 랜드마크 패턴 그대로: 효과 = 독립 컴포넌트, 수치 = SO, 서비스 접근 = `LandmarkContext`
+- 새 효과는 `FridgeLootEffect`, `CampfireEnhanceEffect`, `CampfireSafeZone`(각각 `ILandmarkPart` + 필요하면 `ILandmarkInteractable`). `LandmarkInteractor`(F)와 `InteractableRegistry`는 수정하지 않았다.
+- 컨텍스트에 `Inventory`(`IFoodInventory`)와 `Events`(`ILandmarkEventSink`)만 추가. 이미 만든 에셋/프리팹은 `Install Landmarks To Open Scene`이 비어 있는 참조와 빠진 컴포넌트만 채운다(직접 고친 값은 유지).
+
+## D43. 상호작용 거리는 `interactRange`, 효과 반경(`effectRadius`)이 아니다
+- "반경 안에서 F"의 반경을 효과 반경(냉장고 5 / 모닥불 4.5)으로 읽으면 멀리서도 눌려 어색하다. 편의점과 같은 `LandmarkData.interactRange`(기본 2, 신규 에셋 2.5)를 쓴다. 헷갈리지 않게 이 필드의 헤더를 "상호작용 공통"으로 바꿨다.
+
+## D44. 냉장고/모닥불은 "불가능해도 대상" — 프롬프트로 사유를 보여준다
+- `LandmarkInteractor`는 `CanInteract == false`인 대상을 건너뛴다(편의점은 열고 나면 프롬프트도 사라짐). 요구가 "비어 있음 표시"와 "굽기 불가 사유 표시"라서, 냉장고(`fridgeEmptyPrompt`)와 모닥불은 범위 안이면 항상 대상으로 두고 `PromptText`만 상태에 따라 바꾼다. 누르면 아무 일도 안 일어난다.
+- 프롬프트 문자열은 상태(선택 음식/사유/남은 초)가 바뀔 때만 다시 만든다(Interactor가 매 프레임 읽으므로).
+
+## D45. 냉장고 수치 분리 = 전용 `DropTable_Fridge` + `LandmarkData.fridge*`
+- 편의점: `DropTable_Store`(신선도 50~100%, 한 번에 2~3개 × `lootRolls` 3 = 6~9개, 다량). 냉장고: `DropTable_Fridge`(남은 유통기한 90~100%, 2~3개 × `fridgeRolls` 1). 표/굴림 수/위협도(`fridgeThreat01` 0)/빈 문구를 서로 다른 필드·에셋으로 둬서 한쪽을 만져도 다른 쪽이 안 변한다.
+- 유통기한 감소 배율은 `decayEnabled`(체크박스) + 기존 `decayMultiplier`. 꺼도 드롭은 한다.
+- "글로우 끔"은 프리팹의 `Glow` 자식 오브젝트를 비활성화(재방문 리셋은 편의점처럼 청크 재로드 때 허용).
+
+## D46. 강화 = `FoodItem`의 플래그 + 배율, 변환 로직은 건드리지 않음
+- `FoodStatCalculator`(유통기한→스탯)는 그대로. `FoodItem.CurrentHeal/CurrentDamage`가 신선할 때 값에 `HealMultiplier/DamageMultiplier`(기본 1)를 곱할 뿐이다. 썩은 값은 강화와 무관(강화된 음식이 나중에 썩어도 썩은 쪽 값은 그대로).
+- `FoodItem.TryEnhance`가 "음식당 1회 / 썩은 음식 불가"를 최종 보장하고, `FoodEnhancer`(순수 클래스)가 같은 규칙으로 "가능 여부 + 사유 + 회복 변화량"을 미리 계산해 프롬프트에 쓴다. 쿨다운은 `CooldownTimer`(시간을 인자로 받음, 모닥불마다 하나).
+- **"남은 유통기한 +50%"** = 남은 값 × 1.5, 음식의 최대 유통기한을 넘지 않는다(`shelfLifeBonusRatio` 0.5). 최대치의 +50%로 읽으면 거의 항상 가득 차서 의미가 없다. 바꾸려면 `FoodItem.TryEnhance` 한 줄.
+- 쿨다운 기본 10초(요구에 값이 없어서 임의로 정함 → `EnhanceProfile.cooldownSeconds`). 쿨다운은 모닥불 인스턴스마다라 청크 재로드 시 리셋된다.
+- 가방 안 음식이 강화되면 `FoodInventory`가 `Changed`를 다시 발행해 슬롯/상세 패널이 기존 구독만으로 갱신된다(UI 쪽 새 구독 없음).
+
+## D47. 안전지대: 스폰은 "배치 정보", 밀어내기는 "로드된 모닥불"로 판단
+- 스폰 제외: `EnemyChunkSpawner`가 청크가 생길 때 `LandmarkLocator`(순수 계산, 프리팹 로드와 무관)로 주변 모닥불을 받아 `SafeZoneSet`을 청크에 붙여 둔다. 보충 스폰과 위험 구역 추가 스폰(burst) 모두 이 집합으로 걸러낸다. 순수 클래스라 EditMode 테스트가 된다(`Integration`은 asmdef가 없어 테스트가 못 닿는다 → 로직을 Landmark 쪽에 둔 이유).
+- 밀어내기: 이미 있는 적은 `EnemyAdapter`가 `SafeZoneRegistry`(로드된 모닥불 등록소)에서 자기 위치를 찾아 `IKnockbackable.ApplyKnockback`으로 민다. 팀원 `Enemy`는 수정하지 않았다. 간격(`repelIntervalSeconds`), 최소 거리(`repelDistance`), 켜고 끄기(`repelEnemies`, 기본 ON), 반경(`radius`)은 전부 `SafeZoneProfile` SO.
+- 반경 링은 `LandmarkData.RingRadius`(안전지대가 있으면 그 반경)로 그리고, 모닥불 `ringTint`가 이미 주황이라 틴트는 그대로다.
+
+## D48. 위험 구역(쓰레기 더미)과 겹치면 안전이 우선 — 플레이어가 안전지대 안일 때 위험 이벤트를 내지 않는다
+- `DumpDangerEffect`가 진입/이탈 이벤트 대신 매 프레임 `zone.IsInside && !SafeZoneRegistry.IsSafe(player)`로 위험 상태를 계산하고, 바뀔 때만 `Enter/Exit`을 발행한다. 그러면 `DangerZoneEvents.IsPlayerInDanger`(스포너의 위험 배율)와 `OnDangerZoneEntered`(burst)가 둘 다 자동으로 따라온다. 음식이 쏟아지는 건 위험이 아니라 그대로 한다.
+
+## D49. 연출/소리는 이벤트만: `ILandmarkEvents.OnFoodEnhanced / OnFridgeOpened`
+- 모닥불/냉장고 코드는 연출을 모른다. `AudioEventBinder`가 `AudioCatalog.sfxEnhance/sfxFridgeOpen`을 재생(비어 있으면 무음), 새 `EnhanceFeedback`이 기존 `HitFxSpawner`의 스파크 파티클(`IHitFx.BurstParticles`)로 불꽃을 낸다(수치는 `FlowSettings`). 이벤트 허브가 씬에 없으면 그냥 연결하지 않는다.
+
+## D50. 강화 배지: `UITheme` 스프라이트가 비면 임시 도형(마름모)
+- `EnhanceBadge`가 슬롯 우상단/상세 패널 아이콘 오른쪽 아래에 작은 배지를 필요할 때 만든다 → HUD를 다시 설치하지 않아도 된다. 아트가 생기면 `UITheme.sprites.enhanceBadge`만 채우면 된다(`docs/art_needed.md`).
+
+## 검증 범위
+- Unity 에디터가 이 프로젝트를 열고 있어 배치 모드를 쓰지 못했다. `dotnet build`로 Survival/Landmark/UI/Flow/Assembly-CSharp(Integration 포함)/각 Editor/테스트 어셈블리 에러 0.
+- 실행하지 못함: 설치 메뉴, 플레이 동작, EditMode 테스트(`FridgeCampfireTests` 13개를 만들고 컴파일만 확인).
+
+
+---
+
+# 넉백 약화 + 먹기 진행 바 (2026-10-17)
+
+서브에이전트 회의는 열지 않았다. 막히는 지점(원인이 코드로 확정되지 않거나 구조가 충돌하는 곳)이 없었고, 갈림길은 모두 SO 값 하나로 되돌릴 수 있는 선택이라 아래처럼 근거를 남기고 직접 정했다.
+
+## 넉백 원인 조사 (수정 전 코드 기준 계산값)
+적이 밀리는 경로는 아래 5개다. 거리 = 총 이동(타일), 속도 = 순간 최대 속도, 시간 = 밀리는 동안(`IsKnockedBack`, 이 동안 적 AI가 멈춘다).
+
+| # | 경로 | 힘(거리) | 순간 속도 | 시간 | 비고 |
+|---|---|---|---|---|---|
+| 1 | 휘두르기 적중 → `KnockbackReceiver` 임펄스 (`HitFeelProfile.knockbackDistance` 0.3~1.4) | 데미지 3 → 0.3, 10 → 0.63, 25 → 1.4 | 거리 × damping 12 = 3.6 ~ **16.8** | 속도 0.3 이하까지 ln(v0/0.3)/12 = 0.24 ~ **0.34초** | `velocity +=`라 **연속 피격이 상한 없이 누적**(0.1초 안에 두 번 맞으면 최대 2.8타일) |
+| 2 | 모닥불 안전지대 밀어내기 (`EnemyAdapter.RepelFromSafeZone`) | `max(repelDistance 1.5, 경계에서 안쪽 깊이 + 0.25)` = 1.5 ~ **4.75** (반경 4.5) | 거리 × 12 = 18 ~ **57** | 0.4 ~ 0.5초 | 0.25초마다 반복. **타격 넉백과 같은 리시버·같은 damping**을 써서 모닥불 근처에서 때리면 "1타일 + 1.5타일 이상"이 연달아 붙는다 |
+| 3 | `Rigidbody2D` 충돌 (적 프리팹: Dynamic, 질량 1, 선형 드래그 0, 중력 0, 회전 고정) | 적 이동 속도(SO 3~10) 만큼의 접촉 충격 | 3 ~ 10 | `Enemy.Update`가 매 프레임 `linearVelocity`를 덮어써서 **다음 프레임에 사라짐** | 드래그가 0이라 덮어쓰기 전 한 프레임은 유지. 주원인은 아님. 다만 `MovePosition`(경로 1·2)이 다른 적(질량 1)에 막히면 그 적을 밀어 **이웃이 같이 튀는** 현상이 생김 |
+| 4 | 플레이어 반동 (`SwingProfile.recoilDistance`) | 0.18 | 2.2 | 0.09초 | 플레이어에게만. 약함 |
+| 5 | 적 → 플레이어 접촉 (`Enemy.OnCollisionEnter2D`/Stay) | 플레이어 질량 1 vs 적 속도 3~10 | 적 속도 | 접촉 동안 | 플레이어가 밀리는 물리. 적을 미는 힘은 아님 |
+
+**주원인**: 1번이다. 약한 음식(데미지 10 안팎)도 0.6타일을 초당 7.6타일로 밀고 0.27초 동안 AI를 멈추게 하고, 센 음식은 1.4타일을 초당 16.8타일로 민다. 거기에 **모닥불 근처에서는 2번이 이어붙어** 가장 세게 느껴진다(최대 4.75타일, 초당 57타일). 상한도 연속 피격 감쇠도 없었다(누적).
+
+## D52. 넉백 수치는 `KnockbackProfile`(SO) 하나로, 타격/안전지대는 에셋 두 개
+- `Assets/Resources/ShelfLife/Knockback_Hit.asset`(타격)과 `Knockback_SafeZone.asset`(밀어내기). 둘 다 같은 SO 클래스라 항목(거리/지속시간/감속 곡선/데미지 곡선/상한/연속 피격 감쇠/최대 속도/경직)이 같다. 안전지대는 값만 훨씬 약하고 느리다(거리 1.5~5 상한, 0.6초, 최대 속도 3타일/초, 경직 0, 감쇠 없음).
+- **Resources 폴더에 둔 이유**: `HitFeedbackPlayer`/`KnockbackReceiver`/`FoodConsumer`는 Player 프리팹이 아니라 4개 씬의 Player 인스턴스에 설치기가 얹은 오버라이드라, 연결하려면 씬 YAML을 일일이 고쳐야 한다. 연결이 비어 있으면 `Resources/ShelfLife/…` → 코드 기본값 순으로 찾게 해서 **설치 메뉴를 다시 돌리지 않아도 바로 적용**된다. 설치기(`CombatSetup`, `EnemyIntegrationInstaller`)는 같은 에셋을 인스펙터 칸에도 연결해 준다(`HitFeedbackPlayer.hitKnockback`, `KnockbackReceiver.defaultProfile`, `EnemyIntegrationSettings.safeZoneKnockback`).
+- 기본값(요구 반영): 기본 거리 0.3 + 데미지 보너스 최대 0.3 → 한 대 맞으면 **0.3~0.6타일**, 상한 `maxDistance` 1타일, 지속 0.1초, ease-out 곡선, 연속 피격 윈도우 0.6초 / 배율 0.6씩 / 최저 0.2, 경직 0.15초, 순간 속도 상한 14타일/초.
+
+## D53. 움직임 계산은 순수 클래스 `KnockbackMotion`, 리시버는 물리 적용만
+- 리시버(God Class 방지): 계산(거리·감쇠·상한·속도·경직)은 `KnockbackMotion`, 리시버는 변위를 `MovePosition`으로 옮기고 `Rigidbody2D.Cast`로 장애물만 판단한다. 계산 쪽이 물리를 몰라서 EditMode 테스트가 된다(막힘은 `clip` 콜백으로 주입).
+- **누적 방지**: 예전엔 속도를 더했다. 이제는 "남은 거리 + 새 거리"를 `maxDistance` 안에서 합쳐 한 번의 움직임으로 다시 만든다(방향은 거리 가중 평균).
+- **속도 제한**: 곡선의 최대 기울기로 순간 속도를 계산하고, `maxSpeed`를 넘으면 **시간을 늘린다**(거리는 유지). 안전지대 밀어내기가 "천천히" 움직이는 것도 이 규칙에서 나온다(1.5타일 → 약 1초).
+- **장애물/다른 적**: 매 스텝 이동 방향으로 `Cast`해서 닿기 전(skin 0.02)까지만 가고, 막히면 거기서 넉백을 끝낸다(경직은 유지). 멀어지는 쪽에 붙어 있는 물체는 무시한다(법선·방향 내적) — 안 그러면 플레이어와 맞닿은 적이 플레이어 반대쪽으로도 못 밀린다.
+
+## D54. 경직 = `IsKnockedBack`을 "밀림 + 경직"으로 확장, 접촉 데미지도 막는다
+- `IKnockbackable.IsKnockedBack`이 경직 시간(0.15초) 동안도 true라서 `EnemyAdapter`가 쓰던 기존 규칙(이동 속도 0)이 그대로 경직이 된다. 추가로 `OnCollisionStay2D`의 접촉 데미지 반복도 경직 중에는 건너뛴다(즉시 반격 방지). 팀원 `Enemy.OnCollisionEnter2D`의 첫 접촉 1회는 팀원 파일이라 건드리지 않았다 — 경직 중에는 속도가 0이라 새로 접촉(Enter)하지 않는다.
+- 히트스톱/카메라 흔들림/플래시/파티클은 코드 한 줄도 바꾸지 않았다(`HitFeelProfile`에서 `knockbackDistance` 필드만 `KnockbackProfile`로 이사). 넉백 거리만 줄이고 경직 0.15초로 "맞은 느낌"을 보존한다.
+
+## D55. 저항값은 EnemySO에 없으면 0 — 팀원 파일은 수정하지 않는다
+- 요구는 "적 SO/프리팹마다 `knockbackResistance`(0~1)를 어댑터에서 읽기, 없으면 0". 팀원 `EnemySO`는 수정 금지라 필드가 아직 없다. `EnemyAdapter`가 (1) 풀의 `EnemySO` 중 이름이 같은 것에 **`knockbackResistance`라는 public float 필드가 있으면** 그 값 → (2) 없으면 어댑터의 프리팹 값(`knockbackResistance`, 기본 0)을 쓰고, 리시버(`IKnockbackable.Resistance`)에 넣는다. 팀원이 SO에 같은 이름 필드를 추가하면 코드 수정 없이 바로 먹는다.
+- 효과: 거리 × (1 − 저항), 1이면 이동도 경직도 없다.
+
+## D56. 먹기: 입력은 "누르고 있나"만, 시간은 `EatSettings`
+- 기존 E는 입력 에셋(`InputSystem_Actions`의 Interact)에 **Hold 인터랙션(기본 0.4초)** 이 걸려 있어 시간을 SO로 못 바꾸고 진행 표시도 없었다. 입력 에셋은 건드리지 않고 `IPlayerInput.EatHeld`(= `action.IsPressed()`, 인터랙션과 무관하게 눌린 상태)를 추가해 `FoodConsumer`가 `EatHoldTimer`(순수 상태 머신)로 직접 센다. `EatPerformed` 이벤트는 그대로 두었다(더 이상 먹기에 쓰지 않음).
+- `EatSettings.holdSeconds` 기본 0.4초(0이면 누르자마자 먹기). 중간에 놓으면 같은 프레임에 취소(진행도 0), 먹는 중 선택 음식이 바뀌어도 취소, 완료 뒤에는 한 번 놓아야 다음 음식을 먹는다(누른 채 연달아 먹는 사고 방지).
+
+## D57. 진행 바: 월드 좌표 캔버스를 머리 위에, 먹는 중에만
+- `EatProgressView`(UI)가 `FoodConsumer`의 `EatStarted/EatCanceled/FoodEaten`만 구독한다. 화면 고정 HUD가 아니라 월드 좌표 캔버스(플레이어 콜라이더 윗면 + `headGap`)라 하단 패널과 겹칠 수 없다. 바 크기는 기본 0.6 × 0.07타일(작고 얇게), 수치는 전부 `EatSettings`.
+- 플레이어가 좌우 반전(scale.x < 0)돼도 바가 뒤집히지 않게 플레이어의 자식이 아니라 별도 루트가 따라다닌다. 씬에 손으로 붙이지 않아도 `FoodConsumer`가 있으면 씬 로드 직후 자동으로 붙는다(`RuntimeInitializeOnLoadMethod`). 4개 씬을 일일이 고치지 않으려는 선택.
+- **제거한 오브젝트: 없음.** 코드와 `Game.unity`/`Player.prefab`을 모두 찾았지만 먹기 진행 바(채움 이미지, 빈 프레임)는 처음부터 없었다 — E의 Hold는 화면에 아무것도 그리지 않았다. 이름이 비슷한 `EatIcon`/`EatText`는 상세 패널 안의 "먹으면 HP +N" 줄이고, `HpBar`/`TimeBar`/`SlotBar`는 각자 HUD라 겹침이나 빈 프레임으로 볼 근거가 없어 그대로 뒀다.
+
+## D58. "먹기 가능한 상태" 안내 문구 = 막지 않고 이유만 보여준다
+- 요구 문장("체력이 가득이거나 썩은 음식이면 안내 문구로 이유를 표시")이 "먹지 못하게 하라"인지 "먹어도 아쉬우니 알려라"인지 모호했다. 썩은 음식을 먹으면 피해를 입는 것이 기존 핵심 규칙(handoff §1)이고, 체력 가득에서 먹기를 막으면 음식 소비가 막혀 기존 흐름이 바뀐다. 그래서 **먹기는 막지 않고**, 먹는 동안 바 위에 사유를 띄운다: 썩음 → "썩은 음식! HP -N"(썩음이 체력 가득보다 우선), 체력 가득 → "체력이 가득 찼어요". 문구는 `EatSettings`. 막고 싶으면 `FoodConsumer.Update`에서 `CurrentWarning`으로 `hasTarget`만 false로 만들면 되는 한 줄이다.
+
+## 검증 범위
+- Unity 에디터가 프로젝트를 열고 있어 테스트 러너를 못 썼다. `dotnet build`로 Survival / Combat / UI / Flow / Assembly-CSharp(Integration 포함) / Assembly-CSharp-Editor / Combat.Editor / `Tests.Knockback`·`Tests.Spawn`·`Tests.Flow` 에러 0. 테스트 `KnockbackEatTests`(17개)는 만들고 컴파일만 확인했고, 핵심 수치(곡선 기울기, 시간, 순간 속도)는 같은 식을 파이썬으로 따로 계산해 단언 범위 안인지 확인했다.
+- 병행 중이던 다른 작업(`Landmark/Fuel`, `CampfireAppearance`, `ILandmarkEventSink.CampfireStageChanged`)이 중간 상태라 `ExpiryGame.Landmark`가 그대로는 컴파일되지 않았다. 내 변경과 무관하므로 건드리지 않았고, 검증할 때만 생성된 csproj에서 그 파일을 뺐다(`Tests.Campfire`는 같은 이유로 컴파일 에러가 남아 있다).
+- 실행하지 못함: 플레이 동작, 직접 만든 `.asset` YAML의 임포트(에디터가 열면 확인), `EatHeld`가 Hold 인터랙션과 함께 기대대로 `true`가 되는지(`InputAction.IsPressed`).
+
+
+---
+
+# 텍스트 박스 맞춤 + 모닥불 연료 (2026-10-17)
+
+**서브에이전트 회의(설계/비판/일정)는 열지 않았다.** 막혀서 멈춘 지점이 없었다(원인이 코드로 확정됨, 구조는 기존 패턴 재사용). 갈림길 10개를 근거와 함께 남긴다. 같은 작업 트리에서 넉백/먹기 바(D52~D58) 작업이 병행 중이어서 그쪽 파일은 건드리지 않았다.
+
+## D59. 글자 넘침의 원인 = 고정 크기 패널 + 줄바꿈 없는 고정 폭 라벨
+- 확인: `UISetup.BuildPrompt`가 패널을 `P(260)×P(66)`(pixelScale 2 → 173×44 px), 라벨을 `P(240)×P(50)` / `NoWrap` / `Overflow`로 만든다. "F  굽기 불가 (이미 강화됨)"는 15자 × 약 19px ≈ 285px → 박스보다 훨씬 길어 테두리를 넘는다.
+- 전수 점검한 동적 텍스트와 처리: InteractPrompt(→ `AutoSizePanel`), 음식 상세 패널 행(→ `AutoWidthPanel` + 줄임), 슬롯 숫자·체력/시간 숫자·일차·페이즈·미리보기·랜드마크 라벨(→ `ThemedText` 줄임, 라벨은 폭도 글자에 맞춤), 타이틀/게임오버/클리어/일시정지/버튼/일차 배너/컨트롤 안내(→ `FlowUi.Text` 줄임).
+
+## D60. "늘어나는 박스"와 "줄이는 글자"를 구분한다
+- 안내 박스·상세 패널은 글자 쪽이 가변이므로 박스를 키운다(최대 폭 넘으면 줄바꿈 + 높이 증가). 숫자·라벨·타이틀처럼 위치가 레이아웃에 묶인 고정 박스는 키울 수 없으니 최소 70%까지 줄이고 그래도 넘치면 `…`.
+- 줄임은 도트 정수배가 보장되지 않는 타협이다. 도트 폰트가 들어오면 `UITheme.fontSnapUnit`으로 정수배 스냅하고, 고정 박스는 `minFitRatio`를 1로 두면 줄임을 끌 수 있다.
+- 패널 크기는 `pixelScale` 배수로만 올림(가운데 피벗은 2배수라 반 픽셀 위치가 안 생긴다) → 9-slice 테두리가 뭉개지지 않는다. 패딩/최소·최대 폭은 전부 `UITheme`.
+
+## D61. HUD 재설치 없이 동작하도록 런타임에 필요한 컴포넌트를 붙인다
+- 저장된 씬에는 새 컴포넌트가 없다. `InteractPromptView`/`FoodDetailPanelView`가 `Awake`에서 없으면 붙인다(설치 코드도 같은 걸 붙여서 새 설치와 일치). 비활성 패널의 글자는 `Awake` 전이라 폰트/크기가 아직 적용 전일 수 있어 측정 전에 `ThemedText.Apply()`를 먼저 부른다.
+
+## D62. 폰트: 한글 픽셀 폰트가 프로젝트에 없어 현재 폰트를 유지한다
+- 확인: `Assets/Fonts`는 없고, 프로젝트의 폰트 파일은 팀원 `DOSIyagiBoldface.ttf`(JCY), `CookieRun Regular.otf`(픽셀 아님), TMP 기본 Liberation뿐. 라이선스를 확인할 수 없는 파일을 임의로 UI 폰트로 지정하지 않았다.
+- 메뉴(`Create TMP Font From Project Font`)는 `Assets/Fonts`의 폰트(또는 선택한 폰트)로 **래스터(비 SDF) + Point 필터** TMP 폰트를 만들고, 프로젝트 코드/에셋/씬에 나오는 한글 음절을 미리 아틀라스에 넣는다(나머지는 동적 추가). `UITheme.fontSnapUnit`에 원본 도트 크기를 기록해 글자 크기를 정수배로 맞춘다.
+- 폰트가 없을 때 위치 보정: `UITheme.lineSpacing`, 패널 안 글자 세로 정렬 `panelTextAlign`(기본 Capline — 문구가 바뀌어도 위치가 흔들리지 않음), 패딩. 제출 전 폰트 추가 필수는 handoff 맨 위에 적었다.
+
+## D63. 안내 문구 순환은 `LandmarkInteractor`에 디버그 오버라이드로
+- `DebugTools`는 UI를 참조하지 않는다. 안내 문구의 출처인 `LandmarkInteractor`에 `#if UNITY_EDITOR || DEVELOPMENT_BUILD`로 `SetDebugPrompt`를 두고, 메뉴가 문구를 돌려 넣는다 → 실제 `InteractPromptView` 경로(패널 크기 계산 포함)를 그대로 검증한다.
+
+## D64. 연료 구조: 상태 하나, 반응은 각자
+- `CampfireFuel`은 연료 상태만, 규칙은 순수 `CampfireFuelModel`, 보관은 `CampfireStateStore`. 빛/안전지대/회복/링/외형/게이지는 `Ratio·Stage·Strength(바닥일 때 배율)`를 읽어 각자 반응한다(서로 모른다). 새 반응을 추가해도 연료 코드는 안 바뀐다.
+- 꺼짐/재점화는 히스테리시스: 0이 되면 꺼지고, 반경 밖에서 `relightThreshold01`(25%) 이상 차야 켜진다. 반경 안에 계속 있으면 꺼진 채 유지(가까이서 지켜보면 안 살아난다 — 의도).
+- 감소 기준 반경은 고정 효과 반경(`effectRadius`)이지 줄어드는 안전지대 반경이 아니다(줄어든 반경을 기준으로 하면 줄어들수록 덜 닳는 되먹임이 생긴다).
+- `LandmarkData.fuelProfile`이 비면 연료 없는 모닥불(이전 동작).
+
+## D65. 상태 보관: ID 키 저장소, 언로드 중 회복은 경과 시간만큼 따라잡는다
+- ID = 종류 + 위치(센티 단위 반올림). 같은 seed면 로드/언로드와 무관하게 같다. 저장소는 `LandmarkSpawner.Awake`에서 새로 만들어 씬 리로드(다시하기) 때 자연 초기화된다(`CampfireStateStore.Active` 정적 참조는 `SafeZoneRegistry`와 같은 방식).
+- 언로드된 동안은 플레이어가 멀리 있다는 뜻이므로 다시 로드될 때 `Time.time` 경과만큼 회복을 따라잡는다. `SafeZoneSet`(청크 생성 때 스폰 제외 판단)도 같은 저장소를 읽어 꺼진 모닥불은 막지 않고 줄어든 반경을 쓴다.
+
+## D66. 안전지대 반경은 변화 속도를 제한하고, 꺼지면 즉시 0
+- 반경 = 최대 반경 × `Strength(safeRadiusAtEmpty)`. 늘거나 줄 때는 `SafeZoneProfile.radiusChangePerSecond`(기본 1타일/초) 이하로만 움직여 경계가 적을 훅 훑고 지나가지 않는다. 꺼지면 영역이 사라지므로 밀어낼 대상이 없어 즉시 0. 적을 미는 속도 자체는 병행 작업(D52, `Knockback_SafeZone`)이 맡는다.
+- 쓰레기 더미 규칙(D48)은 그대로: 안전 판단은 `SafeZoneRegistry.IsSafe`가 현재 반경을 쓰므로 모닥불이 켜져 있을 때만 안전이 우선한다.
+
+## D67. 단계 전환 연출: 페이드는 로컬, 파티클은 이벤트
+- 스프라이트 전환 페이드는 `CampfireAppearance`가(옛 스프라이트를 위에 겹쳐 투명하게), 파티클은 `ILandmarkEvents.OnCampfireStageChanged`를 구독하는 `CampfireStageFeedback`이 기존 스파크 파티클로 낸다(D49와 같은 방식). 전용 연기 스프라이트가 없어 스파크로 대신했다 → `docs/art_needed.md`.
+
+## D68. 단계 스프라이트를 `Assets/Art/Sprites/landmarks/`로 옮겼다
+- `Assets/campfire_states/`의 PNG는 임포트가 Multiple/PPU 100/Bilinear/중앙 피벗이라 기존 모닥불(Single/PPU 32/Point/바닥 피벗)과 크기·위치가 어긋난다. `ArtImporter`가 이 폴더 규칙을 자동 적용하므로 GUID를 유지한 채 옮기고 meta를 기존 모닥불 설정으로 맞췄다.
+
+## 검증 범위
+- Unity 에디터가 열려 있어 배치 모드를 쓰지 못했다. 각 asmdef/Editor/테스트 프로젝트를 `dotnet build`로 컴파일해 에러 0 확인(Unity 참조 DLL 사용). `CampfireFuelTests`는 컴파일만 확인했고 실행은 못 했다. 설치 메뉴, 폰트 메뉴, 플레이 동작은 실행하지 못했다.

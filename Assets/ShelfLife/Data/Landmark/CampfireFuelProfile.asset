@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 086ce6986ad8be645ad7934fc6dd5af0, type: 3}
+  m_Name: CampfireFuelProfile
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.CampfireFuelProfile
+  maxFuel: 100
+  drainPerSecondInside: 1.2
+  regenPerSecondOutside: 0.4
+  nightDrainMultiplier: 1.6
+  relightThreshold01: 0.25
+  enhanceFuelCost: 15
+  fullMin01: 0.6
+  weakMin01: 0.3
+  lightRadiusAtEmpty: 0.35
+  lightIntensityAtEmpty: 0.25
+  safeRadiusAtEmpty: 0.4
+  healAtEmpty: 0.3
+  lightFollowSpeed: 1.5
+  stageFadeSeconds: 0.4
+  gaugeShowBelow01: 0.5
+  gaugeFlashBelow01: 0.2
+  gaugeFlashHz: 3
+  gaugeHeight: 2.1
+  gaugeWidth: 1.3

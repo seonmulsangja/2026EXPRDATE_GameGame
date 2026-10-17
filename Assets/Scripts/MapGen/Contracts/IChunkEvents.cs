@@ -14,5 +14,20 @@ namespace ExpiryGame.MapGen
 
         Vector2Int CurrentChunk { get; }
         IReadOnlyCollection<Vector2Int> LoadedChunks { get; }
+
+        // 청크 좌표의 월드 경계 (OnChunkLoaded로 받은 Bounds와 같은 값). 구독 시점 이전에 로드된 청크를 소급 처리할 때 쓴다
+        Bounds BoundsOf(Vector2Int coord);
+    }
+
+    public static class ChunkEventsExtensions
+    {
+        // 구독하기 "전에" 이미 로드된 청크에 대해 onLoaded를 한 번씩 부른다. 이벤트만 구독하면 시작 지역이 영구히 비는 문제를 막는다.
+        // 호출 중에 컬렉션이 바뀌어도 안전하도록 복사본을 순회한다.
+        public static int ForEachLoaded(this IChunkEvents events, Action<Vector2Int, Bounds> onLoaded)
+        {
+            var snapshot = new List<Vector2Int>(events.LoadedChunks);
+            foreach (var coord in snapshot) onLoaded(coord, events.BoundsOf(coord));
+            return snapshot.Count;
+        }
     }
 }

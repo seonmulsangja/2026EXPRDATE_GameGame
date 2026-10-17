@@ -14,11 +14,19 @@ namespace ExpiryGame.Landmark
         [SerializeField, Min(0.1f)] private float flickerSpeed = 7f;
 
         private Light2D lightSource;
+        private CampfireFuel fuel;
         private float seed;
+        private float baseOuter;
+        private float baseInner;
+        private float radiusFollow = 1f;
+        private float intensityFollow = 1f;
 
         private void Awake()
         {
             lightSource = GetComponent<Light2D>();
+            fuel = GetComponentInParent<CampfireFuel>();
+            baseOuter = lightSource.pointLightOuterRadius;
+            baseInner = lightSource.pointLightInnerRadius;
             seed = Random.value * 100f;
         }
 
@@ -26,7 +34,22 @@ namespace ExpiryGame.Landmark
         {
             var baseIntensity = Mathf.Lerp(intensityAtDay, intensityAtNight, DayNightState.Night01);
             var noise = Mathf.PerlinNoise(seed, Time.time * flickerSpeed) * 2f - 1f;
-            lightSource.intensity = baseIntensity * (1f + noise * flicker);
+            var intensity = baseIntensity * (1f + noise * flicker);
+
+            // 연료 비율에 따라 빛 반경/밝기를 줄이고(부드럽게 따라간다), 꺼지면 빛을 끈다
+            if (fuel != null && fuel.HasProfile)
+            {
+                var profile = fuel.Profile;
+                var step = profile.lightFollowSpeed * Time.deltaTime;
+                radiusFollow = Mathf.MoveTowards(radiusFollow, fuel.Strength(profile.lightRadiusAtEmpty), step);
+                intensityFollow = Mathf.MoveTowards(intensityFollow, fuel.Strength(profile.lightIntensityAtEmpty), step);
+                lightSource.pointLightOuterRadius = baseOuter * radiusFollow;
+                lightSource.pointLightInnerRadius = Mathf.Min(baseInner, baseOuter * radiusFollow);
+                intensity *= intensityFollow;
+                var on = intensityFollow > 0.001f;
+                if (lightSource.enabled != on) lightSource.enabled = on;
+            }
+            lightSource.intensity = intensity;
         }
     }
 }

@@ -5,6 +5,7 @@
         "ExpiryGame.Survival",
         "ExpiryGame.Combat",
         "ExpiryGame.Drop",
+        "ExpiryGame.Landmark",
         "ExpiryGame.UI",
         "Unity.TextMeshPro",
         "Unity.InputSystem",

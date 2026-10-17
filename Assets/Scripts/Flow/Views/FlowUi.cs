@@ -76,11 +76,13 @@ namespace ExpiryGame.Flow
             var text = rt.gameObject.AddComponent<TextMeshProUGUI>();
             if (theme != null && theme.font != null) text.font = theme.font;
             text.text = content;
-            text.fontSize = size;
+            text.fontSize = theme != null ? UITextFit.SnapFontSize(size, theme.fontSnapUnit) : size;
             text.color = color;
             text.alignment = alignment;
             text.textWrappingMode = TextWrappingModes.NoWrap;
             text.raycastTarget = false;
+            // 박스보다 긴 문구는 줄여서 맞춘다 (타이틀/게임오버/클리어/버튼/배너 모두 이 경로)
+            if (theme != null) UITextFit.ConfigureShrink(text, theme.minFitRatio);
             return text;
         }
 

@@ -24,10 +24,20 @@ namespace ExpiryGame.UI
         [SerializeField] private PipRow pips;
         [SerializeField] private TMP_Text shelfText;
 
+        private Image enhancedBadge;
+        private AutoWidthPanel fitter;
         private FoodItem watched;
         private int shownSecond = -1;
         private bool pinned;
         private float previewLeft;
+
+        private void Awake()
+        {
+            // 긴 문구가 들어와도 패널이 가로로 늘어난다. 이전 씬에서도 동작하도록 필요하면 직접 붙인다
+            fitter = panel.GetComponent<AutoWidthPanel>();
+            if (fitter == null) fitter = panel.gameObject.AddComponent<AutoWidthPanel>();
+            fitter.Setup(theme, panel, new[] { nameText, hintText, eatText, damageText, shelfText });
+        }
 
         private void OnEnable()
         {
@@ -112,6 +122,10 @@ namespace ExpiryGame.UI
         {
             icon.sprite = watched.Data.icon != null ? watched.Data.icon : watched.Data.sprite;
             nameText.text = watched.Data.displayName;
+            if (enhancedBadge == null)
+                enhancedBadge = EnhanceBadge.Create((RectTransform)icon.transform.parent, theme, new Vector2(0f, 1f), new Vector2(0f, 0f), 22f);
+            enhancedBadge.rectTransform.anchoredPosition = icon.rectTransform.anchoredPosition + new Vector2(icon.rectTransform.sizeDelta.x, -icon.rectTransform.sizeDelta.y);
+            enhancedBadge.gameObject.SetActive(watched.IsEnhanced);
 
             var heal = Mathf.RoundToInt(watched.CurrentHeal);
             eatText.color = heal >= 0 ? theme.healText : theme.dangerText;
@@ -121,6 +135,7 @@ namespace ExpiryGame.UI
             RefreshUses();
             shownSecond = -1;
             RefreshShelfLife();
+            fitter.Refresh();
         }
 
         private void RefreshUses()
@@ -138,10 +153,12 @@ namespace ExpiryGame.UI
             {
                 shelfText.color = theme.dangerText;
                 shelfText.text = string.Format(theme.shelfLine, theme.rottenLabel);
+                fitter.Refresh();
                 return;
             }
             shelfText.color = theme.shelfText;
             shelfText.text = string.Format(theme.shelfLine, $"{second / 60}:{second % 60:00}");
+            fitter.Refresh();
         }
     }
 }

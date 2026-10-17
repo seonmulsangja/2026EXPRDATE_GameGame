@@ -1,7 +1,8 @@
 # Handoff — 이동 / 음식 / 낮밤
 
-> ⚠️ **제출 전 필수: 폰트 교체.** 지금 한글 폰트(`Assets/ShelfLife/UI/Fonts/PlaceholderKorean*`)는 **OS 맑은 고딕을 복사한 임시 폰트**라 배포 라이선스 문제가 있다. 배포 가능한 한글 픽셀 폰트(.ttf/.otf)를 `Assets/ShelfLife/UI/Fonts/`에 넣고 `Tools > ShelfLife > UI > Create TMP Font From Project Font`를 실행하면 `UITheme.font` 한 곳만 바뀌어 HUD와 게임 흐름 화면(타이틀/결과 등)이 모두 따라간다. 교체 후 `PlaceholderKorean*`은 삭제.
-> (팀원 폰트 `Assets/JCY/08 Font/DOSIyagiBoldface`가 있다 — 라이선스를 확인해 쓸 수 있으면 이걸 `UITheme.font`로 지정해도 된다.)
+> ⚠️ **제출 전 폰트 파일 추가 필수.** 지금은 한글 픽셀 폰트가 프로젝트에 없어(`Assets/Fonts`가 비어 있음) OS 폰트를 복사한 임시 폰트가 쓰인다 — 도트 UI와 모양이 안 맞고 배포 라이선스도 문제.
+> 라이선스가 확실한 한글 픽셀 폰트(.ttf/.otf)를 **`Assets/Fonts/`** 에 넣고 `Tools > ShelfLife > UI > Create TMP Font From Project Font` 를 실행하면, 래스터(Point) TMP 폰트 에셋이 만들어져 `UITheme.font` 한 곳만 바뀐다(HUD·흐름 화면 모두 따라감). 프로젝트의 한글 글자도 미리 아틀라스에 넣고 `UITheme.fontSnapUnit`(원본 도트 크기, 기본 16)을 기록한다. 폰트 원본 크기가 16이 아니면 실행 전에 `UITheme.fontSnapUnit`을 그 값으로 바꿔 둘 것.
+> 교체 후 `Assets/ShelfLife/UI/Fonts/PlaceholderKorean*`은 삭제. (팀원 폰트 `Assets/JCY/08 Font/DOSIyagiBoldface`는 라이선스 확인 후 `Assets/Fonts`로 복사해 써도 된다. 팀원 파일 자체는 수정하지 않는다.)
 
 설계 상세·이름 확정 목록은 `docs/spec.md` 참고. 코드: `Assets/Scripts/Survival/` (네임스페이스 `ExpiryGame`, asmdef `ExpiryGame.Survival`).
 
@@ -17,7 +18,7 @@
 | 디버그 | `DebugHud` | 임시 OnGUI. UI 완성 후 삭제 |
 
 썩은 음식: 회복 × `rottenHealMultiplier`(기본 −0.5 → 먹으면 피해), 데미지 × `rottenDamageMultiplier`(0.5).
-조작: 이동 WASD, 먹기 **E (길게 누름 — 템플릿 Interact가 Hold)**, 공격 좌클릭/Enter, 다음 음식 **2**.
+조작: 이동 WASD, 먹기 **E (길게 누름 — 시간은 `EatSettings.holdSeconds`, 기본 0.4초. 아래 "넉백 약화 + 먹기 진행 바" 참고)**, 공격 좌클릭/Enter, 다음 음식 **2**.
 
 ## 2. 팀원 연결용 인터페이스 / 이벤트
 ```csharp
@@ -271,3 +272,153 @@ IStatsSource      : Snapshot() → GameStats{DaysSurvived Kills FoodEaten Rotten
 - [ ] 사망 → 게임 오버(생존 일수/처치/먹은 음식/썩은 음식/시간/점수) → 다시하기(바로 시작) / 타이틀. 6일차 새벽 → 클리어 화면
 - [ ] 다시하기를 여러 번 반복해도 에러·이중 처리(처치 수 2배, 배너 두 번 등)가 없는지
 - [ ] 이 환경에서 확인 못 한 것: 위 전부 + Light2D에서 적 스프라이트 밝기, 버튼 클릭(`InputSystemUIInputModule`)
+
+
+---
+
+# 추가: 냉장고 / 모닥불 상호작용 (Landmark / Survival / Flow / Integration / UI)
+
+설계 근거 `docs/meetings.md` D42~D50, 필요한 도트 `docs/art_needed.md`. **팀원 파일(`Assets/JCY/`) 수정 0건** — 적 쪽은 `EnemyAdapter`(내 코드)가 기존 `KnockbackReceiver`/`IKnockbackable`로만 연결. 기존 이벤트/인터페이스 이름 변경 없음(추가만).
+기존 코드 수정: `FoodItem`(강화 플래그/배율), `FoodInventory`(강화 시 `Changed` 재발행), `LandmarkContext/Spawner`(참조 2개), `DumpDangerEffect`(안전지대 우선), `ZoneRingView`(링 반경), `EnemyChunkSpawner`/`EnemyAdapter`(안전지대), `AudioEventBinder`/`GameFlowRoot`(이벤트 연결), `FoodSlotView`/`FoodDetailPanelView`(배지), `UITheme`(배지 필드), `Flow` asmdef(Landmark 참조 추가).
+
+## 새 이벤트 / 인터페이스
+```csharp
+using ExpiryGame.Landmark;
+ILandmarkEvents     : OnFoodEnhanced(FoodEnhancedInfo{Food Position HealBefore HealAfter})  OnFridgeOpened(FridgeOpenedInfo{Position})   // LandmarkEvents 컴포넌트(씬에 1개, Install Landmarks가 만든다)
+ILandmarkEventSink  : FoodEnhanced(...) FridgeOpened(...)             // 효과 컴포넌트가 발행 (LandmarkContext.Events)
+ISafeZone           : Center Radius RepelEnemies RepelDistance RepelIntervalSeconds   // CampfireSafeZone이 구현
+SafeZoneRegistry    : Register/Unregister / TryFind(pos, out ISafeZone) / IsSafe(pos)  // 로드된 모닥불
+SafeZoneSet         : From(IEnumerable<LandmarkInfo>) / Contains(pos)                  // 배치 정보만으로 (청크 스폰 제외용)
+FoodEnhancer        : Check(FoodItem, cooldownLeft) → EnhanceCheck{Block CooldownLeft HealBefore HealAfter}  Apply(FoodItem)
+CooldownTimer       : Start(now, seconds) Remaining(now) IsReady(now)
+
+using ExpiryGame;   // Survival
+FoodItem : IsEnhanced HealMultiplier DamageMultiplier  TryEnhance(heal, damage, shelfLifeBonusRatio)  event Enhanced(FoodItem)
+```
+- `CurrentHeal/CurrentDamage`는 신선할 때 `Stats × 배율`. 유통기한→스탯 변환(`FoodStatCalculator`)은 그대로이고 복사하지 않았다.
+- 팀원 쪽에서 쓸 만한 것: 강화/냉장고 개봉은 `FindFirstObjectByType<LandmarkEvents>()`의 `OnFoodEnhanced/OnFridgeOpened` 구독. 안전지대 판단은 `SafeZoneRegistry.IsSafe(pos)`.
+
+## 클래스 / SO
+| 클래스 | 책임 |
+|---|---|
+| `FridgeLootEffect` | F로 `fridgeTable` 1회 드롭 → "비어 있음", 글로우 끔 |
+| `FridgeDecayEffect` | (기존) 반경 안 유통기한 ×0.3. 이제 `decayEnabled`로 끌 수 있음 |
+| `CampfireEnhanceEffect` | F로 선택 슬롯 음식 강화 + 쿨다운 + 프롬프트(변화량/사유) |
+| `CampfireSafeZone` | 안전지대 등록 (`SafeZoneProfile`) |
+| `EnemyChunkSpawner` / `EnemyAdapter` | 안전지대 안 스폰 제외 / 들어온 적 밀어내기 |
+| `EnhanceFeedback`, `AudioEventBinder` | 불꽃 파티클 / 효과음 (이벤트 구독만) |
+| `EnhanceBadge` | 슬롯·상세 패널의 작은 배지 (임시 도형) |
+
+## 수치 위치
+| 무엇 | 에셋 / 필드 |
+|---|---|
+| 강화 배율 1.3/1.3, 유통기한 +50%, 쿨다운(10초), 프롬프트·사유 문구 | `Assets/ShelfLife/Data/Landmark/EnhanceProfile.asset` |
+| 안전지대 반경(4.5), 밀어내기 ON/OFF·거리·간격 | `…/Landmark/SafeZoneProfile.asset` |
+| 냉장고 드롭 표 (신선도 90~100%, 2~3개) | `…/Landmark/DropTable_Fridge.asset` |
+| 냉장고: 유통기한 감소 on/off·0.3배, 드롭 굴림 수·위협도, 빈 문구 / 상호작용 거리 | `…/Landmark/Landmark_Fridge.asset` |
+| 모닥불: 위 두 SO 연결, 회복량, 상호작용 거리 | `…/Landmark/Landmark_Campfire.asset` |
+| 불꽃 파티클 개수·속도, 효과음 클립(강화/냉장고 열기) | `…/Flow/FlowSettings.asset`, `…/Flow/AudioCatalog.asset` |
+| 배지 색/스프라이트 | `Assets/ShelfLife/UI/UITheme.asset` (`enhancedBadgeColor`, `sprites.enhanceBadge`) |
+
+## 유니티에서 할 일
+- [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 Unity 없이 `dotnet build`로만 검증)
+- [ ] **열려 있는 씬마다** `Tools > ShelfLife > Install Landmarks To Open Scene` 한 번 더 (새 SO 3개 생성, 냉장고/모닥불 프리팹에 컴포넌트 추가, 씬에 `LandmarkEvents` 추가). HUD/적 재설치는 필요 없음
+- [ ] Test Runner > EditMode > `FridgeCampfireTests` (13개)
+
+
+## 추가: 적 스폰 진단 / 방어 (Flow / Integration / MapGen / DebugTools)
+- `IChunkEvents.BoundsOf(coord)` + `ForEachLoaded(...)`: 구독 전에 이미 로드된 청크를 소급 처리 (`EnemyChunkSpawner.OnEnable`이 사용). 새 `IChunkEvents` 구현은 `BoundsOf`를 구현해야 한다.
+- `DifficultyProfile.EnsureCurves()`: 비어 있는 곡선을 기본값으로 채움 (설치 / OnValidate / `DifficultyService.Awake`). `minSpawnMultiplier`(기본 0.2)가 스폰 배율의 하한.
+- `SpawnDiagnostics` / `SpawnBlockReason` / `ISpawnDebug` (`Flow/Spawning`): 막힌 이유별 카운터. `EnemyChunkSpawner`가 구현. 시작 시 필수 참조가 비면 `Debug.LogError`로 무엇이 비었는지 한 번에 알려 주고 스폰을 멈춘다.
+- F1 디버그 메뉴에 "적 스폰 상태" 패널: 활성/최대, 배율, 직전 결과, 이유별 카운터, 강제 스폰, 전체 정지/재개.
+- **유니티에서 할 일**: `Tools > ShelfLife > Setup Game (All In One)` 실행 후 저장 → `Assets/ShelfLife/Scenes/Game.unity`를 열고 Play. 테스트는 Test Runner > EditMode > `SpawnPathTests`.
+
+
+---
+
+# 추가: 넉백 약화 + 먹기 진행 바 (Combat / Survival / UI / Integration)
+
+설계 근거·원인 조사 수치 `docs/meetings.md` D52~D58. **팀원 파일(`Assets/JCY/`) 수정 0건.**
+기존 이름은 그대로(`KnockbackReceiver`, `FoodConsumer`, `EnemyAdapter`, `HitFeelProfile` …). 바뀐 계약은 아래 두 줄뿐.
+- `IKnockbackable`: `Resistance`(0~1)와 `ApplyKnockback(dir, distance, KnockbackProfile)` 오버로드 추가. `IsKnockedBack`은 이제 "밀림 + 경직" 동안 true.
+- `IPlayerInput`: `EatHeld`(E를 누르고 있는 동안 true) 추가. `HitFeelProfile.knockbackDistance`는 `KnockbackProfile`로 이사(방향 섞기 `knockbackRadialBlend`는 그대로).
+
+## 클래스 / SO
+| 클래스 | 책임 |
+|---|---|
+| `KnockbackProfile` (SO) | 넉백 수치 전부: 기본 거리·데미지 보너스 곡선·최대 거리·지속시간·ease-out·최대 속도·경직·연속 피격 감쇠 |
+| `KnockbackMotion` | 넉백 한 번의 계산(순수 클래스, 테스트 대상). 상한/감쇠/누적 방지/속도 제한/장애물 정지/경직 |
+| `KnockbackReceiver` | 계산된 변위를 `MovePosition`으로 적용, `Rigidbody2D.Cast`로 장애물·다른 적 앞에서 멈춤 |
+| `EatSettings` (SO) | 길게 누르는 시간(0.4초), 진행 바 크기/위치/색, 안내 문구 |
+| `EatHoldTimer` | 길게 눌러 먹기 상태 머신(순수). 놓으면 즉시 취소 |
+| `EatAdvisor` | 체력 가득 / 썩은 음식 판정 + 안내 문구 (먹기를 막지는 않음) |
+| `FoodConsumer` | `EatHoldTimer`로 먹기. `EatStarted/EatCanceled/FoodEaten`, `Progress01` 노출 |
+| `EatProgressView` (UI) | 먹는 중에만 머리 위(월드 좌표 캔버스)에 바 + 안내 문구. 씬 로드 직후 자동 부착 |
+
+## 수치 위치
+| 무엇 | 에셋 / 필드 |
+|---|---|
+| 타격 넉백: 거리 0.3~0.6(상한 1) · 지속 0.1초 · ease-out · 경직 0.15초 · 연속 피격 감쇠 · 최대 속도 | `Assets/Resources/ShelfLife/Knockback_Hit.asset` |
+| 모닥불 밀어내기(훨씬 약하고 느리게, 경직 없음) | `Assets/Resources/ShelfLife/Knockback_SafeZone.asset` (밀어낼 거리·간격은 기존 `SafeZoneProfile`) |
+| 먹기 길게 누르기 0.4초 · 바 크기/높이/색 · 안내 문구 | `Assets/Resources/ShelfLife/EatSettings.asset` |
+| 적별 넉백 저항(0~1, 기본 0) | `EnemyAdapter.knockbackResistance`(프리팹) — EnemySO에 같은 이름 필드가 생기면 그 값이 우선 |
+| 스윙 반동 | `SwingProfile.recoilDistance` (플레이어 `KnockbackReceiver.defaultProfile` 수치를 따름) |
+
+연결이 비어 있어도 `Resources/ShelfLife/…` → 코드 기본값 순으로 찾으므로 설치 메뉴를 다시 돌리지 않아도 바로 적용된다.
+(`Install Combat…`/`Install Enemies…`를 다시 실행하면 인스펙터 칸에도 연결해 준다.)
+
+## 플레이해서 확인할 항목
+- [ ] 허수아비/적을 때렸을 때 한 번에 밀리는 거리가 약 0.3~0.6타일(대략 반 칸), 가장 센 음식도 1칸을 넘지 않는다. 연속으로 때리면 점점 덜 밀린다 — `Knockback_Hit.asset`: `baseDistance`, `bonusDistanceAtMaxDamage`, `maxDistance`, `comboFalloff`
+- [ ] 맞은 적이 잠깐(0.15초) 멈칫하고 바로 접촉 데미지를 주지 않는다 — `staggerSeconds`. 타격감(히트스톱/흔들림/플래시)은 그대로인지 — 약하면 `duration`/`staggerSeconds`를 올리고 거리는 두기
+- [ ] 벽/나무/다른 적에 붙어서 때려도 뚫고 밀리지 않고 그 앞에서 멈춘다
+- [ ] 모닥불 안쪽에 있는 적이 휙 날아가지 않고 천천히 경계 밖으로 나간다 — `Knockback_SafeZone.asset`: `maxSpeed`, `duration`
+- [ ] E를 누르면 플레이어 머리 위에 작은 바가 차오르고(0.4초) 다 차면 먹는다. 중간에 놓으면 바로 사라진다 — `EatSettings.asset`: `holdSeconds`, `barSize`, `headGap`
+- [ ] 체력이 가득일 때 / 썩은 음식을 먹을 때 바 위에 사유 문구가 뜬다 (한글이 깨지면 `UITheme.font` 확인)
+- [ ] 하단 패널 옆에 먹기 관련 바가 더 이상 뜨지 않는다 (원래부터 먹기용 바 오브젝트는 없었음 — meetings D57)
+- [ ] Test Runner > EditMode > `KnockbackEatTests` (17개)
+
+
+---
+
+# 추가: 텍스트 박스 맞춤 + 모닥불 연료 (UI / Landmark / Flow / DebugTools)
+
+설계 근거 `docs/meetings.md` D59~D68. **팀원 파일(`Assets/JCY/`) 수정 0건.** 기존 이름 유지(추가만): `ILandmarkEvents`에 `OnCampfireStageChanged`, `ILandmarkEventSink`에 `CampfireStageChanged`, `EnhanceBlock`에 `CampfireOut/LowFuel`, `SafeZoneSet.From(landmarks, store = null)`(옵션 인자).
+
+## 1. 텍스트가 박스에 맞게
+| 클래스 | 책임 |
+|---|---|
+| `UITextFit` | 순수 계산: 도트 배율 단위 올림(`SnapUp`), 패널 크기(`PanelSize`), 폰트 정수배(`SnapFontSize`), 고정 박스용 줄임(`ConfigureShrink`) |
+| `AutoSizePanel` | 안내 박스(InteractPrompt): 글자 크기 + 패딩에 맞춰 늘어나고, 최대 폭을 넘으면 줄바꿈 + 높이 증가. 크기는 `pixelScale` 배수(가운데 피벗은 2배수)로만 변해 9-slice가 안 뭉개짐 |
+| `AutoWidthPanel` | 음식 상세 패널: 가장 긴 행에 맞춰 가로로 늘어남(`detailMaxWidth`까지) |
+| `ThemedText` | 고정 박스 글자(슬롯 숫자, 체력/시간, 일차, 상세 행, 랜드마크 라벨): 넘치면 최소 비율까지 줄이고 그래도 넘치면 `…`. 폰트 정수배 스냅, 줄 간격 |
+| `FlowUi.Text` | 타이틀/일시정지/게임오버/클리어/버튼/일차 배너 문구도 같은 방식으로 줄임 |
+- 씬 재설치 없이도 동작: `InteractPromptView`/`FoodDetailPanelView`가 실행 시 필요한 컴포넌트를 스스로 붙인다. (HUD를 새로 설치하면 설치 코드가 같은 컴포넌트를 붙인다.)
+- 수치 위치: `Assets/ShelfLife/UI/UITheme.asset` → "텍스트 박스 맞춤"(패딩 X/Y, 최소 폭/높이, **안내 박스 최대 폭**, **상세 패널 최대 폭**, 줄임 최소 비율), "폰트 렌더링"(`fontSnapUnit`, `lineSpacing`, `panelTextAlign`).
+- F1 디버그 메뉴 → "안내 문구 순환 표시": 짧은/긴/여러 줄/영문/숫자 문구를 1.5초마다 박스에 띄운다(이전/다음 버튼도 있음). 에디터/Development Build 전용.
+
+## 2. 모닥불 연료
+| 클래스 | 책임 |
+|---|---|
+| `CampfireFuelProfile` (SO) | 모든 수치: 최대 연료, 반경 안 초당 감소, 반경 밖 초당 회복, 밤 배율, 재점화 임계값, 굽기 1회 소모량, 단계 경계, 바닥일 때의 빛/안전지대/회복 배율, 게이지 설정 |
+| `CampfireFuelModel` | 연료 규칙(순수): `Tick`, `TryConsume`, `Stage`, `Strength(atEmpty)`, `CatchUpAway` |
+| `CampfireStateStore` / `CampfireState` / `LandmarkId` | 랜드마크 ID(종류+위치)로 키를 잡는 상태 보관. `LandmarkSpawner`가 씬마다 새로 만든다 |
+| `CampfireFuel` (컴포넌트) | **연료 상태만**. 다른 컴포넌트가 `Ratio/Stage/IsLit/Strength()`를 읽는다 |
+| `CampfireLight`, `CampfireHealEffect`, `CampfireSafeZone`, `ZoneRingView`, `CampfireAppearance`, `CampfireFuelGauge` | 각자 연료를 읽어 반응(빛 반경·밝기 / 회복량 / 안전지대 반경 / 링 크기 / 스프라이트 단계+페이드+글로우 / 월드 게이지) |
+| `CampfireEnhanceEffect` | 꺼짐/연료 부족이면 굽기 불가(프롬프트 "꺼짐"), 굽기 성공 시 연료 소모 |
+| `CampfireStageFeedback` (Flow) | 단계가 바뀔 때 스파크 파티클 (이벤트 구독만) |
+- 단계 스프라이트: 가득 `landmark_campfire_0~2`(기존 루프) / 약해짐 `_low_0~1` / 잉걸불 `_embers` / 꺼짐 `_out` — `Assets/Art/Sprites/landmarks/`로 옮겨서 기존 임포트 규칙(PPU 32, Point, 피벗 바닥)을 받는다.
+- `LandmarkData.fuelProfile`을 비우면 연료 없는 모닥불(이전 동작) — 안전망.
+
+### 수치 위치
+| 무엇 | 에셋 / 필드 |
+|---|---|
+| 연료·감소·회복·밤 배율·재점화 임계값·굽기 소모·단계 경계·바닥 배율·페이드·게이지(표시 50%/깜빡임 20%) | `Assets/ShelfLife/Data/Landmark/CampfireFuelProfile.asset` |
+| 안전지대 최대 반경, 반경 변화 속도 `radiusChangePerSecond` | `…/Landmark/SafeZoneProfile.asset` |
+| 굽기 불가 사유 문구 ("꺼짐", "연료 부족") | `…/Landmark/EnhanceProfile.asset` |
+| 단계 전환 파티클 개수/속도 | `…/Flow/FlowSettings.asset` ("모닥불 연료 단계 전환 연출") |
+
+## 유니티에서 할 일
+- [ ] Console에 컴파일 에러 없는지 확인 (이 환경에서는 Unity 없이 `dotnet build`로만 검증)
+- [ ] 열린 씬마다 `Tools > ShelfLife > Install Landmarks To Open Scene` 한 번 (연료 SO 생성, 모닥불 프리팹에 연료/게이지/외형 컴포넌트와 단계 스프라이트 연결). HUD 재설치는 필수 아님 — 새 HUD 설치 코드를 쓰려면 `Install HUD To Open Scene`
+- [ ] Test Runner > EditMode > `CampfireFuelTests` (15개), `FridgeCampfireTests`
+- [ ] (제출 전) 위 폰트 안내 참고

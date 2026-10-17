@@ -291,6 +291,12 @@ namespace ExpiryGame.UI.Editor
             Set(view, "usesText", uses);
             Set(view, "pips", pips);
             Set(view, "shelfText", shelf);
+
+            // 긴 문구가 들어오면 패널이 (최대 폭까지) 가로로 늘어난다
+            var fit = panel.gameObject.AddComponent<AutoWidthPanel>();
+            Set(fit, "theme", theme);
+            Set(fit, "panel", panel);
+            SetArray(fit, "rows", new Object[] { nameText, hint, eat, damage, shelf });
         }
 
         // 화살표/라벨이 피할 HUD 점유 영역을 실제 패널 크기에서 읽어 UITheme에 기록한다 (패널 크기를 바꾸고 재설치하면 따라간다)
@@ -300,6 +306,10 @@ namespace ExpiryGame.UI.Editor
             AddZone(zones, canvas, "HealthPanel", new Vector2(0f, 1f));
             AddZone(zones, canvas, "TimePanel", new Vector2(1f, 1f));
             AddZone(zones, canvas, "DetailPanel", new Vector2(1f, 0f));
+            // 상세 패널은 긴 문구에 맞춰 최대 폭까지 늘어나므로 그만큼을 점유 영역으로 기록한다
+            var detail = zones[zones.Count - 1];
+            detail.size.x += Mathf.Max(0f, theme.detailMaxWidth * scale - ((RectTransform)canvas.Find("DetailPanel")).sizeDelta.x);
+            zones[zones.Count - 1] = detail;
             zones.Add(new HudZone
             {
                 name = "SlotBar",
@@ -361,6 +371,13 @@ namespace ExpiryGame.UI.Editor
             Set(view, "interactor", interactor);
             Set(view, "root", panel.gameObject);
             Set(view, "label", label);
+            Set(view, "theme", theme);
+
+            // 안내 박스는 글자에 맞춰 늘어난다 (패딩/최소·최대 폭은 UITheme)
+            var fit = panel.gameObject.AddComponent<AutoSizePanel>();
+            Set(fit, "theme", theme);
+            Set(fit, "panel", panel);
+            Set(fit, "label", label);
         }
 
         // ---------- 생성 도우미 ----------

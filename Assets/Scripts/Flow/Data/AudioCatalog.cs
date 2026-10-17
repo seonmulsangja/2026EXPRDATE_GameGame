@@ -24,6 +24,10 @@ namespace ExpiryGame.Flow
         public AudioClip sfxRot;
         public AudioClip sfxPickup;
         public AudioClip sfxBreak;
+        [Tooltip("모닥불에서 음식을 강화했을 때 (비어 있으면 무음)")]
+        public AudioClip sfxEnhance;
+        [Tooltip("냉장고를 열었을 때 (비어 있으면 무음)")]
+        public AudioClip sfxFridgeOpen;
         [Range(0f, 1f)] public float sfxVolume = 0.8f;
     }
 }

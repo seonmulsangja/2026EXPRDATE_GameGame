@@ -19,3 +19,14 @@
 ## 이번 작업에서 추가로 필요한 것
 - 없음. 타이틀/일시정지/결과/배너/힌트는 UITheme 폰트와 단색 패널로 만들었고, 피격 비네트는 코드로 만든 텍스처다.
 - (선택) 타이틀 로고 이미지: `ui_title_logo.png` (권장 256×64, PPU 32 → 화면에서 4배 확대). 쓰려면 `FlowSettings.gameTitle` 텍스트 대신 이미지를 넣도록 `TitleView`를 고치면 된다.
+
+
+## 냉장고 / 모닥불 작업에서 추가로 필요한 것
+| 용도 | 스프라이트 이름 | 크기(권장) | 비고 |
+|---|---|---|---|
+| 강화된 음식 배지 (슬롯 우상단 + 상세 패널 아이콘 옆) | `ui_badge_enhanced.png` | 8×8 (PPU 32 → 슬롯에서 약 17% 크기) | 불꽃/별 모양. 지금은 주황 마름모 임시 도형(`UITheme.enhancedBadgeColor`). 쓰려면 `UITheme.sprites.enhanceBadge`에 끌어다 놓기만 하면 됨 |
+- (선택) 비어 있는 냉장고: 문이 열린 `landmark_fridge_open.png` (32×40 권장). 코드 지원 없음 — 지금은 글로우만 꺼진다. 쓰려면 `FridgeLootEffect.Interact`에서 `Body` 스프라이트를 바꾸면 된다.
+- 불꽃 파티클은 기존 스파크(`ParticleKind.Spark`)를 재사용해서 추가 아트 없음.
+
+- (선택) 모닥불 단계 전환 연기: 지금은 기존 스파크 파티클을 재사용한다. 전용 연기 스프라이트(`fx_smoke_*.png`, 8×8 안팎 3프레임)가 생기면 `HitFxSpawner`에 `ParticleKind.Smoke`를 추가해 `CampfireStageFeedback`에서 쓰면 된다.
+- 모닥불 단계 스프라이트(`landmark_campfire_low_0~1`, `_embers`, `_out`)는 `Assets/Art/Sprites/landmarks/`에 들어 있다.

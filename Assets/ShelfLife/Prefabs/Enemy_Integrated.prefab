@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3970593457881870368
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.874
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.2283
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 685292592183055673, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6390350694691049279, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      propertyPath: m_Name
+      value: Enemy_Integrated
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6390350694691049279, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1377987397051292671}
+    - targetCorrespondingSourceObject: {fileID: 6390350694691049279, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5097362617964535610}
+    - targetCorrespondingSourceObject: {fileID: 6390350694691049279, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2886861901236022660}
+  m_SourcePrefab: {fileID: 100100000, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+--- !u!1 &8049471502895218463 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6390350694691049279, guid: 7d84282756b87f0408a132da9993fbb4, type: 3}
+  m_PrefabInstance: {fileID: 3970593457881870368}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1377987397051292671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049471502895218463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f224f2b5febb3044192b72e9417d28b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ExpiryGame.Integration.EnemyAdapter
+--- !u!114 &5097362617964535610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049471502895218463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78ef069132ad7a245a19382018d484c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Combat::ExpiryGame.Combat.KnockbackReceiver
+  multiplier: 1
+  damping: 12
+  stopSpeed: 0.3
+--- !u!114 &2886861901236022660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049471502895218463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dad559cdc9de2848860a210e4aa5d46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ExpiryGame.Combat::ExpiryGame.Combat.FlashOnHit
+  flashMaterial: {fileID: 2100000, guid: 92718edfffc47534da45fc13e5b93eaa, type: 2}
+  renderers: []

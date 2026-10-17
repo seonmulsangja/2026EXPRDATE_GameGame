@@ -79,6 +79,7 @@ namespace ExpiryGame.Flow.Editor
             InstallPlayerFlash(player);
 
             var profile = LoadOrCreate<DifficultyProfile>("DifficultyProfile");
+            if (profile.EnsureCurves()) EditorUtility.SetDirty(profile); // 비어 있는 곡선은 배율 0 = 적이 안 나옴
             var host = GameObject.Find(RootName) ?? new GameObject(RootName);
 
             var difficulty = DarkArtSceneInstaller.GetOrAdd<DifficultyService>(host);

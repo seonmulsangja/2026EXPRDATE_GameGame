@@ -12,12 +12,14 @@ namespace ExpiryGame.Landmark
         [SerializeField] private SpriteRenderer ring;
 
         private LandmarkZone zone;
+        private CampfireSafeZone safe;
         private float applied = -1f;
         private float appliedRadius = -1f;
 
         private void Awake()
         {
             zone = GetComponent<LandmarkZone>();
+            safe = GetComponent<CampfireSafeZone>();
         }
 
         private void Update()
@@ -25,15 +27,17 @@ namespace ExpiryGame.Landmark
             var data = zone.Data;
             if (data == null) return;
 
-            if (!Mathf.Approximately(appliedRadius, data.effectRadius))
+            // 모닥불은 안전지대의 "현재" 반경(연료에 따라 변함)으로 그린다
+            var radius = safe != null ? safe.Radius : data.RingRadius;
+            if (!Mathf.Approximately(appliedRadius, radius))
             {
-                appliedRadius = data.effectRadius;
+                appliedRadius = radius;
                 ring.transform.position = transform.position;
-                ring.transform.localScale = Vector3.one * (data.effectRadius * 2f / RingSpriteDiameter);
+                ring.transform.localScale = Vector3.one * (radius * 2f / RingSpriteDiameter);
             }
 
             var reveal = Mathf.Max(0.01f, data.ringRevealDistance);
-            var alpha = 1f - Mathf.Clamp01((zone.PlayerDistance - data.effectRadius) / reveal);
+            var alpha = 1f - Mathf.Clamp01((zone.PlayerDistance - radius) / reveal);
             if (Mathf.Abs(alpha - applied) < 0.01f) return;
             applied = alpha;
             var color = data.ringTint;

@@ -33,6 +33,13 @@ namespace ExpiryGame.MapGen
         public Vector2Int CurrentChunk { get; private set; }
         public IReadOnlyCollection<Vector2Int> LoadedChunks => loaded.Keys;
 
+        public Bounds BoundsOf(Vector2Int coord)
+        {
+            return new Bounds(
+                new Vector3(coord.x * settings.chunkSize + settings.chunkSize * 0.5f, coord.y * settings.chunkSize + settings.chunkSize * 0.5f, 0f),
+                new Vector3(settings.chunkSize, settings.chunkSize, 0f));
+        }
+
         public event Action<Vector2Int, Bounds, ChunkRandom> OnChunkLoaded;
         public event Action<Vector2Int> OnChunkUnloaded;
 

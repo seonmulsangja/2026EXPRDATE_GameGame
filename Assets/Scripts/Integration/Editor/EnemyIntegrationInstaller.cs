@@ -19,6 +19,7 @@ namespace ExpiryGame.Integration.Editor
         private const string VariantPath = "Assets/ShelfLife/Prefabs/Enemy_Integrated.prefab";
         private const string DataDir = "Assets/ShelfLife/Data/Integration";
         private const string SettingsPath = DataDir + "/EnemyIntegrationSettings.asset";
+        private const string KnockbackSafeZonePath = "Assets/Resources/ShelfLife/Knockback_SafeZone.asset";
         private const string DropTablePath = "Assets/ShelfLife/Data/Drop/DropTable_Default.asset";
         private const string FlashMaterialPath = "Assets/ShelfLife/Data/Combat/SpriteFlash.mat";
         private const string PoolingName = "EnemyPooling (JCY)";
@@ -44,6 +45,7 @@ namespace ExpiryGame.Integration.Editor
             inventory.gameObject.tag = "Player";
             var settings = LoadOrCreateSettings();
             settings.enemyPrefab = CreateVariant(prefab);
+            if (settings.enemyPrefab == null) { Debug.LogError("[ShelfLife] 적 프리팹 변형을 만들지 못했습니다. 위 오류를 확인하세요."); return; }
             EditorUtility.SetDirty(settings);
 
             InstallPooling(inventory.transform);
@@ -123,6 +125,7 @@ namespace ExpiryGame.Integration.Editor
                 AssetDatabase.CreateAsset(settings, SettingsPath);
             }
             if (settings.dropTable == null) settings.dropTable = AssetDatabase.LoadAssetAtPath<DropTable>(DropTablePath);
+            if (settings.safeZoneKnockback == null) settings.safeZoneKnockback = AssetDatabase.LoadAssetAtPath<KnockbackProfile>(KnockbackSafeZonePath);
             return settings;
         }
 
