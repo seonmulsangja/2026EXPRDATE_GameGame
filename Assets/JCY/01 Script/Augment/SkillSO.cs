@@ -33,6 +33,7 @@ public class SkillSO : ScriptableObject
     [Header("Action")]
     public SkillActionSO skillAction;
 
+
     public float GetDamage(int level)
     {
         return damage + damagePerLevel * (level - 1);

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a7757ddc24c38449fa00a758b257f9, type: 3}
+  m_Name: __Blood_SKill
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSO
+  skillName: "\uD608\uC561 \uBCF4\uCDA9"
+  icon: {fileID: 1381499768, guid: acd3dc0c906228b4085a7d0bbed1a4a5, type: 3}
+  description: "\uCCB4\uB825\uC774 \uC77C\uC815 \uC218\uCE58 \uC774\uD558\uB85C \uB0B4\uB824\uAC00\uBA74
+    \uCCB4\uB825\uC744 \uB9E4\uC6B0 \uD06C\uAC8C \uD68C\uBCF5\uD569\uB2C8\uB2E4.
+    120\uCD08\uB9C8\uB2E4 \uC7AC\uBC1C\uB3D9 \uB429\uB2C8\uB2E4."
+  maxLevel: 5
+  damage: 0
+  damagePerLevel: 0
+  duration: 0
+  durationPerLevel: 0
+  cooldown: 0
+  cooldownReductionPerLevel: 0
+  minCooldown: 0
+  range: 0
+  rangePerLevel: 0
+  skillAction: {fileID: 11400000, guid: d2049935237164b4eb86651871412766, type: 2}

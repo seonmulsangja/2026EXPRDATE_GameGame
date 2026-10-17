@@ -9,6 +9,8 @@ public class PlayerSkillController : MonoBehaviour
         public SkillSO skill;
         public int level;
         public Coroutine routine;
+        
+        public float nextActivationTime = 0f;
     }
 
     private readonly Dictionary<SkillSO, SkillRuntime> _skills = new();
@@ -46,6 +48,22 @@ public class PlayerSkillController : MonoBehaviour
             SkillActionSO action = skill.skillAction;
             int level = runtime.level;
 
+            // Blood 스킬은 자체 쿨타임으로 관리
+            if (action is Blood_SKill)
+            {
+                while (true)
+                {
+                    if (Time.time >= runtime.nextActivationTime)
+                    {
+                        action.Execute(gameObject, skill, level);
+    
+                        runtime.nextActivationTime = Time.time + 120f;
+                    }
+
+                    yield return null;
+                }
+            }
+            
             // 스킬 발동
             action.Execute(gameObject, skill, level);
 

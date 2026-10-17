@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ExpiryGame;
 
 public class AugmentState : MonoBehaviour
 {
     [Header("Base Stats")]
-    [SerializeField] private float baseAttackPower = 10f;
+    [SerializeField] private int baseAttackPower = 10;
     [SerializeField] private float baseMoveSpeed = 5f;
 
     [Header("Current Stats")]
-    [SerializeField] private float attackPower;
+    [SerializeField] private int attackPower;
     [SerializeField] private float moveSpeed;
 
     private readonly Dictionary<SkillSO, int> _skillLevels = new();
@@ -31,7 +32,7 @@ public class AugmentState : MonoBehaviour
         switch (augment.effectType)
         {
             case AugmentEffectType.AttackPower:
-                attackPower += augment.value;
+                attackPower += (int)augment.value;
                 break;
 
             case AugmentEffectType.MoveSpeed:
@@ -74,4 +75,17 @@ public class AugmentState : MonoBehaviour
         Debug.Log($"{skill.skillName} 획득! Lv.{newLevel}");
         return true;
     }
+    
+    public int AddAttackPower(int amount)
+    {
+        attackPower += amount;
+        return attackPower;
+    }
+    
+    public float AddMoveSpeed(float amount)
+    {
+        moveSpeed += amount;
+        return moveSpeed;
+    }
+    
 }

@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e44f200cd042b242ad3e1e513bdbd76, type: 3}
-  m_Name: DamageUp
+  m_Name: BloodAugmentSO
   m_EditorClassIdentifier: Assembly-CSharp::AugmentSO
   augmentName: 
   description: 
   icon: {fileID: 0}
-  augmentType: 0
+  augmentType: 1
   effectType: 0
   value: 0
-  skill: {fileID: 0}
+  skill: {fileID: 11400000, guid: 11f5270363527dc419e9162dff6f8b0b, type: 2}
   maxLevel: 5

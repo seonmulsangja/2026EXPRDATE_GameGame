@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a7757ddc24c38449fa00a758b257f9, type: 3}
+  m_Name: HealSkill_JCY
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSO
+  skillName: "\uD68C\uBCF5\uC758 \uAC00\uD638"
+  icon: {fileID: 1045400028, guid: acd3dc0c906228b4085a7d0bbed1a4a5, type: 3}
+  description: "\uC77C\uC815\uC2DC\uAC04 \uB9C8\uB2E4 \uB808\uBCA8 * 1\uC758 \uCCB4\uB825\uC744
+    \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+  maxLevel: 5
+  damage: 0
+  damagePerLevel: 0
+  duration: 0.5
+  durationPerLevel: 0.5
+  cooldown: 15
+  cooldownReductionPerLevel: 1
+  minCooldown: 10
+  range: 0
+  rangePerLevel: 0
+  skillAction: {fileID: 11400000, guid: 812c100f5547cab4080bff9f99e4b273, type: 2}
