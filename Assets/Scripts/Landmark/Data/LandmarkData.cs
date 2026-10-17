@@ -49,6 +49,8 @@ namespace ExpiryGame.Landmark
         [Header("모닥불: 음식 강화(F) / 안전지대")]
         public EnhanceProfile enhanceProfile;
         public SafeZoneProfile safeZone;
+        [Tooltip("비어 있으면 연료 없이 항상 켜져 있는 모닥불 (이전 동작)")]
+        public CampfireFuelProfile fuelProfile;
 
         [Header("편의점: 상호작용 1회 드롭 (재방문 시 비어 있음)")]
         public DropTable lootTable;

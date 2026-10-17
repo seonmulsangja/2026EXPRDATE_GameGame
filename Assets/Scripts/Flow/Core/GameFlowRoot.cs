@@ -39,6 +39,7 @@ namespace ExpiryGame.Flow
         private PlayerHurtFeedback hurtFeedback;
         private AudioEventBinder audioBinder;
         private EnhanceFeedback enhanceFeedback;
+        private CampfireStageFeedback campfireFeedback;
         private LoadoutGiver loadoutGiver;
         private DayBannerView banner;
         private ControlsHintView hint;
@@ -87,6 +88,7 @@ namespace ExpiryGame.Flow
             var landmarkEvents = FindFirstObjectByType<LandmarkEvents>();
             audioBinder = new AudioEventBinder(audio, audioCatalog, consumer, hitDetector, inventory, dropSpawner, landmarkEvents);
             enhanceFeedback = new EnhanceFeedback(landmarkEvents, FindFirstObjectByType<HitFxSpawner>(), settings);
+            campfireFeedback = new CampfireStageFeedback(landmarkEvents, FindFirstObjectByType<HitFxSpawner>(), settings);
 
             clock.DayStarted += OnDayStarted;
             machine.StateChanged += OnStateChanged;
@@ -124,6 +126,7 @@ namespace ExpiryGame.Flow
             hurtFeedback?.Dispose();
             audioBinder?.Dispose();
             enhanceFeedback?.Dispose();
+            campfireFeedback?.Dispose();
             stats?.Dispose();
             loadoutGiver?.Release();
             Time.timeScale = 1f;

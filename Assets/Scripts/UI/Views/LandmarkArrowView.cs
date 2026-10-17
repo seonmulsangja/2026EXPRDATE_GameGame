@@ -19,6 +19,8 @@ namespace ExpiryGame.UI
         [SerializeField, Min(0f)] private float edgeMargin = 60f;
         [Tooltip("화살표 중심에서 라벨 중심까지 안쪽으로 (캔버스 px)")]
         [SerializeField, Min(0f)] private float labelOffset = 60f;
+        [Tooltip("라벨 최대 폭 (캔버스 px). 넘으면 글자가 줄어든다")]
+        [SerializeField, Min(40f)] private float labelMaxWidth = 480f;
         [SerializeField, Min(0.05f)] private float refreshSeconds = 0.25f;
         [Tooltip("화면 안으로 판정하는 뷰포트 여유 (0.02 = 가장자리 2% 안쪽까지 보이는 것으로 취급)")]
         [SerializeField, Range(0f, 0.2f)] private float onScreenInset = 0.02f;
@@ -151,6 +153,8 @@ namespace ExpiryGame.UI
             shownDistance = distance;
             shownName = info.Data.displayName;
             label.text = string.Format(theme.landmarkFormat, info.Data.displayName, distance);
+            // 라벨 영역을 글자 폭에 맞춰 HUD 회피 계산(Bounds)이 실제 크기를 쓰게 한다
+            UITextFit.FitLabelWidth(label, labelMaxWidth);
         }
 
         private void Show(bool visible)

@@ -7,6 +7,9 @@ namespace ExpiryGame.Landmark
     public class LandmarkContext
     {
         public LandmarkData Data;
+        // 랜드마크 ID(종류+위치). 청크가 언로드돼도 상태를 이어 붙이는 키
+        public string Id;
+        public CampfireStateStore Store;
         public Transform Player;
         public IHealable PlayerHealth;
         public IDropService Drops;

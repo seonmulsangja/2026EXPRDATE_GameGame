@@ -10,6 +10,7 @@ namespace ExpiryGame.Landmark
 
         private LandmarkContext context;
         private FoodEnhancer enhancer;
+        private CampfireFuel fuel;
 
         // 프롬프트 문자열은 상태가 바뀔 때만 다시 만든다 (Interactor가 매 프레임 읽는다)
         private string prompt = string.Empty;
@@ -37,7 +38,16 @@ namespace ExpiryGame.Landmark
         {
             context = ctx;
             enhancer = ctx.Data.enhanceProfile != null ? new FoodEnhancer(ctx.Data.enhanceProfile) : null;
+            fuel = GetComponent<CampfireFuel>();
             promptDirty = true;
+        }
+
+        // 꺼졌거나 연료가 모자라면 굽기 불가 (연료가 없는 모닥불은 항상 가능)
+        private EnhanceBlock FuelBlock()
+        {
+            if (fuel == null || !fuel.HasProfile) return EnhanceBlock.None;
+            if (!fuel.IsLit) return EnhanceBlock.CampfireOut;
+            return fuel.CanAfford(fuel.Profile.enhanceFuelCost) ? EnhanceBlock.None : EnhanceBlock.LowFuel;
         }
 
         private void OnEnable()
@@ -55,9 +65,10 @@ namespace ExpiryGame.Landmark
             if (!CanInteract) return;
 
             var item = context.Inventory.Selected;
-            var check = enhancer.Check(item, cooldown.Remaining(Time.time));
+            var check = enhancer.Check(item, cooldown.Remaining(Time.time), FuelBlock());
             if (!check.CanEnhance || !enhancer.Apply(item)) return;
 
+            if (fuel != null && fuel.HasProfile) fuel.TryConsume(fuel.Profile.enhanceFuelCost);
             cooldown.Start(Time.time, Profile.cooldownSeconds);
             promptDirty = true;
             context.Events?.FoodEnhanced(new FoodEnhancedInfo(item, Position, check.HealBefore, check.HealAfter));
@@ -73,7 +84,7 @@ namespace ExpiryGame.Landmark
 
             var item = context.Inventory.Selected;
             var left = cooldown.Remaining(Time.time);
-            var check = enhancer.Check(item, left);
+            var check = enhancer.Check(item, left, FuelBlock());
             var second = Mathf.CeilToInt(left);
             if (!promptDirty && item == promptItem && check.Block == promptBlock && second == promptSecond) return;
 

@@ -22,21 +22,43 @@ namespace ExpiryGame.DebugTools
         [SerializeField] private float[] speeds = { 1f, 4f, 16f, 64f };
         [Tooltip("텔레포트 시 랜드마크 아래쪽으로 비켜 서는 거리 (타일)")]
         [SerializeField] private float teleportOffset = 2.5f;
+        [Tooltip("안내 문구 순환 표시에서 문구를 바꾸는 간격 (초)")]
+        [SerializeField, Min(0.3f)] private float promptSeconds = 1.5f;
+
+        // 안내 박스 점검용 문구: 짧은 것 / 긴 것 / 여러 줄이 될 만큼 긴 것 / 영문 / 숫자 / 기호
+        private static readonly string[] PromptSamples =
+        {
+            "F  열기",
+            "F  굽기 불가 (이미 강화됨)",
+            "F  굽기 (회복 +12 → +16)",
+            "F  굽기 불가 (꺼짐)",
+            "F  굽기 불가 (연료 부족)",
+            "F  굽기 불가 (쿨다운 10초) 지금은 다른 음식도 구울 수 없습니다 잠시 후 다시 시도하세요",
+            "F  Cook (Heal +12 -> +16) Already Enhanced",
+            "F  1234567890 / 9999 / 100%",
+            "F  WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+        };
 
         private readonly List<LandmarkInfo> nearby = new List<LandmarkInfo>();
         private ISpawnDebug spawn;
         private float nextSpawnLookup;
         private bool open;
         private Vector2 scroll;
+        private LandmarkInteractor interactor;
+        private bool promptCycle;
+        private int promptIndex;
+        private float nextPromptTime;
 
         private void Update()
         {
             if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame) open = !open;
+            UpdatePromptCycle();
         }
 
         private void OnDisable()
         {
             clock.SpeedMultiplier = 1f;
+            ShowPrompt(null);
         }
 
         private void OnGUI()
@@ -73,6 +95,7 @@ namespace ExpiryGame.DebugTools
                 if (GUILayout.Button($"가장 가까운 곳으로: {nearest.Data.displayName} ({nearest.Distance:0}m)")) Teleport(nearest);
             }
 
+            DrawPromptPanel();
             DrawSpawnPanel();
 
             GUILayout.Label("음식 지급 (가방에 추가)");
@@ -86,6 +109,47 @@ namespace ExpiryGame.DebugTools
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        // 안내 문구 순환 표시: 켜면 PromptSamples를 일정 간격으로 돌려 띄워 박스 안에 들어오는지 확인한다
+        private void DrawPromptPanel()
+        {
+            GUILayout.Label("안내 문구 박스 점검");
+            var wasCycling = promptCycle;
+            promptCycle = GUILayout.Toggle(promptCycle, promptCycle ? "순환 표시 중 (눌러서 끄기)" : "안내 문구 순환 표시");
+            if (promptCycle != wasCycling)
+            {
+                nextPromptTime = 0f;
+                if (!promptCycle) ShowPrompt(null);
+            }
+            if (!promptCycle) return;
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("이전")) StepPrompt(-1);
+            if (GUILayout.Button("다음")) StepPrompt(1);
+            GUILayout.EndHorizontal();
+            GUILayout.Label($"{promptIndex + 1}/{PromptSamples.Length}: {PromptSamples[promptIndex]}");
+        }
+
+        private void UpdatePromptCycle()
+        {
+            if (!promptCycle || Time.unscaledTime < nextPromptTime) return;
+            nextPromptTime = Time.unscaledTime + promptSeconds;
+            ShowPrompt(PromptSamples[promptIndex]);
+            promptIndex = (promptIndex + 1) % PromptSamples.Length;
+        }
+
+        private void StepPrompt(int delta)
+        {
+            promptIndex = (promptIndex + delta + PromptSamples.Length) % PromptSamples.Length;
+            ShowPrompt(PromptSamples[promptIndex]);
+            nextPromptTime = Time.unscaledTime + promptSeconds;
+        }
+
+        private void ShowPrompt(string text)
+        {
+            if (interactor == null) interactor = FindFirstObjectByType<LandmarkInteractor>();
+            if (interactor != null) interactor.SetDebugPrompt(text);
         }
 
         // 스포너는 Assembly-CSharp에 있어 직접 참조할 수 없으므로 ISpawnDebug 계약으로 찾는다 (1초마다 재탐색)

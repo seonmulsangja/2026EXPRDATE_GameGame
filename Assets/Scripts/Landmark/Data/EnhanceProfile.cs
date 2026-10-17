@@ -26,6 +26,8 @@ namespace ExpiryGame.Landmark
         public string reasonRotten = "썩음";
         [Tooltip("{0} = 남은 초")]
         public string reasonCooldown = "쿨다운 {0}초";
+        public string reasonCampfireOut = "꺼짐";
+        public string reasonLowFuel = "연료 부족";
 
         public string ReasonFor(EnhanceBlock block, float cooldownLeft)
         {
@@ -34,6 +36,8 @@ namespace ExpiryGame.Landmark
                 case EnhanceBlock.NoFood: return reasonNoFood;
                 case EnhanceBlock.AlreadyEnhanced: return reasonAlreadyEnhanced;
                 case EnhanceBlock.Rotten: return reasonRotten;
+                case EnhanceBlock.CampfireOut: return reasonCampfireOut;
+                case EnhanceBlock.LowFuel: return reasonLowFuel;
                 case EnhanceBlock.Cooldown: return string.Format(reasonCooldown, Mathf.CeilToInt(cooldownLeft));
                 default: return string.Empty;
             }

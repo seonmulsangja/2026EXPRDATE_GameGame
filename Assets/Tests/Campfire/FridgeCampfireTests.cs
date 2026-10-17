@@ -34,6 +34,8 @@ namespace ExpiryGame.Tests
         {
             public int Enhanced;
             public int FridgeOpened;
+            public int StageChanges;
+            void ILandmarkEventSink.CampfireStageChanged(CampfireStageInfo info) => StageChanges++;
             void ILandmarkEventSink.FoodEnhanced(FoodEnhancedInfo info) => Enhanced++;
             void ILandmarkEventSink.FridgeOpened(FridgeOpenedInfo info) => FridgeOpened++;
         }

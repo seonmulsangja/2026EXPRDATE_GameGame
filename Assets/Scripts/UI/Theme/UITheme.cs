@@ -66,6 +66,28 @@ namespace ExpiryGame.UI
         [Tooltip("텍스트 크기는 pixelScale 3 기준으로 적혀 있다. 이 값으로 비율을 맞춘다.")]
         public float TextScale => pixelScale / 3f;
 
+        [Header("폰트 렌더링")]
+        [Tooltip("도트 폰트 원본 크기 (예: 16). 0보다 크면 글자 크기를 이 값의 정수배로 맞춰 번짐을 막는다. 0 = 끔 (OS/벡터 폰트)")]
+        [Min(0)] public int fontSnapUnit = 0;
+        [Tooltip("줄 간격 보정 (TMP lineSpacing). 폰트마다 다르니 글자 위아래 여백이 어긋나면 여기서 맞춘다")]
+        public float lineSpacing = 0f;
+        [Tooltip("패널 안 글자의 세로 정렬. Capline = 대문자 높이 기준이라 문구가 바뀌어도 위치가 흔들리지 않는다")]
+        public TMPro.VerticalAlignmentOptions panelTextAlign = TMPro.VerticalAlignmentOptions.Capline;
+
+        [Header("텍스트 박스 맞춤 (도트 px = pixelScale 곱해서 사용)")]
+        [Tooltip("글자와 패널 테두리 사이 여백 (가로, 도트 px)")]
+        [Min(0)] public int panelPaddingX = 8;
+        [Tooltip("글자와 패널 테두리 사이 여백 (세로, 도트 px)")]
+        [Min(0)] public int panelPaddingY = 5;
+        [Min(1)] public int panelMinWidth = 40;
+        [Min(1)] public int panelMinHeight = 16;
+        [Tooltip("안내 박스 최대 폭 (도트 px). 이보다 길면 줄바꿈하고 높이가 늘어난다")]
+        [Min(8)] public int panelMaxWidth = 150;
+        [Tooltip("음식 상세 패널이 긴 문구에 맞춰 늘어나는 최대 폭 (도트 px)")]
+        [Min(8)] public int detailMaxWidth = 190;
+        [Tooltip("고정 크기 박스(숫자/라벨 등)에서 글자가 넘칠 때 줄어드는 최소 비율. 1 = 줄이지 않음")]
+        [Range(0.3f, 1f)] public float minFitRatio = 0.7f;
+
         [Header("텍스트 스타일")]
         public TextStyle title = new TextStyle { size = 36, color = Color.white };
         public TextStyle body = new TextStyle { size = 28, color = Color.white };

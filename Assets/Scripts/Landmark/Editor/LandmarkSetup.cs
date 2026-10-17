@@ -83,6 +83,7 @@ namespace ExpiryGame.Landmark.Editor
             var fridgeTable = LoadOrCreateTable("DropTable_Fridge", FridgeTable);
             var enhance = LoadOrCreateAsset<EnhanceProfile>("EnhanceProfile");
             var safeZone = LoadOrCreateAsset<SafeZoneProfile>("SafeZoneProfile");
+            var fuelProfile = LoadOrCreateAsset<CampfireFuelProfile>("CampfireFuelProfile");
 
             var fridge = LoadOrCreateData("Landmark_Fridge", d =>
             {
@@ -138,6 +139,7 @@ namespace ExpiryGame.Landmark.Editor
             if (fridge.fridgeTable == null) fridge.fridgeTable = fridgeTable;
             if (campfire.enhanceProfile == null) campfire.enhanceProfile = enhance;
             if (campfire.safeZone == null) campfire.safeZone = safeZone;
+            if (campfire.fuelProfile == null) campfire.fuelProfile = fuelProfile;
 
             BuildPrefab(fridge, "landmark_fridge", additive, root =>
             {
@@ -149,7 +151,9 @@ namespace ExpiryGame.Landmark.Editor
                 AddCampfireVisuals(root, additive);
             });
             EnsureParts(fridge, typeof(FridgeLootEffect));
-            EnsureParts(campfire, typeof(CampfireEnhanceEffect), typeof(CampfireSafeZone));
+            EnsureParts(campfire, typeof(CampfireEnhanceEffect), typeof(CampfireSafeZone),
+                typeof(CampfireFuel), typeof(CampfireFuelGauge), typeof(CampfireAppearance));
+            LinkCampfireFuelAssets(campfire);
             BuildPrefab(store, "landmark_store", additive, root => root.AddComponent<StoreLootEffect>());
             BuildPrefab(dump, "landmark_dump", additive, root => root.AddComponent<DumpDangerEffect>());
 
@@ -303,6 +307,55 @@ namespace ExpiryGame.Landmark.Editor
             {
                 PrefabUtility.UnloadPrefabContents(contents);
             }
+        }
+
+        // 모닥불 연료 단계 스프라이트(약해짐/잉걸불/꺼짐)와 게이지 머티리얼을 프리팹에 연결한다 (비어 있는 칸만)
+        private static void LinkCampfireFuelAssets(LandmarkData data)
+        {
+            var path = $"{PrefabDir}/{data.name}.prefab";
+            var contents = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var changed = false;
+                var appearance = contents.GetComponent<CampfireAppearance>();
+                if (appearance != null)
+                {
+                    var so = new SerializedObject(appearance);
+                    changed |= FillFrames(so, "weakFrames", "landmark_campfire_low_0", "landmark_campfire_low_1");
+                    changed |= FillFrames(so, "embersFrames", "landmark_campfire_embers");
+                    changed |= FillFrames(so, "outFrames", "landmark_campfire_out");
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                var gauge = contents.GetComponent<CampfireFuelGauge>();
+                if (gauge != null)
+                {
+                    var so = new SerializedObject(gauge);
+                    var material = so.FindProperty("material");
+                    if (material.objectReferenceValue == null)
+                    {
+                        material.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>(ArtAssets.UnlitMaterialPath);
+                        so.ApplyModifiedPropertiesWithoutUndo();
+                        changed = true;
+                    }
+                }
+
+                if (changed) PrefabUtility.SaveAsPrefabAsset(contents, path);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
+        }
+
+        private static bool FillFrames(SerializedObject so, string field, params string[] spriteNames)
+        {
+            var frames = so.FindProperty(field);
+            if (frames.arraySize > 0) return false;
+            frames.arraySize = spriteNames.Length;
+            for (var i = 0; i < spriteNames.Length; i++)
+                frames.GetArrayElementAtIndex(i).objectReferenceValue = ArtAssets.Load("landmarks", spriteNames[i]);
+            return true;
         }
 
         private static void AddGlow(GameObject root, string spriteName, Material additive, bool campfire)

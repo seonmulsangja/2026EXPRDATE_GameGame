@@ -27,3 +27,6 @@
 | 강화된 음식 배지 (슬롯 우상단 + 상세 패널 아이콘 옆) | `ui_badge_enhanced.png` | 8×8 (PPU 32 → 슬롯에서 약 17% 크기) | 불꽃/별 모양. 지금은 주황 마름모 임시 도형(`UITheme.enhancedBadgeColor`). 쓰려면 `UITheme.sprites.enhanceBadge`에 끌어다 놓기만 하면 됨 |
 - (선택) 비어 있는 냉장고: 문이 열린 `landmark_fridge_open.png` (32×40 권장). 코드 지원 없음 — 지금은 글로우만 꺼진다. 쓰려면 `FridgeLootEffect.Interact`에서 `Body` 스프라이트를 바꾸면 된다.
 - 불꽃 파티클은 기존 스파크(`ParticleKind.Spark`)를 재사용해서 추가 아트 없음.
+
+- (선택) 모닥불 단계 전환 연기: 지금은 기존 스파크 파티클을 재사용한다. 전용 연기 스프라이트(`fx_smoke_*.png`, 8×8 안팎 3프레임)가 생기면 `HitFxSpawner`에 `ParticleKind.Smoke`를 추가해 `CampfireStageFeedback`에서 쓰면 된다.
+- 모닥불 단계 스프라이트(`landmark_campfire_low_0~1`, `_embers`, `_out`)는 `Assets/Art/Sprites/landmarks/`에 들어 있다.

@@ -8,7 +8,9 @@ namespace ExpiryGame.Landmark
         NoFood,
         AlreadyEnhanced,
         Rotten,
-        Cooldown
+        Cooldown,
+        CampfireOut,
+        LowFuel
     }
 
     // "지금 이 음식을 강화할 수 있나, 안 되면 왜, 되면 회복이 얼마에서 얼마로 바뀌나"의 결과
@@ -40,12 +42,14 @@ namespace ExpiryGame.Landmark
             this.profile = profile;
         }
 
-        public EnhanceCheck Check(FoodItem item, float cooldownLeft)
+        // fuelBlock: 모닥불 연료 때문에 막힌 사유 (꺼짐/연료 부족). 음식 상태보다 먼저 보여준다.
+        public EnhanceCheck Check(FoodItem item, float cooldownLeft, EnhanceBlock fuelBlock = EnhanceBlock.None)
         {
-            if (item == null) return new EnhanceCheck(EnhanceBlock.NoFood, cooldownLeft, 0f, 0f);
+            if (item == null) return new EnhanceCheck(fuelBlock != EnhanceBlock.None ? fuelBlock : EnhanceBlock.NoFood, cooldownLeft, 0f, 0f);
 
             var before = item.CurrentHeal;
             var after = before * profile.healMultiplier;
+            if (fuelBlock != EnhanceBlock.None) return new EnhanceCheck(fuelBlock, cooldownLeft, before, after);
             if (item.IsEnhanced) return new EnhanceCheck(EnhanceBlock.AlreadyEnhanced, cooldownLeft, before, before);
             if (item.IsRotten) return new EnhanceCheck(EnhanceBlock.Rotten, cooldownLeft, before, before);
             if (cooldownLeft > 0f) return new EnhanceCheck(EnhanceBlock.Cooldown, cooldownLeft, before, after);

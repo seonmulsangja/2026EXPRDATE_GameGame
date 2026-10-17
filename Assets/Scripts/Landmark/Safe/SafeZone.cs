@@ -70,14 +70,20 @@ namespace ExpiryGame.Landmark
 
         public int Count => circles.Count;
 
-        public static SafeZoneSet From(IEnumerable<LandmarkInfo> landmarks)
+        // store: 모닥불 연료 상태 (비우면 현재 씬의 저장소). 꺼진 모닥불은 안전지대가 아니고, 연료가 줄면 그만큼 반경도 준다.
+        public static SafeZoneSet From(IEnumerable<LandmarkInfo> landmarks, CampfireStateStore store = null)
         {
+            store = store ?? CampfireStateStore.Active;
             var circles = new List<KeyValuePair<Vector2, float>>();
             foreach (var info in landmarks)
             {
                 var data = info.Data;
                 if (data == null || data.kind != LandmarkKind.Campfire || data.safeZone == null || data.safeZone.radius <= 0f) continue;
-                circles.Add(new KeyValuePair<Vector2, float>(info.Position, data.safeZone.radius));
+                var radius = data.safeZone.radius;
+                if (data.fuelProfile != null && store != null && store.TryGet(info.Id, out var state))
+                    radius *= new CampfireFuelModel(data.fuelProfile, state).Strength(data.fuelProfile.safeRadiusAtEmpty);
+                if (radius <= 0f) continue;
+                circles.Add(new KeyValuePair<Vector2, float>(info.Position, radius));
             }
             return circles.Count == 0 ? Empty : new SafeZoneSet(circles);
         }
