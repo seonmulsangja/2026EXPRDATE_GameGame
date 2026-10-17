@@ -8,6 +8,12 @@ namespace ExpiryGame
         [SerializeField] private PlayerInputReader input;
         [SerializeField, Min(0f)] private float moveSpeed = 5f;
 
+        public float MoveSpeed
+        {
+            get => moveSpeed;
+            set => moveSpeed = Mathf.Max(0f, value);
+        }
+
         private Rigidbody2D body;
 
         private void Awake()
@@ -24,7 +30,9 @@ namespace ExpiryGame
 
         private void FixedUpdate()
         {
-            body.linearVelocity = Vector2.ClampMagnitude(((IPlayerInput)input).Move, 1f) * moveSpeed;
+            body.linearVelocity =
+                Vector2.ClampMagnitude(((IPlayerInput)input).Move, 1f)
+                * moveSpeed;
         }
     }
 }

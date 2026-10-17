@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e44f200cd042b242ad3e1e513bdbd76, type: 3}
   m_Name: HealSkill_JCY
   m_EditorClassIdentifier: Assembly-CSharp::AugmentSO
-  augmentName: 
-  description: 
-  icon: {fileID: 0}
+  augmentName: "\uACF5\uACA9\uB825 \uAC15\uD654"
+  description: "\uACF5\uACA9\uB825\uC774 \uB808\uBCA8 * 1\uB9CC\uD07C \uAC15\uD654\uB429\uB2C8\uB2E4."
+  icon: {fileID: 1546960081, guid: acd3dc0c906228b4085a7d0bbed1a4a5, type: 3}
   augmentType: 1
   effectType: 0
   value: 0

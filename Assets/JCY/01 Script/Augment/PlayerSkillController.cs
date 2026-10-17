@@ -12,9 +12,40 @@ public class PlayerSkillController : MonoBehaviour
         
         public float nextActivationTime = 0f;
     }
-
+    [SerializeField] private ExpiryGame.PlayerInputReader input;
     private readonly Dictionary<SkillSO, SkillRuntime> _skills = new();
+    private void Awake()
+    {
+        if (input == null)
+            input = GetComponent<ExpiryGame.PlayerInputReader>();
+    }
 
+    private void OnEnable()
+    {
+        if (input != null)
+            input.EatPerformed += OnEat;
+    }
+
+    private void OnDisable()
+    {
+        if (input != null)
+            input.EatPerformed -= OnEat;
+    }
+
+    private void OnEat()
+    {
+        foreach (SkillRuntime runtime in _skills.Values)
+        {
+            if (runtime.skill.skillAction is FoodEatUPSkill)
+            {
+                runtime.skill.skillAction.Execute(
+                    gameObject,
+                    runtime.skill,
+                    runtime.level
+                );
+            }
+        }
+    }
     public void AddOrLevelUpSkill(SkillSO skill, int level)
     {
         if (skill == null || skill.skillAction == null)
@@ -37,7 +68,11 @@ public class PlayerSkillController : MonoBehaviour
         };
 
         _skills.Add(skill, newRuntime);
-        newRuntime.routine = StartCoroutine(SkillRoutine(newRuntime));
+
+        if (skill.skillAction is not FoodEatUPSkill)
+        {
+            newRuntime.routine = StartCoroutine(SkillRoutine(newRuntime));
+        }
     }
 
     private IEnumerator SkillRoutine(SkillRuntime runtime)

@@ -15,7 +15,15 @@ namespace ExpiryGame
         [SerializeField, Min(0f)] private float cooldownSeconds = 0.4f;
         [Tooltip("(선택) IAttackDriver를 구현한 컴포넌트(SwingController 등). 있으면 판정/연출을 위임하고, 없으면 즉발 원형 판정을 쓴다.")]
         [SerializeField] private MonoBehaviour attackDriver;
+        
+        private int attackPower;
+        private float attackCooldown;
 
+        public void SetAttackStats(int power, float cooldown)
+        {
+            attackPower = power;
+            attackCooldown = cooldown;
+        }
 
         private readonly List<Collider2D> hits = new List<Collider2D>();
         private readonly HashSet<IDamageable> targets = new HashSet<IDamageable>();
@@ -39,17 +47,25 @@ namespace ExpiryGame
             if (item == null || Time.time < nextAttackTime) return;
 
             var driver = attackDriver as IAttackDriver;
+
             if (driver == null)
             {
-                nextAttackTime = Time.time + cooldownSeconds;
+                nextAttackTime = Time.time + Mathf.Max(0.05f, cooldownSeconds - attackCooldown);
+
                 CollectTargets();
-                foreach (var target in targets) target.TakeDamage(item.CurrentDamage);
+
+                foreach (var target in targets)
+                {
+                    target.TakeDamage(item.CurrentDamage + attackPower);
+                }
+
                 Commit(item, targets.Count);
                 return;
             }
 
             if (driver.IsBusy) return;
-            nextAttackTime = Time.time + driver.CooldownSeconds;
+
+            nextAttackTime = Time.time + Mathf.Max(0.05f, driver.CooldownSeconds - attackCooldown);
             driver.Begin(item, hitCount => Commit(item, hitCount));
         }
 

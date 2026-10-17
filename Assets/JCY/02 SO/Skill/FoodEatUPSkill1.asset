@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a7757ddc24c38449fa00a758b257f9, type: 3}
+  m_Name: FoodEatUPSkill1
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSO
+  skillName: "\uBE44\uCD95\uD558\uAE30"
+  icon: {fileID: 550747101, guid: acd3dc0c906228b4085a7d0bbed1a4a5, type: 3}
+  description: "\uC74C\uC2DD\uC744 \uC12D\uCDE8 \uD560 \uB54C\uB9C8\uB2E4 \uB808\uBCA8
+    * 1 \uB9CC\uD07C \uCD5C\uB300\uCCB4\uB825\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+  maxLevel: 5
+  damage: 0
+  damagePerLevel: 0
+  duration: 0
+  durationPerLevel: 0
+  cooldown: 0
+  cooldownReductionPerLevel: 0
+  minCooldown: 0
+  range: 0
+  rangePerLevel: 0
+  skillAction: {fileID: 11400000, guid: e372e5303a38d0448bfaeb8782576e90, type: 2}
