@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace ExpiryGame
 {
-    // 임시 디버그용: UI 담당 HUD가 완성되면 삭제
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    // 임시 디버그용: UI 담당 HUD가 완성되면 삭제. 에디터/Development Build에서만 컴파일된다.
     public class DebugHud : MonoBehaviour
     {
         [SerializeField] private GameClock clock;
@@ -50,4 +51,14 @@ namespace ExpiryGame
             }
         }
     }
+#else
+    // 릴리스 빌드에서는 컴파일되지 않는다. 씬에 남은 컴포넌트가 Missing Script가 되지 않도록 빈 껍데기만 둔다.
+    public class DebugHud : MonoBehaviour
+    {
+        [SerializeField] private GameClock clock;
+        [SerializeField] private Health player;
+        [SerializeField] private FoodInventory inventory;
+        [SerializeField] private Camera viewCamera;
+    }
+#endif
 }

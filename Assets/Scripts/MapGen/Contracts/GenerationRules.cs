@@ -15,12 +15,20 @@ namespace ExpiryGame.MapGen
         void Generate(in ChunkInfo chunk, List<ObstaclePlacement> output);
     }
 
+    // 장식 규칙: 이미 배치된 장애물을 피해 충돌 없는 장식 배치를 만든다
+    public interface IDecorRule
+    {
+        void Generate(in ChunkInfo chunk, IReadOnlyList<ObstaclePlacement> obstacles, List<DecorPlacement> output);
+    }
+
     // 바이옴 = 바닥 규칙 + 장애물 규칙 묶음. 새 바이옴은 이 인터페이스만 구현하면 된다.
     public interface IBiome
     {
         string Name { get; }
         IFloorRule Floor { get; }
         IObstacleRule Obstacles { get; }
+        // 장식이 없는 바이옴은 null (기본 구현)
+        IDecorRule Decor => null;
     }
 
     // 청크 좌표 → 바이옴. 지금은 하나뿐이지만, 나중에 노이즈로 바이옴을 나누려면 이것만 교체한다.

@@ -16,6 +16,10 @@ namespace ExpiryGame
         public float CurrentHeal => IsRotten ? Stats.RottenHeal : Stats.Heal;
         public float CurrentDamage => IsRotten ? Stats.RottenDamage : Stats.Damage;
 
+        // 이 음식이 지금 월드 어디에 있는지 알려주는 Transform (가방이면 플레이어, 바닥 드롭이면 드롭 오브젝트).
+        // 위치 기반 감소 배율(IDecayRateModifier)이 읽는다. 비어 있으면 위치 효과를 받지 않는다.
+        public Transform Anchor { get; set; }
+
         public event Action<FoodItem> Rotted;
         public event Action<FoodItem> Broken;
 

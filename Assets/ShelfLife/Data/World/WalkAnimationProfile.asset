@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02f6a2e7034aced4f9051f8d6674b76d, type: 3}
+  m_Name: WalkAnimationProfile
+  m_EditorClassIdentifier: ExpiryGame.World::ExpiryGame.World.WalkAnimationProfile
+  frameSeconds: 0.13
+  down:
+    idle: {fileID: 21300000, guid: 98484ae9cd0f77942aa05ed2d075377a, type: 3}
+    walkA: {fileID: 21300000, guid: e4041c243237ec24bb10fe55ddf29f61, type: 3}
+    walkB: {fileID: 21300000, guid: 364813a63eaccb54292f45c98b9edd78, type: 3}
+  up:
+    idle: {fileID: 21300000, guid: 8969706b3924d944d9ab51e01ee800a8, type: 3}
+    walkA: {fileID: 21300000, guid: b73cecc60e897604b82868e376ac26d0, type: 3}
+    walkB: {fileID: 21300000, guid: 945ff35ee92224941bc4c8bd2dd12adb, type: 3}
+  left:
+    idle: {fileID: 21300000, guid: ae99bb6d1a10b074b90c9cc66873cb9e, type: 3}
+    walkA: {fileID: 21300000, guid: 3aae1f5e858426640a0cdb20c1186c91, type: 3}
+    walkB: {fileID: 21300000, guid: feffbd9f19706544a9335f6774d6a2e3, type: 3}
+  right:
+    idle: {fileID: 21300000, guid: adc594a8ef26b0242a6fc06b389182bd, type: 3}
+    walkA: {fileID: 21300000, guid: 39a1d70b981f16248bbab5eb7419420c, type: 3}
+    walkB: {fileID: 21300000, guid: 8e5fdc8a451a3684d97e27c71d7f5740, type: 3}

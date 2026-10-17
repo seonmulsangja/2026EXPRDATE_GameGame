@@ -148,7 +148,7 @@ namespace ExpiryGame.Visual.Editor
 
                 var renderer = health.GetComponent<SpriteRenderer>();
                 renderer.color = Color.white;
-                renderer.sprite = ArtAssets.Load("player", "player_down");
+                renderer.sprite = ArtAssets.Load("player", "player_down_idle");
                 renderer.sortingOrder = 2;
                 health.transform.localScale = Vector3.one;
                 EnsureLit(renderer);
@@ -176,10 +176,10 @@ namespace ExpiryGame.Visual.Editor
             var facing = GetOrAdd<PlayerSpriteFacing>(player);
             SetObject(facing, "facing", player.GetComponent<PlayerFacing>());
             SetObject(facing, "body", body);
-            SetObject(facing, "down", ArtAssets.Load("player", "player_down"));
-            SetObject(facing, "up", ArtAssets.Load("player", "player_up"));
-            SetObject(facing, "left", ArtAssets.Load("player", "player_left"));
-            SetObject(facing, "right", ArtAssets.Load("player", "player_right"));
+            SetObject(facing, "down", ArtAssets.Load("player", "player_down_idle"));
+            SetObject(facing, "up", ArtAssets.Load("player", "player_up_idle"));
+            SetObject(facing, "left", ArtAssets.Load("player", "player_left_idle"));
+            SetObject(facing, "right", ArtAssets.Load("player", "player_right_idle"));
 
             var lightHost = GetOrCreateChild(player.transform, PlayerLightName);
             lightHost.transform.localPosition = new Vector3(0f, 0.5f, 0f);

@@ -1,0 +1,31 @@
+using System;
+
+namespace ExpiryGame.Flow
+{
+    // 게임 진행 상태 하나만 관리한다. 시간/입력/화면은 StateChanged를 구독한 쪽이 처리.
+    public class GameStateMachine : IGameStateMachine
+    {
+        public GameState Current { get; private set; }
+
+        public event Action<GameState, GameState> StateChanged;
+
+        public GameStateMachine(GameState initial)
+        {
+            Current = initial;
+        }
+
+        public bool StartGame() => Move(GameState.Title, GameState.Playing);
+        public bool Pause() => Move(GameState.Playing, GameState.Paused);
+        public bool Resume() => Move(GameState.Paused, GameState.Playing);
+        public bool Fail() => Move(GameState.Playing, GameState.GameOver);
+        public bool Win() => Move(GameState.Playing, GameState.Clear);
+
+        private bool Move(GameState from, GameState to)
+        {
+            if (Current != from) return false;
+            Current = to;
+            StateChanged?.Invoke(from, to);
+            return true;
+        }
+    }
+}

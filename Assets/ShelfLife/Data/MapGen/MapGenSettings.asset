@@ -21,10 +21,18 @@ MonoBehaviour:
   floorBStart: 0.45
   floorCStart: 0.62
   floorTiles:
-  - {fileID: 11400000, guid: b332c0558d606da4481d396ba1e466fd, type: 2}
-  - {fileID: 11400000, guid: 9efee8f4b6951d44baeabfc5784d9c25, type: 2}
-  - {fileID: 11400000, guid: 9f0633015c8cc7148931a9d37399ee85, type: 2}
+  - {fileID: 11400000, guid: 34b5d325a26ebca458d4c45f9beaebbf, type: 2}
+  - {fileID: 11400000, guid: 0f9157d80850e9047923ccd0e9fd9d82, type: 2}
+  - {fileID: 11400000, guid: a1fb0b94b2589494cb4df01612cb16b7, type: 2}
+  - {fileID: 11400000, guid: 360a9d90659f1d240be8519289d08f7b, type: 2}
+  nightFloorTiles:
+  - {fileID: 11400000, guid: b565b33ed0344dc4d9d82a359b0b4cfd, type: 2}
+  - {fileID: 11400000, guid: d2443ef536151b34f8a3e50cb3bdb03f, type: 2}
+  - {fileID: 11400000, guid: bf6e54be2a639ac418abccc16dffbbd1, type: 2}
+  - {fileID: 11400000, guid: a549924130a50ce4790c31db43df6aa6, type: 2}
   floorSortingOrder: -100
+  grassNoiseScale: 0.05
+  grassStart: 0.68
   obstacleNoiseScale: 0.04
   obstacleAttemptsPerChunk: 48
   densityAtLow: 0.02
@@ -50,3 +58,37 @@ MonoBehaviour:
     colliderOffset: {x: 0, y: 0.3}
   obstacleMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   obstacleSortingOrder: 1
+  decor:
+  - name: Weed
+    day: {fileID: 21300000, guid: 40ebf2fad4a8a6a40a7b5684f6964593, type: 3}
+    night: {fileID: 21300000, guid: d21ea9fd95fb7ca4988b93e5a36d3d20, type: 3}
+    weight: 4
+    nightTint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Puddle
+    day: {fileID: 21300000, guid: 35ffd0c5acd1c884997e5e31307bb2bd, type: 3}
+    night: {fileID: 21300000, guid: 63574c60392249b4b81ac5f1e23ba1e4, type: 3}
+    weight: 1.5
+    nightTint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Pebbles
+    day: {fileID: 21300000, guid: 09a94b1dcf5dd4440ba4295f222c708a, type: 3}
+    night: {fileID: 0}
+    weight: 3
+    nightTint: {r: 0.5, g: 0.56, b: 0.8, a: 1}
+  - name: Fishbone
+    day: {fileID: 21300000, guid: 0dc560d1266a3d3478ed7e94098c40d7, type: 3}
+    night: {fileID: 0}
+    weight: 1
+    nightTint: {r: 0.5, g: 0.56, b: 0.8, a: 1}
+  - name: Trash
+    day: {fileID: 21300000, guid: 3be58539c5b4d164ab86496b0919b418, type: 3}
+    night: {fileID: 0}
+    weight: 1
+    nightTint: {r: 0.5, g: 0.56, b: 0.8, a: 1}
+  decorAttemptsPerChunk: 40
+  decorNoiseScale: 0.06
+  decorDensityAtLow: 0.15
+  decorDensityAtHigh: 0.6
+  minDecorSpacing: 1.2
+  decorObstacleClearance: 1
+  decorMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  decorSortingOrder: -95

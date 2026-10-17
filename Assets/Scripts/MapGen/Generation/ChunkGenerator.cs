@@ -21,6 +21,7 @@ namespace ExpiryGame.MapGen
             var biome = biomes.GetBiome(coord);
             biome.Floor.Fill(info, data.FloorVariants);
             biome.Obstacles.Generate(info, data.Obstacles);
+            biome.Decor?.Generate(info, data.Obstacles, data.Decor);
             return data;
         }
     }

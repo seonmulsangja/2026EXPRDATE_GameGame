@@ -73,6 +73,7 @@ namespace ExpiryGame.Drop
 
             var pickup = pool.Get();
             pickup.Launch(item, origin, target, context);
+            item.Anchor = pickup.transform;
             FoodDropped?.Invoke(item, origin);
         }
 

@@ -42,19 +42,29 @@ namespace ExpiryGame.Visual.Editor
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
             settings.spritePivot = PivotFor(path);
             importer.SetTextureSettings(settings);
+            importer.spriteBorder = BorderFor(path);
 
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.isReadable = false;
             importer.npotScale = TextureImporterNPOTScale.None;
         }
 
-        // 캐릭터/음식/장애물: Bottom Center, slash: 왼쪽 중앙(3/24), 나머지(타일/스파크/파티클/그림자): 중앙
+        // 아트 v2 9-slice 보더 (ART_MANIFEST_V2): 패널 6/6/6/6, 바 프레임 4/4/4/4. 나머지는 보더 없음.
+        private static Vector4 BorderFor(string path)
+        {
+            var name = Path.GetFileNameWithoutExtension(path);
+            if (name == "ui_panel" || name == "ui_panel_accent") return new Vector4(6f, 6f, 6f, 6f);
+            if (name == "ui_bar_frame") return new Vector4(4f, 4f, 4f, 4f);
+            return Vector4.zero;
+        }
+
+        // 캐릭터/음식/장애물/랜드마크: Bottom Center, slash: 왼쪽 중앙(3/24), 나머지(타일/스파크/파티클/그림자/UI/이펙트): 중앙
         private static Vector2 PivotFor(string path)
         {
             var name = Path.GetFileNameWithoutExtension(path);
             if (name.StartsWith("fx_slash")) return new Vector2(3f / 24f, 0.5f);
             if (name == "shadow") return new Vector2(0.5f, 0.5f);
-            if (path.Contains("/food/") || path.Contains("/player/") || path.Contains("/obstacles/")) return new Vector2(0.5f, 0f);
+            if (path.Contains("/food/") || path.Contains("/player/") || path.Contains("/obstacles/") || path.Contains("/landmarks/")) return new Vector2(0.5f, 0f);
             return new Vector2(0.5f, 0.5f);
         }
     }

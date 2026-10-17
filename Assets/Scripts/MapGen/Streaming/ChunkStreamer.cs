@@ -13,16 +13,21 @@ namespace ExpiryGame.MapGen
         [SerializeField] private MapGenSettings settings;
         [SerializeField] private Transform target;
         [SerializeField] private Tilemap tilemap;
+        [Tooltip("낮밤 크로스페이드용 night 바닥. 같은 Grid에 겹쳐 둔 Tilemap (비어 있으면 낮 바닥만)")]
+        [SerializeField] private Tilemap nightTilemap;
         [Tooltip("장애물 오브젝트의 부모. 비어 있으면 자기 자신")]
         [SerializeField] private Transform obstacleRoot;
 
         private readonly Dictionary<Vector2Int, List<PooledObstacle>> loaded = new Dictionary<Vector2Int, List<PooledObstacle>>();
+        private readonly Dictionary<Vector2Int, List<DecorInstance>> loadedDecor = new Dictionary<Vector2Int, List<DecorInstance>>();
         private readonly List<Vector2Int> pending = new List<Vector2Int>();
         private readonly List<Vector2Int> unloadBuffer = new List<Vector2Int>();
 
         private ChunkGenerator generator;
         private ChunkTilemapView view;
         private ObstaclePool obstacles;
+        private DecorPool decor;
+        private IObstacleFilter obstacleFilter;
         private bool hasCenter;
 
         public Vector2Int CurrentChunk { get; private set; }
@@ -34,14 +39,21 @@ namespace ExpiryGame.MapGen
         private void Awake()
         {
             generator = new ChunkGenerator(settings, new SingleBiomeProvider(new DefaultBiome(settings)));
-            view = new ChunkTilemapView(tilemap, settings);
+            view = new ChunkTilemapView(tilemap, settings, nightTilemap);
             obstacles = new ObstaclePool(settings, obstacleRoot != null ? obstacleRoot : transform);
+            decor = new DecorPool(settings, obstacleRoot != null ? obstacleRoot : transform);
         }
 
         // 바이옴을 추가할 때: 새 IBiomeProvider를 만들어 여기에 넘긴다 (이미 로드된 청크는 그대로)
         public void SetBiomeProvider(IBiomeProvider provider)
         {
             generator = new ChunkGenerator(settings, provider);
+        }
+
+        // 랜드마크처럼 "이 위치는 비워 달라"는 쪽이 등록한다 (이미 로드된 청크는 그대로)
+        public void SetObstacleFilter(IObstacleFilter filter)
+        {
+            obstacleFilter = filter;
         }
 
         private void Update()
@@ -100,8 +112,21 @@ namespace ExpiryGame.MapGen
             view.Show(data);
 
             var spawned = new List<PooledObstacle>(data.Obstacles.Count);
-            foreach (var placement in data.Obstacles) spawned.Add(obstacles.Get(placement));
+            foreach (var placement in data.Obstacles)
+            {
+                if (obstacleFilter != null && obstacleFilter.IsBlocked(placement.Position)) continue;
+                spawned.Add(obstacles.Get(placement));
+            }
             loaded.Add(coord, spawned);
+
+            // 장식은 장애물과 같은 필터(랜드마크 주변 비움)를 거친다
+            var decorSpawned = new List<DecorInstance>(data.Decor.Count);
+            foreach (var placement in data.Decor)
+            {
+                if (obstacleFilter != null && obstacleFilter.IsBlocked(placement.Position)) continue;
+                decorSpawned.Add(decor.Get(placement));
+            }
+            loadedDecor.Add(coord, decorSpawned);
 
             var info = new ChunkInfo(coord, settings.chunkSize, settings.seed);
             OnChunkLoaded?.Invoke(coord, data.WorldBounds, new ChunkRandom(ChunkSeed.For(info.WorldSeed, coord, 0x5EED)));
@@ -112,6 +137,11 @@ namespace ExpiryGame.MapGen
             if (!loaded.TryGetValue(coord, out var spawned)) return;
             foreach (var obstacle in spawned) obstacles.Release(obstacle);
             loaded.Remove(coord);
+            if (loadedDecor.TryGetValue(coord, out var decorSpawned))
+            {
+                foreach (var item in decorSpawned) decor.Release(item);
+                loadedDecor.Remove(coord);
+            }
             view.Hide(coord);
             OnChunkUnloaded?.Invoke(coord);
         }

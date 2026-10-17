@@ -1,0 +1,27 @@
+{
+    "name": "ExpiryGame.Flow.Editor",
+    "rootNamespace": "ExpiryGame.Flow.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Combat",
+        "ExpiryGame.Drop",
+        "ExpiryGame.Flow",
+        "ExpiryGame.UI",
+        "ExpiryGame.UI.Editor",
+        "ExpiryGame.Visual.Editor",
+        "ExpiryGame.DebugTools",
+        "ExpiryGame.DebugTools.Editor",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

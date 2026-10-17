@@ -34,7 +34,12 @@ namespace ExpiryGame
         {
             snapshot.Clear();
             snapshot.AddRange(items);
-            foreach (var item in snapshot) item.Tick(deltaSeconds);
+            foreach (var item in snapshot)
+            {
+                var anchor = item.Anchor;
+                var multiplier = anchor != null ? DecayRateRegistry.Combined(anchor.position) : 1f;
+                item.Tick(deltaSeconds * multiplier);
+            }
         }
     }
 }

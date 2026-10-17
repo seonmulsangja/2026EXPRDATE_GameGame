@@ -1,0 +1,22 @@
+{
+    "name": "ExpiryGame.Flow",
+    "rootNamespace": "ExpiryGame.Flow",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Combat",
+        "ExpiryGame.Drop",
+        "ExpiryGame.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

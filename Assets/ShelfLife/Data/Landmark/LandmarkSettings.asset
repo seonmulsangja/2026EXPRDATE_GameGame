@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb529a1ac5d54f94db152d27ce6d0371, type: 3}
+  m_Name: LandmarkSettings
+  m_EditorClassIdentifier: ExpiryGame.Landmark::ExpiryGame.Landmark.LandmarkSettings
+  map: {fileID: 11400000, guid: dea507e75b387d143b16f205a674c7c7, type: 2}
+  chunksPerRegion: 6
+  regionMargin: 8
+  spawnChance: 0.75
+  obstacleClearPadding: 2
+  salt: 6701
+  landmarks:
+  - {fileID: 11400000, guid: 9c651aa6a24a17e47ae8f2e619cc2ffa, type: 2}
+  - {fileID: 11400000, guid: 672bbbc7f5a77244096d005725ed0387, type: 2}
+  - {fileID: 11400000, guid: bede4cc9ab055114d84566f8c2e4ab41, type: 2}
+  - {fileID: 11400000, guid: 5f89ffcc49be22f4c9ae5187e7b04a21, type: 2}
+  startLandmark: {fileID: 11400000, guid: 672bbbc7f5a77244096d005725ed0387, type: 2}
+  startOffset: {x: 10, y: 8}

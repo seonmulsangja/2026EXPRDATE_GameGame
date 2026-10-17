@@ -1,0 +1,29 @@
+{
+    "name": "ExpiryGame.DebugTools.Editor",
+    "rootNamespace": "ExpiryGame.DebugTools.Editor",
+    "references": [
+        "ExpiryGame.Survival",
+        "ExpiryGame.Visual",
+        "ExpiryGame.Visual.Editor",
+        "ExpiryGame.MapGen",
+        "ExpiryGame.MapGen.Editor",
+        "ExpiryGame.Drop",
+        "ExpiryGame.World",
+        "ExpiryGame.World.Editor",
+        "ExpiryGame.Landmark",
+        "ExpiryGame.Landmark.Editor",
+        "ExpiryGame.UI.Editor",
+        "ExpiryGame.DebugTools"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
